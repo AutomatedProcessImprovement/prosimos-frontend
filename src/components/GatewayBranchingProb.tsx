@@ -1,21 +1,42 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, Grid, TextField, Typography } from "@mui/material";
+import { JsonData } from "./SimulationParameters";
 
+export interface GatewayBranchingProbabilities {
+    [gatewayUid: string]: {
+        [activityUid: string]: number
+    }
+}
 interface GatewayBranchingProbProps {
-    probabilities?: []
+    probabilities: GatewayBranchingProbabilities
+    onParamFormUpdate: (paramSectionName: keyof JsonData, updatedValue: any) => void
 }
 
 const GatewayBranchingProb = (props: GatewayBranchingProbProps) => {
-    const handleSubmit = () => {
+    const [updProbabilities, setUpdProbabilities] = useState(props.probabilities)
 
+
+    const onProbChange = (gatewayUid: string, activityUid: string, {target}: any) => {
+        const updated = {
+            ...updProbabilities,
+            [gatewayUid]: {
+                ...updProbabilities[gatewayUid],
+                [activityUid]: target.value
+            }
+        }
+
+        setUpdProbabilities(updated)
+
+        // update params in the parent component
+        props.onParamFormUpdate("gateway_branching_probabilities", updated)
     }
 
-    if (props.probabilities) {
+    if (updProbabilities) {
         return (<>
-            <form onSubmit={handleSubmit}>
+            <form>
                 <Grid container spacing={2}>
-                    {Object.entries(props.probabilities).map(([gatewayKey, prob]) => (
-                        <Grid item xs={12}>
+                    {Object.entries(updProbabilities).map(([gatewayKey, prob]) => (
+                        <Grid key={`${gatewayKey}Grid`} item xs={12}>
                             <Card elevation={5} sx={{ p: 1 }}>
                                 <Grid container spacing={1} key={gatewayKey+'Grid'}>
                                     <Grid item xs={12}>
@@ -34,7 +55,7 @@ const GatewayBranchingProb = (props: GatewayBranchingProbProps) => {
                                                 <TextField
                                                     key={activityKey+'Value'}
                                                     required
-                                                    // onChange={onTextChange}
+                                                    onChange={e => onProbChange(gatewayKey, activityKey, e)}
                                                     value={probValue}
                                                     variant="standard"
                                                     label="Probability"

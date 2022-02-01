@@ -19,8 +19,6 @@ const Upload = () => {
     };
 
     const onContinueClick = () => {
-        console.log(selectedBpmnFile)
-        console.log(selectedJsonFile)
         navigate(paths.SIMULATOR_PARAMS_PATH, {
             state: {
                 bpmnFile: selectedBpmnFile,

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Box, Grid, Tab, Tabs } from '@mui/material';
+import { Box, Grid, Tab, Tabs, Typography } from '@mui/material';
 import { useLocation } from 'react-router-dom';
-import GatewayBranchingProb from './GatewayBranchingProb';
+import GatewayBranchingProb, { GatewayBranchingProbabilities } from './GatewayBranchingProb';
 import { useEffect } from 'react';
 
 const tabs_name = {
@@ -18,13 +18,13 @@ interface LocationState {
     jsonFile: any
 }
 
-interface JsonData {
-    resource_profiles: []
-    arrival_time_distribution: []
+export interface JsonData {
+    resource_profiles: {}
+    arrival_time_distribution: {}
     arrival_time_calendar: []
-    gateway_branching_probabilities: []
-    task_resource_distribution: []
-    resource_calendars: []
+    gateway_branching_probabilities: GatewayBranchingProbabilities
+    task_resource_distribution: {}
+    resource_calendars: {}
 }
 
 function tabProps(index: number) {
@@ -64,7 +64,7 @@ const SimulationParameters = () => {
     const [value, setValue] = useState(0);
     const [jsonData, setJsonData] = useState<JsonData>();
 
-    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
       setValue(newValue);
     };
 
@@ -82,6 +82,13 @@ const SimulationParameters = () => {
           };
     }, [jsonFile])
 
+    const onParamFormUpdate = (paramSectionName: keyof JsonData, updatedValue: any) => {
+        setJsonData({
+            ...jsonData,
+            [paramSectionName]: updatedValue
+        } as JsonData)
+    }
+
     return (
         <Grid container alignItems="center" justifyContent="center">
             <Grid item xs={9}>
@@ -90,7 +97,7 @@ const SimulationParameters = () => {
                     sx={{ flexGrow: 1, display: 'flex' }}
                 >
                     <Tabs value={value} 
-                        onChange={handleChange}
+                        onChange={handleTabChange}
                         variant="scrollable"
                         aria-label="scrollable wrapped label basic example"
                         orientation="vertical">
@@ -117,7 +124,13 @@ const SimulationParameters = () => {
                         Item Three
                     </TabPanel>
                     <TabPanel value={value} index={5}>
-                        <GatewayBranchingProb probabilities={jsonData?.gateway_branching_probabilities}/>
+                        {
+                            (jsonData?.gateway_branching_probabilities !== undefined) 
+                            ? <GatewayBranchingProb
+                                probabilities={jsonData?.gateway_branching_probabilities}
+                                onParamFormUpdate={onParamFormUpdate}/>
+                            : <Typography>No branching</Typography>
+                        }
                     </TabPanel>
                 </Box>
                 </Grid>
