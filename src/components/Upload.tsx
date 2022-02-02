@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import { useState } from 'react';
 import { Button, Grid, Paper, Typography } from "@mui/material";
 import FileUploader from './FileUploader';
 import { useNavigate } from 'react-router-dom';
@@ -48,8 +48,8 @@ const Upload = () => {
                     <Grid item xs={12} md={6}>
                         <Paper elevation={5} sx={{ p: 3, minHeight: '12vw' }}>
                             <FileUploader
-                            ext="json"
-                            onFileChange={onJsonFileChange} 
+                                ext="json"
+                                onFileChange={onJsonFileChange}
                             />
                         </Paper>
                     </Grid>

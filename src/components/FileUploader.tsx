@@ -1,20 +1,20 @@
-import {useState} from 'react';
+import { useState } from 'react';
 import { Grid, Typography, Input, Button } from "@mui/material";
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 
 interface FileUploaderProps {
     ext: string;
     onFileChange: (file: any) => void;
-  }
+}
 
 const FileUploader = (props: FileUploaderProps) => {
     const [selectedFile, setSelectedFile] = useState<any>();
-	const [isFilePicked, setIsFilePicked] = useState(false);
+    const [isFilePicked, setIsFilePicked] = useState(false);
 
     const onFileChange = (event: any) => {
         const selectedFile = event.target.files[0]
         setSelectedFile(selectedFile);
-		setIsFilePicked(true);
+        setIsFilePicked(true);
         props.onFileChange(selectedFile)
     };
 
@@ -26,9 +26,9 @@ const FileUploader = (props: FileUploaderProps) => {
         </Grid>
         <Grid>
             <label htmlFor={props.ext + "-file"}>
-                <Input 
-                    type="file" 
-                    inputProps={{ accept: `.${props.ext}` }} 
+                <Input
+                    type="file"
+                    inputProps={{ accept: `.${props.ext}` }}
                     style={{ display: 'none' }}
                     id={props.ext + "-file"}
                     onChange={onFileChange}
@@ -45,7 +45,7 @@ const FileUploader = (props: FileUploaderProps) => {
             isFilePicked && (
                 <Grid>
                     <p>Loaded file: {selectedFile && selectedFile.name}</p>
-                </Grid> 
+                </Grid>
             )
         }
     </>)

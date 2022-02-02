@@ -16,7 +16,7 @@ const GatewayBranchingProb = (props: GatewayBranchingProbProps) => {
     const [updProbabilities, setUpdProbabilities] = useState(props.probabilities)
 
 
-    const onProbChange = (gatewayUid: string, activityUid: string, {target}: any) => {
+    const onProbChange = (gatewayUid: string, activityUid: string, { target }: any) => {
         const updated = {
             ...updProbabilities,
             [gatewayUid]: {
@@ -38,22 +38,22 @@ const GatewayBranchingProb = (props: GatewayBranchingProbProps) => {
                     {Object.entries(updProbabilities).map(([gatewayKey, prob]) => (
                         <Grid key={`${gatewayKey}Grid`} item xs={12}>
                             <Card elevation={5} sx={{ p: 1 }}>
-                                <Grid container spacing={1} key={gatewayKey+'Grid'}>
+                                <Grid container spacing={1} key={gatewayKey + 'Grid'}>
                                     <Grid item xs={12}>
-                                        <Typography key={gatewayKey+'Key'} variant="h6" align="left">
+                                        <Typography key={gatewayKey + 'Key'} variant="h6" align="left">
                                             {gatewayKey}
                                         </Typography>
                                     </Grid>
                                     {Object.entries(prob).map(([activityKey, probValue]) => (
                                         <React.Fragment key={`${activityKey}Fr`} >
                                             <Grid key={`${activityKey}NameGrid`} item xs={5}>
-                                                <Typography key={activityKey+'Name'} align="center" variant="body2">
+                                                <Typography key={activityKey + 'Name'} align="center" variant="body2">
                                                     {activityKey}
                                                 </Typography>
                                             </Grid>
-                                            <Grid key={activityKey+'ValueGrid'} item xs={7}>
+                                            <Grid key={activityKey + 'ValueGrid'} item xs={7}>
                                                 <TextField
-                                                    key={activityKey+'Value'}
+                                                    key={activityKey + 'Value'}
                                                     required
                                                     onChange={e => onProbChange(gatewayKey, activityKey, e)}
                                                     value={probValue}
