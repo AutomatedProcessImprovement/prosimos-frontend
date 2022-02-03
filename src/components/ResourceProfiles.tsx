@@ -45,40 +45,28 @@ function Row(props: { row: any; resourceTypeUid: any; }) {
                 </TableCell>
                 <TableCell>{row.name}</TableCell>
                 <TableCell>({row.resource_list.length})</TableCell>
+                <TableCell></TableCell>
             </TableRow>
             <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0}} colSpan={6}>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
                     <Collapse in={openModule} timeout="auto" unmountOnExit>
                         <Box margin={1}>
                             <Table size="small" aria-label="purchases">
-                                <TableBody>
+                                <TableHead>
                                     <TableRow>
-                                        <TableCell
-                                            style={{ paddingBottom: 0, paddingTop: 0, borderBottom: "none" }}
-                                            colSpan={6}
-                                        >
-                                            <Box margin={1}>
-                                                <Table size="small" aria-label="purchases">
-                                                    <TableHead>
-                                                        <TableRow>
-                                                            <TableCell>Name</TableCell>
-                                                            <TableCell>Cost per hour</TableCell>
-                                                            <TableCell>Amount</TableCell>
-                                                        </TableRow>
-                                                    </TableHead>
-                                                    <TableBody>
-                                                        {row.resource_list.map((childrenRow: any) => (
-                                                            <TableRow key={childrenRow.name}>
-                                                                <TableCell>{childrenRow.name}</TableCell>
-                                                                <TableCell>{childrenRow.cost_per_hour}</TableCell>
-                                                                <TableCell>{childrenRow.amount}</TableCell>
-                                                            </TableRow>
-                                                        ))}
-                                                    </TableBody>
-                                                </Table>
-                                            </Box>
-                                        </TableCell>
+                                        <TableCell>Name</TableCell>
+                                        <TableCell>Cost per hour</TableCell>
+                                        <TableCell>Amount</TableCell>
                                     </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {row.resource_list.map((childrenRow: any) => (
+                                        <TableRow key={childrenRow.name}>
+                                            <TableCell>{childrenRow.name}</TableCell>
+                                            <TableCell>{childrenRow.cost_per_hour}</TableCell>
+                                            <TableCell>{childrenRow.amount}</TableCell>
+                                        </TableRow>
+                                    ))}
                                 </TableBody>
                             </Table>
                         </Box>

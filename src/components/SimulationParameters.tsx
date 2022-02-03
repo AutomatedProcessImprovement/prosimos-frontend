@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Box, Grid, Tab, Tabs, Typography } from '@mui/material';
 import { useLocation } from 'react-router-dom';
-import GatewayBranchingProb, { GatewayBranchingProbabilities } from './GatewayBranchingProb';
+import AllGatewaysProbabilities, { GatewayBranchingProbabilities } from './AllGatewaysProbabilities';
 import { useEffect } from 'react';
 import ResourceProfiles from './ResourceProfiles';
 
@@ -134,7 +134,7 @@ const SimulationParameters = () => {
                         <TabPanel value={value} index={5}>
                             {
                                 (jsonData?.gateway_branching_probabilities !== undefined)
-                                    ? <GatewayBranchingProb
+                                    ? <AllGatewaysProbabilities
                                         probabilities={jsonData?.gateway_branching_probabilities}
                                         onParamFormUpdate={onParamFormUpdate} />
                                     : <Typography>No branching</Typography>
