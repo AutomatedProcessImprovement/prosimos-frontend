@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import {v4 as uuid} from "uuid";
 import {
     Box, Collapse, Grid, IconButton, Paper,
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField
@@ -8,6 +9,8 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { JsonData } from "./SimulationParameters";
 import ResourceProfilesTable from "./ResourceProfilesTable";
+import AddButtonToolbar from "./AddButtonToolbar";
+
 
 export interface ResourceInfo {
     id: string,
@@ -61,10 +64,13 @@ function Row(props: RowProps) {
                         onChange={e => onPoolNameChange(resourceTypeUid, e)}
                         value={row.name}
                         variant="standard"
-                        // style={{ width: "50%" }}
+                        placeholder="Pool Name"
                     />
                 </TableCell>
-                <TableCell>({row.resource_list.length})</TableCell>
+                <TableCell>
+                    {(row.resource_list as ResourceInfo[])
+                        .reduce(function (prev, curr) { return Number(prev) + Number(curr.amount)}, 0)}
+                </TableCell>
                 <TableCell style={{ width: "62px" }}>
                     <IconButton
                         size="small"
@@ -79,6 +85,7 @@ function Row(props: RowProps) {
                     <Collapse in={openModule} timeout="auto" unmountOnExit>
                         <Box margin={1}>
                             <ResourceProfilesTable
+                                poolUuid={resourceTypeUid}
                                 resourceList={row.resource_list}
                                 onResourceListUpdate={onResourceListUpdate}
                             />
@@ -127,9 +134,27 @@ const ResourcePools = (props: ResourcePoolsProps) => {
         props.onParamFormUpdate("resource_profiles", updatedPools)
     }
 
+    const onNewPoolCreation = () => {
+        const newPoolUuid = "sid-" + uuid()
+        const updatedPools = {
+            ...props.resourcePools,
+            [newPoolUuid]: {
+                name: "",
+                resource_list: []
+            }
+        }
+
+        setResourcePools(updatedPools)
+        props.onParamFormUpdate("resource_profiles", updatedPools)
+    }
+
     return (
         <form>
             <Grid container spacing={2}>
+                <AddButtonToolbar
+                    onClick={onNewPoolCreation}
+                    labelName="Add new pool"
+                />
                 <TableContainer component={Paper}>
                     <Table aria-label="collapsible table">
                         <TableHead>
