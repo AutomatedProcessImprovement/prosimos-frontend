@@ -3,7 +3,7 @@ import { Box, Grid, Tab, Tabs, Typography } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import AllGatewaysProbabilities, { GatewayBranchingProbabilities } from './AllGatewaysProbabilities';
 import { useEffect } from 'react';
-import ResourceProfiles from './ResourceProfiles';
+import ResourcePools from './ResourcePools';
 
 const tabs_name = {
     RESOURCE_PROFILES: "Resource Profiles",
@@ -113,8 +113,8 @@ const SimulationParameters = () => {
                         <TabPanel value={value} index={0}>
                             {
                                 (jsonData?.resource_profiles !== undefined)
-                                    ? <ResourceProfiles
-                                        resourceProfiles={jsonData.resource_profiles}
+                                    ? <ResourcePools
+                                        resourcePools={jsonData.resource_profiles}
                                         onParamFormUpdate={onParamFormUpdate} />
                                     : <Typography>No resource profiles</Typography>
                             }

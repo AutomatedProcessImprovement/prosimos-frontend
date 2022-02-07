@@ -59,7 +59,7 @@ const GatewayProbabilities = (props: BranchingProbProps) => {
                             label="Probability"
                             helperText={areProbabilitiesValid ? "" : "Summation should be <= 1"}
                             inputProps={{
-                                step: "0.05",
+                                step: "0.01",
                                 min: 0,
                                 max: 1
                             }}
