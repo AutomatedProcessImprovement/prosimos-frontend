@@ -1,60 +1,49 @@
 import React from "react";
 import { Table, TableHead, TableRow, TableCell, TableBody, TextField, IconButton } from "@mui/material";
-import { useState } from "react";
-import { ResourceInfo } from "./ResourcePools";
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddButtonToolbar from "./AddButtonToolbar";
+import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
+import { JsonData } from "./SimulationParameters";
+
+const REQUIRED_ERROR_MESSAGE = "Cannot be empty"
 
 interface ResourceProfilesTableProps {
     poolUuid: string
-    resourceList: ResourceInfo[]
-    onResourceListUpdate: (updatedResourceList: ResourceInfo[])  => void
+    formState: UseFormReturn<JsonData, object>
+    errors: any
 }
 
 const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
-    const [resourceProfiles, setResourceProfiles] = useState(props.resourceList)
-
-    const onChange = (propName: keyof ResourceInfo, index: number, e: any) => {
-        const updatedProfiles = resourceProfiles.map((profile, pIndex) => 
-            (index === pIndex) ?
-            { 
-                ...profile,
-                [propName]: e.target.value
-            } :
-            profile
-        )
-        setResourceProfiles(updatedProfiles)
-        props.onResourceListUpdate(updatedProfiles)
-    }
+    const { control: formControl, trigger } = props.formState
+    const { fields, append, remove } = useFieldArray({
+        keyName: 'key',
+        control: formControl,
+        name: `resource_profiles.${props.poolUuid}.resource_list`
+    })
 
     const onResourceProfileDelete = (index: number) => {
-        const updatedProfiles = [...resourceProfiles.slice(0, index), ...resourceProfiles.slice(index + 1)]
-
-        setResourceProfiles(updatedProfiles)
-        props.onResourceListUpdate(updatedProfiles)
+        remove(index)
     }
 
-    const onResourceAdd = () => {
+    const onResourceAdd = async () => {
+        const arePrevResourcesValid = await trigger(`resource_profiles.${props.poolUuid}.resource_list`)
+
+        if (!arePrevResourcesValid) return
+
         let nextResourceNum = 1
-        let [lastResource] = resourceProfiles.slice(-1)
+        let [lastResource] = fields.slice(-1)
 
         if (lastResource) {
             const lastResourceId = lastResource.id
             nextResourceNum = Number(Number(lastResourceId.split('_').pop()!) + 1)
         }
 
-        const updatedProfiles = [
-            ...resourceProfiles,
-            { 
-                id: props.poolUuid + "_" + nextResourceNum,
-                name: "",
-                cost_per_hour: "",
-                amount: ""
-            } as ResourceInfo
-        ]
-
-        setResourceProfiles(updatedProfiles)
-        props.onResourceListUpdate(updatedProfiles)
+        append({
+            id: props.poolUuid + "_" + nextResourceNum,
+            name: "",
+            cost_per_hour: "",
+            amount: ""
+        })
     }
 
     return (
@@ -62,7 +51,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
             <AddButtonToolbar
                 labelName="Add new resource"
                 onClick={onResourceAdd}
-                />
+            />
             <Table size="small">
                 <TableHead>
                     <TableRow>
@@ -73,55 +62,81 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {resourceProfiles.map((childrenRow: any, index: any) => (
-                        <TableRow key={childrenRow.id} hover>
+                    {fields.map((childrenRow: any, index: any) => {
+                        const isError = props.errors && props.errors[index]
+                        const nameError = isError && props.errors[index].name
+                        const costPerHourError = isError && props.errors[index].cost_per_hour
+                        const amountError = isError && props.errors[index].amount
+
+                        return <TableRow key={childrenRow.id} hover>
                             <TableCell>
-                                <TextField
-                                    required
-                                    onChange={e => onChange("name", index, e)}
-                                    value={childrenRow.name}
-                                    variant="standard"
-                                    placeholder="Resource Name"
+                                <Controller
+                                    name={`resource_profiles.${props.poolUuid}.resource_list.${index}.name` as const}
+                                    control={formControl}
+                                    rules={{ required: true }}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            error={nameError !== undefined}
+                                            helperText={(nameError?.type === "required") ? REQUIRED_ERROR_MESSAGE : ""}
+                                            variant="standard"
+                                            placeholder="Resource Name"
+                                        />
+                                    )}
                                 />
                             </TableCell>
                             <TableCell>
-                                <TextField
-                                    required
-                                    type="number"
-                                    onChange={e => onChange("cost_per_hour", index, e)}
-                                    value={childrenRow.cost_per_hour}
-                                    variant="standard"
-                                    inputProps={{
-                                        min: 0
-                                    }}
-                                    style = {{width: "40%"}}
-                                    placeholder="Cost"
+                                <Controller
+                                    name={`resource_profiles.${props.poolUuid}.resource_list.${index}.cost_per_hour`}
+                                    control={formControl}
+                                    rules={{ required: true }}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            type="number"
+                                            error={costPerHourError !== undefined}
+                                            helperText={(costPerHourError?.type === "required") ? REQUIRED_ERROR_MESSAGE : ""}
+                                            variant="standard"
+                                            inputProps={{
+                                                min: 0
+                                            }}
+                                            style={{ width: "50%" }}
+                                            placeholder="Cost"
+                                        />
+                                    )}
                                 />
                             </TableCell>
                             <TableCell>
-                                <TextField
-                                    required
-                                    type="number"
-                                    onChange={e => onChange("amount", index, e)}
-                                    value={childrenRow.amount}
-                                    variant="standard"
-                                    inputProps={{
-                                        min: 0
-                                    }}
-                                    style = {{width: "40%"}}
-                                    placeholder="Amount"
+                                <Controller
+                                    name={`resource_profiles.${props.poolUuid}.resource_list.${index}.amount`}
+                                    control={formControl}
+                                    rules={{ required: true }}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            type="number"
+                                            error={amountError !== undefined}
+                                            helperText={(amountError?.type === "required") ? REQUIRED_ERROR_MESSAGE : ""}
+                                            variant="standard"
+                                            inputProps={{
+                                                min: 0
+                                            }}
+                                            style={{ width: "50%" }}
+                                            placeholder="Amount"
+                                        />
+                                    )}
                                 />
                             </TableCell>
                             <TableCell>
                                 <IconButton
                                     size="small"
-                                    onClick={e => onResourceProfileDelete(index)}
+                                    onClick={() => onResourceProfileDelete(index)}
                                 >
                                     <DeleteIcon />
                                 </IconButton>
                             </TableCell>
                         </TableRow>
-                    ))}
+                    })}
                 </TableBody>
             </Table>
         </React.Fragment>

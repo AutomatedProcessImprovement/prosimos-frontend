@@ -35,7 +35,6 @@ const AllGatewaysProbabilities = (props: GatewayBranchingProbProps) => {
 
     if (updProbabilities) {
         return (<>
-            <form>
                 <Grid container spacing={2}>
                     {Object.entries(updProbabilities).map(([gatewayKey, prob]) => (
                         <Grid key={`${gatewayKey}Grid`} item xs={12}>
@@ -49,7 +48,6 @@ const AllGatewaysProbabilities = (props: GatewayBranchingProbProps) => {
                         </Grid>
                     ))}
                 </Grid>
-            </form>
         </>)
     }
 
