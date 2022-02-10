@@ -5,6 +5,7 @@ import AllGatewaysProbabilities, { GatewayBranchingProbabilities } from './AllGa
 import { useEffect } from 'react';
 import ResourcePools, { ResourcePool } from './ResourcePools';
 import { useForm } from 'react-hook-form';
+import ArrivalParameters from './ArrivalParameters';
 
 const tabs_name = {
     RESOURCE_PROFILES: "Resource Profiles",
@@ -141,7 +142,7 @@ const SimulationParameters = () => {
                                 Item Three
                             </TabPanel>
                             <TabPanel value={value} index={3}>
-                                Item Three
+                                <ArrivalParameters/>
                             </TabPanel>
                             <TabPanel value={value} index={4}>
                                 {

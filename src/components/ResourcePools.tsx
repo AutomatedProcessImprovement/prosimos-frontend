@@ -157,7 +157,7 @@ const ResourcePools = (props: ResourcePoolsProps) => {
                 labelName="Add new pool"
             />
             <TableContainer component={Paper}>
-                <Table aria-label="collapsible table">
+                <Table>
                     <TableHead>
                         <TableRow>
                             <TableCell></TableCell>
