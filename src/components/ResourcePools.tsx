@@ -161,7 +161,7 @@ const ResourcePools = (props: ResourcePoolsProps) => {
                     <TableHead>
                         <TableRow>
                             <TableCell></TableCell>
-                            <TableCell>Pool Name</TableCell>
+                            <TableCell>Resource Profile</TableCell>
                             <TableCell>Amount</TableCell>
                             <TableCell>Actions</TableCell>
                         </TableRow>

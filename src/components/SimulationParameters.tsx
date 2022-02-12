@@ -5,7 +5,7 @@ import AllGatewaysProbabilities, { GatewayBranchingProbabilities } from './AllGa
 import { useEffect } from 'react';
 import ResourcePools, { ResourcePool } from './ResourcePools';
 import { useForm } from 'react-hook-form';
-import ArrivalParameters from './ArrivalParameters';
+import ResourceCalendars from './ResourceCalendars';
 
 const tabs_name = {
     RESOURCE_PROFILES: "Resource Profiles",
@@ -13,8 +13,8 @@ const tabs_name = {
     ARRIVAL_PARAMS: "Arrival Parameters",
     ARRIVAL_TIME_DISTR: "Arrival Time Distribution",
     ARRIVAL_TIME_CALENDAR: "Arrival Time Calendar",
-    GATEWAY_BRANCHING_PROB: "Gateway Branching Probabilities",
-    TASK_RESOURCE_DISTR: "Task Resource Distribution"
+    BRANCHING_PROB: "Branching Probabilities",
+    RESOURCE_ALLOCATION: "Resource Allocation"
 }
 
 interface LocationState {
@@ -67,7 +67,7 @@ function TabPanel(props: TabPanelProps) {
 
 const SimulationParameters = () => {
     const formState = useForm<JsonData>();
-    const { control, handleSubmit, reset, formState: { errors } } = formState
+    const { handleSubmit, reset, formState: { errors } } = formState
 
     const [value, setValue] = useState(0);
     const [jsonData, setJsonData] = useState<JsonData>();
@@ -119,10 +119,10 @@ const SimulationParameters = () => {
                                 orientation="vertical">
                                 <Tab label={tabs_name.RESOURCE_PROFILES} wrapped {...tabProps(0)} />
                                 <Tab label={tabs_name.RESOURCE_CALENDARS} wrapped {...tabProps(1)} />
-                                <Tab label={tabs_name.TASK_RESOURCE_DISTR} wrapped {...tabProps(2)} />
+                                <Tab label={tabs_name.RESOURCE_ALLOCATION} wrapped {...tabProps(2)} />
                                 <Tab label={tabs_name.ARRIVAL_TIME_CALENDAR} wrapped {...tabProps(3)} />
                                 <Tab label={tabs_name.ARRIVAL_TIME_DISTR} wrapped {...tabProps(4)} />
-                                <Tab label={tabs_name.GATEWAY_BRANCHING_PROB} wrapped {...tabProps(4)} />
+                                <Tab label={tabs_name.BRANCHING_PROB} wrapped {...tabProps(5)} />
                             </Tabs>
                             <TabPanel value={value} index={0}>
                                 {
@@ -136,15 +136,18 @@ const SimulationParameters = () => {
                                 }
                             </TabPanel>
                             <TabPanel value={value} index={1}>
-                                Item Two
+                                <ResourceCalendars/>
                             </TabPanel>
                             <TabPanel value={value} index={2}>
                                 Item Three
                             </TabPanel>
                             <TabPanel value={value} index={3}>
-                                <ArrivalParameters/>
+                                Item Three
                             </TabPanel>
                             <TabPanel value={value} index={4}>
+                                Item Three
+                            </TabPanel>
+                            <TabPanel value={value} index={5}>
                                 {
                                     (jsonData?.gateway_branching_probabilities !== undefined)
                                         ? <AllGatewaysProbabilities
