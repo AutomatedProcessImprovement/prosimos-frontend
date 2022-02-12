@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import { v4 as uuid } from "uuid";
 import {
     Box, Collapse, Grid, IconButton, Paper,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Toolbar
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { JsonData } from "./SimulationParameters";
 import ResourceProfilesTable from "./ResourceProfilesTable";
-import AddButtonToolbar from "./AddButtonToolbar";
+import AddButtonToolbar from "./toolbar/AddButtonToolbar";
 import { Controller, UseFormReturn } from "react-hook-form";
 
 
@@ -152,10 +152,13 @@ const ResourcePools = (props: ResourcePoolsProps) => {
 
     return (
         <Grid container spacing={2}>
-            <AddButtonToolbar
-                onClick={onNewPoolCreation}
-                labelName="Add new pool"
-            />
+            <Toolbar sx={{ justifyContent: "flex-end", marginLeft: "auto" }}>
+                <AddButtonToolbar
+                    onClick={onNewPoolCreation}
+                    labelName="Add new pool"
+                />
+            </Toolbar>
+
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>

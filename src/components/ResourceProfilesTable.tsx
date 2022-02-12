@@ -1,7 +1,7 @@
 import React from "react";
 import { Table, TableHead, TableRow, TableCell, TableBody, TextField, IconButton } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
-import AddButtonToolbar from "./AddButtonToolbar";
+import AddButtonToolbar from "./toolbar/AddButtonToolbar";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
 import { JsonData } from "./SimulationParameters";
 
