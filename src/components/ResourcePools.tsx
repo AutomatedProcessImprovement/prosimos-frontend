@@ -7,7 +7,7 @@ import {
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import DeleteIcon from '@mui/icons-material/Delete';
-import { JsonData } from "./SimulationParameters";
+import { JsonData } from "./formData";
 import ResourceProfilesTable from "./ResourceProfilesTable";
 import AddButtonToolbar from "./toolbar/AddButtonToolbar";
 import { Controller, UseFormReturn } from "react-hook-form";
@@ -33,7 +33,7 @@ interface ResourcePoolsProps {
     formState: UseFormReturn<JsonData, object>
     errors: {
         [x: string]: any;
-    },
+    }
 }
 
 interface RowProps {

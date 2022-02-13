@@ -1,36 +1,33 @@
-import React, { useState } from "react";
+import React from "react";
 import { Grid, Typography, TextField } from "@mui/material";
-
-interface ActivityProbabilites {
-    [activityUid: string]: number
-}
+import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
+import { JsonData } from "./formData";
+import { REQUIRED_ERROR_MSG, SUMMATION_ONE_MSG } from "./validationMessages";
 
 interface BranchingProbProps {
     gatewayKey: string
-    prob: any
-    onProbChange: (gatewayUid: string, activityUid: string, { target }: any) => void
+    index: number
+    formState: UseFormReturn<JsonData, object>
+    errors: {
+        [x: string]: any;
+    }
 }
 
 const GatewayProbabilities = (props: BranchingProbProps) => {
-    const [areProbabilitiesValid, setAreProbabilitiesValid] = useState(true)
-    const { gatewayKey, prob, onProbChange } = props
+    const { gatewayKey, index: gatewayIndex, 
+        formState : { control: formControl, getValues, trigger }, errors } = props
 
-    const onChange = (gatewayUid: string, activityUid: string, e: any) => {
-        const updatedValue = parseFloat(e.target.value).toFixed(2)
-        const updated = {
-            ...prob,
-            [activityUid]: updatedValue
-        } as ActivityProbabilites
+    const { fields } = useFieldArray({
+        keyName: 'key',
+        control: formControl,
+        name: `gateway_branching_probabilities.${gatewayIndex}.probabilities`
+    })
 
-        const probabilitiesSum = Object.values(updated).reduce((prev, curr) => Number(prev) + Number(curr))
+    const isProbSumLessThanOne = () => {
+        const values = getValues(`gateway_branching_probabilities.${gatewayIndex}.probabilities`)
+        const valuesSum = values.reduce((acc, curr) => Number(acc) + Number(curr.value) , 0)
 
-        if (probabilitiesSum > 1) {
-            setAreProbabilitiesValid(false)
-        } else {
-            setAreProbabilitiesValid(true)
-        }
-
-        onProbChange(gatewayUid, activityUid, e)
+        return valuesSum <= 1
     }
 
     return (
@@ -40,34 +37,49 @@ const GatewayProbabilities = (props: BranchingProbProps) => {
                     {gatewayKey}
                 </Typography>
             </Grid>
-            {Object.entries(prob).map(([activityKey, probValue]) => (
-                <React.Fragment key={`${activityKey}Fr`} >
-                    <Grid key={`${activityKey}NameGrid`} item xs={5}>
+            {fields.map(({ path_id: activityKey }, index) => {
+                const fieldError = errors?.gateway_branching_probabilities?.[gatewayIndex]?.probabilities?.[index]?.value
+
+                return <React.Fragment key={`${activityKey}Fr`} >
+                    <Grid key={`${activityKey}NameGrid`} item xs={6}>
                         <Typography key={activityKey + 'Name'} align="center" variant="body2">
                             {activityKey}
                         </Typography>
                     </Grid>
-                    <Grid key={activityKey + 'ValueGrid'} item xs={7}>
-                        <TextField
-                            error={areProbabilitiesValid ? false : true}
-                            key={activityKey + 'Value'}
-                            type="number"
-                            required
-                            onChange={e => onChange(gatewayKey, activityKey, e)}
-                            value={probValue}
-                            variant="standard"
-                            label="Probability"
-                            helperText={areProbabilitiesValid ? "" : "Summation should be <= 1"}
-                            inputProps={{
-                                step: "0.01",
-                                min: 0,
-                                max: 1
+                    <Grid key={activityKey + 'ValueGrid'} item xs={6}>
+                        <Controller
+                            name={`gateway_branching_probabilities.${gatewayIndex}.probabilities.${index}.value`}
+                            control={formControl}
+                            rules={{ 
+                                required: REQUIRED_ERROR_MSG,
+                                validate: () => { return isProbSumLessThanOne() || SUMMATION_ONE_MSG }
                             }}
-                            style = {{width: "40%"}}
+                            render={({ field }) => {
+                                const {onChange} = field
+                                return <TextField
+                                    {...field}
+                                    key={activityKey + 'Value'}
+                                    type="number"
+                                    onChange={(e) => {
+                                        onChange(e)
+                                        trigger(`gateway_branching_probabilities.${gatewayIndex}.probabilities`)
+                                    }}
+                                    variant="standard"
+                                    label="Probability"
+                                    inputProps={{
+                                        step: "0.01",
+                                        min: 0,
+                                        max: 1
+                                    }}
+                                    style = {{width: "50%"}}
+                                    error={fieldError !== undefined}
+                                    helperText={fieldError?.message || ""}
+                                />
+                            }}
                         />
                     </Grid>
                 </React.Fragment>
-            ))}
+            })}
         </Grid>
     )
 }

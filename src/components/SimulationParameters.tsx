@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Box, Button, Grid, Tab, Tabs, Typography } from '@mui/material';
 import { useLocation } from 'react-router-dom';
-import AllGatewaysProbabilities, { GatewayBranchingProbabilities } from './AllGatewaysProbabilities';
+import AllGatewaysProbabilities from './AllGatewaysProbabilities';
 import { useEffect } from 'react';
-import ResourcePools, { ResourcePool } from './ResourcePools';
+import ResourcePools from './ResourcePools';
 import { useForm } from 'react-hook-form';
 import ResourceCalendars from './ResourceCalendars';
+import { JsonData } from './formData';
 
 const tabs_name = {
     RESOURCE_PROFILES: "Resource Profiles",
@@ -20,15 +21,6 @@ const tabs_name = {
 interface LocationState {
     bpmnFile: any
     jsonFile: any
-}
-
-export interface JsonData {
-    resource_profiles: ResourcePool
-    arrival_time_distribution: {}
-    arrival_time_calendar: []
-    gateway_branching_probabilities: GatewayBranchingProbabilities
-    task_resource_distribution: {}
-    resource_calendars: {}
 }
 
 function tabProps(index: number) {
@@ -115,7 +107,6 @@ const SimulationParameters = () => {
                             <Tabs value={value}
                                 onChange={handleTabChange}
                                 variant="scrollable"
-                                aria-label="scrollable wrapped label basic example"
                                 orientation="vertical">
                                 <Tab label={tabs_name.RESOURCE_PROFILES} wrapped {...tabProps(0)} />
                                 <Tab label={tabs_name.RESOURCE_CALENDARS} wrapped {...tabProps(1)} />
@@ -151,8 +142,8 @@ const SimulationParameters = () => {
                                 {
                                     (jsonData?.gateway_branching_probabilities !== undefined)
                                         ? <AllGatewaysProbabilities
-                                            probabilities={jsonData?.gateway_branching_probabilities}
-                                            onParamFormUpdate={onParamFormUpdate} />
+                                            formState={formState}
+                                            errors={errors} />
                                         : <Typography>No branching</Typography>
                                 }
                             </TabPanel>

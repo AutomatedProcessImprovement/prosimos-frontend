@@ -3,9 +3,8 @@ import { Table, TableHead, TableRow, TableCell, TableBody, TextField, IconButton
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddButtonToolbar from "./toolbar/AddButtonToolbar";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
-import { JsonData } from "./SimulationParameters";
-
-const REQUIRED_ERROR_MESSAGE = "Cannot be empty"
+import { JsonData } from "./formData";
+import { REQUIRED_ERROR_MSG } from "./validationMessages";
 
 interface ResourceProfilesTableProps {
     poolUuid: string
@@ -71,14 +70,14 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                         return <TableRow key={childrenRow.id} hover>
                             <TableCell>
                                 <Controller
-                                    name={`resource_profiles.${props.poolUuid}.resource_list.${index}.name` as const}
+                                    name={`resource_profiles.${props.poolUuid}.resource_list.${index}.name`}
                                     control={formControl}
-                                    rules={{ required: true }}
+                                    rules={{ required: REQUIRED_ERROR_MSG }}
                                     render={({ field }) => (
                                         <TextField
                                             {...field}
                                             error={nameError !== undefined}
-                                            helperText={(nameError?.type === "required") ? REQUIRED_ERROR_MESSAGE : ""}
+                                            helperText={nameError?.message || ""}
                                             variant="standard"
                                             placeholder="Resource Name"
                                         />
@@ -89,13 +88,13 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                                 <Controller
                                     name={`resource_profiles.${props.poolUuid}.resource_list.${index}.cost_per_hour`}
                                     control={formControl}
-                                    rules={{ required: true }}
+                                    rules={{ required: REQUIRED_ERROR_MSG }}
                                     render={({ field }) => (
                                         <TextField
                                             {...field}
                                             type="number"
                                             error={costPerHourError !== undefined}
-                                            helperText={(costPerHourError?.type === "required") ? REQUIRED_ERROR_MESSAGE : ""}
+                                            helperText={costPerHourError?.message || ""}
                                             variant="standard"
                                             inputProps={{
                                                 min: 0
@@ -110,13 +109,13 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                                 <Controller
                                     name={`resource_profiles.${props.poolUuid}.resource_list.${index}.amount`}
                                     control={formControl}
-                                    rules={{ required: true }}
+                                    rules={{ required: REQUIRED_ERROR_MSG }}
                                     render={({ field }) => (
                                         <TextField
                                             {...field}
                                             type="number"
                                             error={amountError !== undefined}
-                                            helperText={(amountError?.type === "required") ? REQUIRED_ERROR_MESSAGE : ""}
+                                            helperText={amountError?.message || ""}
                                             variant="standard"
                                             inputProps={{
                                                 min: 0
