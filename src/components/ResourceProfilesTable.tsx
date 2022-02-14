@@ -8,16 +8,18 @@ import { REQUIRED_ERROR_MSG } from "./validationMessages";
 
 interface ResourceProfilesTableProps {
     poolUuid: string
+    resourcePoolIndex: number
     formState: UseFormReturn<JsonData, object>
     errors: any
 }
 
 const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
+    const { resourcePoolIndex } = props
     const { control: formControl, trigger } = props.formState
     const { fields, append, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
-        name: `resource_profiles.${props.poolUuid}.resource_list`
+        name: `resource_profiles.${resourcePoolIndex}.resource_list`
     })
 
     const onResourceProfileDelete = (index: number) => {
@@ -25,7 +27,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
     }
 
     const onResourceAdd = async () => {
-        const arePrevResourcesValid = await trigger(`resource_profiles.${props.poolUuid}.resource_list`)
+        const arePrevResourcesValid = await trigger(`resource_profiles.${resourcePoolIndex}.resource_list`)
 
         if (!arePrevResourcesValid) return
 
@@ -70,7 +72,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                         return <TableRow key={childrenRow.id} hover>
                             <TableCell>
                                 <Controller
-                                    name={`resource_profiles.${props.poolUuid}.resource_list.${index}.name`}
+                                    name={`resource_profiles.${resourcePoolIndex}.resource_list.${index}.name`}
                                     control={formControl}
                                     rules={{ required: REQUIRED_ERROR_MSG }}
                                     render={({ field }) => (
@@ -86,7 +88,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                             </TableCell>
                             <TableCell>
                                 <Controller
-                                    name={`resource_profiles.${props.poolUuid}.resource_list.${index}.cost_per_hour`}
+                                    name={`resource_profiles.${resourcePoolIndex}.resource_list.${index}.cost_per_hour`}
                                     control={formControl}
                                     rules={{ required: REQUIRED_ERROR_MSG }}
                                     render={({ field }) => (
@@ -107,7 +109,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                             </TableCell>
                             <TableCell>
                                 <Controller
-                                    name={`resource_profiles.${props.poolUuid}.resource_list.${index}.amount`}
+                                    name={`resource_profiles.${resourcePoolIndex}.resource_list.${index}.amount`}
                                     control={formControl}
                                     rules={{ required: REQUIRED_ERROR_MSG }}
                                     render={({ field }) => (

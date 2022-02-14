@@ -10,7 +10,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { JsonData } from "./formData";
 import ResourceProfilesTable from "./ResourceProfilesTable";
 import AddButtonToolbar from "./toolbar/AddButtonToolbar";
-import { Controller, UseFormReturn } from "react-hook-form";
+import { Controller, useFieldArray, UseFieldArrayRemove, UseFormReturn } from "react-hook-form";
+import { REQUIRED_ERROR_MSG } from "./validationMessages";
 
 
 export interface ResourceInfo {
@@ -20,16 +21,7 @@ export interface ResourceInfo {
     amount: string
 }
 
-export interface ResourcePool {
-    [resourceTypeUid: string]: {
-        name: string,
-        resource_list: ResourceInfo[]
-    }
-}
-
 interface ResourcePoolsProps {
-    resourcePools: ResourcePool
-    onParamFormUpdate: (paramSectionName: keyof JsonData, updatedValue: any) => void
     formState: UseFormReturn<JsonData, object>
     errors: {
         [x: string]: any;
@@ -38,7 +30,8 @@ interface ResourcePoolsProps {
 
 interface RowProps {
     resourceTypeUid: string
-    onResourcePoolDelete: (resourceTypeUid: string, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
+    resourcePoolIndex: number
+    onResourcePoolDelete: UseFieldArrayRemove
     formState: UseFormReturn<JsonData, object>
     errors: {
         [x: string]: any;
@@ -46,13 +39,15 @@ interface RowProps {
 }
 
 function Row(props: RowProps) {
+    const { resourcePoolIndex } = props
+
     const { resourceTypeUid, onResourcePoolDelete, formState: { control: formControl, watch } } = props
-    const [openModule, setOpenModule] = React.useState(false);
+    const [openModule, setOpenModule] = useState(false);
 
     const { resource_profiles: resourceProfilesErrors } = props.errors
-    const resourceListErrors = resourceProfilesErrors && resourceProfilesErrors[resourceTypeUid]
+    const resourceListErrors = resourceProfilesErrors && resourceProfilesErrors[resourcePoolIndex]
 
-    const resourceListValues = watch(`resource_profiles.${resourceTypeUid}.resource_list`)
+    const resourceListValues = watch(`resource_profiles.${resourcePoolIndex}.resource_list`)
 
     return (
         <React.Fragment>
@@ -67,12 +62,14 @@ function Row(props: RowProps) {
                 </TableCell>
                 <TableCell>
                     <Controller
-                        name={`resource_profiles.${resourceTypeUid}.name`}
+                        name={`resource_profiles.${resourcePoolIndex}.name`}
                         control={formControl}
-                        rules={{ required: true }}
+                        rules={{ required: REQUIRED_ERROR_MSG }}
                         render={({ field }) => (
                             <TextField
                                 {...field}
+                                error={resourceListErrors?.name !== undefined}
+                                helperText={resourceListErrors?.name?.message}
                                 variant="standard"
                                 placeholder="Pool Name"
                             />
@@ -89,7 +86,7 @@ function Row(props: RowProps) {
                 <TableCell style={{ width: "62px" }}>
                     <IconButton
                         size="small"
-                        onClick={e => onResourcePoolDelete(resourceTypeUid, e)}
+                        onClick={() => onResourcePoolDelete(resourcePoolIndex)}
                     >
                         <DeleteIcon />
                     </IconButton>
@@ -100,6 +97,7 @@ function Row(props: RowProps) {
                     <Collapse in={openModule} timeout="auto" unmountOnExit>
                         <Box margin={1}>
                             {resourceTypeUid && <ResourceProfilesTable
+                                resourcePoolIndex={resourcePoolIndex}
                                 poolUuid={resourceTypeUid}
                                 formState={props.formState}
                                 errors={resourceListErrors && resourceListErrors.resource_list}
@@ -113,41 +111,19 @@ function Row(props: RowProps) {
 }
 
 const ResourcePools = (props: ResourcePoolsProps) => {
-    const [resourcePools, setResourcePools] = useState(props.resourcePools)
-
-    const onResourcePoolDelete = (resourceTypeUid: string, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        const { [resourceTypeUid]: removedValue, ...updatedResourcePools } = props.resourcePools
-
-        setResourcePools(updatedResourcePools)
-        props.onParamFormUpdate("resource_profiles", updatedResourcePools)
-    }
-
-    const onPoolNameChange = (resourceTypeUid: string, e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-        const updatedValue = e.target.value
-        const updatedPools = {
-            ...props.resourcePools,
-            [resourceTypeUid]: {
-                ...props.resourcePools[resourceTypeUid],
-                name: updatedValue
-            }
-        }
-
-        setResourcePools(updatedPools)
-        props.onParamFormUpdate("resource_profiles", updatedPools)
-    }
+    const { control: formControl } = props.formState
+    const { fields, append, remove } = useFieldArray({
+        keyName: 'key',
+        control: formControl,
+        name: `resource_profiles`
+    })
 
     const onNewPoolCreation = () => {
-        const newPoolUuid = "sid-" + uuid()
-        const updatedPools = {
-            ...props.resourcePools,
-            [newPoolUuid]: {
-                name: "",
-                resource_list: []
-            }
-        }
-
-        setResourcePools(updatedPools)
-        props.onParamFormUpdate("resource_profiles", updatedPools)
+        append({
+            id: "sid-" + uuid(),
+            name: "",
+            resource_list: []
+        })
     }
 
     return (
@@ -170,10 +146,11 @@ const ResourcePools = (props: ResourcePoolsProps) => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {Object.entries(resourcePools).map(([resourceTypeUid, row]) => (
-                            <Row key={resourceTypeUid}
-                                resourceTypeUid={resourceTypeUid}
-                                onResourcePoolDelete={onResourcePoolDelete}
+                        {fields.map((profile, index) => (
+                            <Row key={profile.id}
+                                resourcePoolIndex={index}
+                                resourceTypeUid={profile.id}
+                                onResourcePoolDelete={remove}
                                 formState={props.formState}
                                 errors={props.errors}
                             />

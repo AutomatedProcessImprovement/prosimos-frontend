@@ -119,8 +119,6 @@ const SimulationParameters = () => {
                                 {
                                     (jsonData?.resource_profiles !== undefined)
                                         ? <ResourcePools
-                                            resourcePools={jsonData.resource_profiles}
-                                            onParamFormUpdate={onParamFormUpdate}
                                             formState={formState}
                                             errors={errors}/>
                                         : <Typography>No resource profiles</Typography>
