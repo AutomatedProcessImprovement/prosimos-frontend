@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { Box, Button, Grid, Tab, Tabs, Typography } from '@mui/material';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import AllGatewaysProbabilities from './AllGatewaysProbabilities';
-import { useEffect } from 'react';
-import ResourcePools from './ResourcePools';
 import { useForm } from 'react-hook-form';
-import ResourceCalendars from './ResourceCalendars';
+import { Box, Button, Grid, Tab, Tabs, Typography } from '@mui/material';
 import { JsonData } from './formData';
+import AllGatewaysProbabilities from './AllGatewaysProbabilities';
+import ResourcePools from './ResourcePools';
+import ResourceCalendars from './ResourceCalendars';
+import ArrivalTimeDistr from './ArrivalTimeDistr';
 
 const tabs_name = {
     RESOURCE_PROFILES: "Resource Profiles",
@@ -86,13 +86,6 @@ const SimulationParameters = () => {
         reset(jsonData)
     }, [jsonData, reset])
 
-    const onParamFormUpdate = (paramSectionName: keyof JsonData, updatedValue: any) => {
-        setJsonData({
-            ...jsonData,
-            [paramSectionName]: updatedValue
-        } as JsonData)
-    }
-
     const onSubmit = (data: any) => console.log(data);
 
     return (
@@ -134,7 +127,9 @@ const SimulationParameters = () => {
                                 Item Three
                             </TabPanel>
                             <TabPanel value={value} index={4}>
-                                Item Three
+                                <ArrivalTimeDistr
+                                   formState={formState}
+                                   errors={errors} />
                             </TabPanel>
                             <TabPanel value={value} index={5}>
                                 {

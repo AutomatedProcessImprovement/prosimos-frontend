@@ -1,6 +1,6 @@
 export interface JsonData {
     resource_profiles: ResourcePool[]
-    arrival_time_distribution: {}
+    arrival_time_distribution: ProbabilityDistribution
     arrival_time_calendar: []
     gateway_branching_probabilities: GatewayBranchingProbability[]
     task_resource_distribution: {}
@@ -30,4 +30,13 @@ export interface ResourceInfo {
     amount: string
     timetable: string
     assignedTasks: string []
+}
+
+export interface ProbabilityDistribution {
+    distribution_name: string
+    distribution_params: { value: number }[]
+}
+
+export interface ProbabilityDistributionForResource extends ProbabilityDistribution {
+    resource_id: string
 }
