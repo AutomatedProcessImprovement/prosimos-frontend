@@ -126,7 +126,7 @@ const TimePeriodItem = (props: TimePeriodItemProps) => {
                         control={formControl}
                         rules={{ required: true }}
                         render={({ 
-                            field: { onChange, value },
+                            field: { onChange, value }
                          }) => (
                             <LocalizationProvider dateAdapter={AdapterMoment}>
                                 <TimePicker
