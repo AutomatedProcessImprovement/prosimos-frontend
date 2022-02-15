@@ -17,10 +17,10 @@ const ArrivalTimeDistr = (props: ArrivalTimeDistrProps) => {
         <Grid container>
             <Grid item xs={12}>
                 <Card elevation={5} sx={{ p: 2 }}>
-                    <Grid container spacing={2}>
+                    <Grid container spacing={4}>
                         <Grid item xs={12}>
                             <Typography variant="h6" align="left">
-                                Calendar
+                                Arrival Time Calendar
                             </Typography>
                             <ArrivalTimePeriod
                                 formState={props.formState}
@@ -28,7 +28,7 @@ const ArrivalTimeDistr = (props: ArrivalTimeDistrProps) => {
                         </Grid>
                         <Grid item xs={12}>
                             <Typography variant="h6" align="left">
-                                Distribution Function
+                                Arrival Time Distribution Function
                             </Typography>
                             <TimeDistribution
                                 formState={props.formState}

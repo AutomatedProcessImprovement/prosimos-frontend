@@ -1,27 +1,31 @@
-import { Select, MenuItem } from "@mui/material";
+import React from "react";
+import { MenuItem, TextField } from "@mui/material";
 import { ControllerRenderProps } from "react-hook-form";
-import { AllResourceCalendars } from "../ResourceCalendars";
+import { JsonData } from "../formData";
 
 interface WeekdaySelectProps {
-    field: ControllerRenderProps<AllResourceCalendars, any>,
-    label: string
+    field: ControllerRenderProps<JsonData, any>,
+    label?: string
 }
 
 const WeekdaySelect = (props: WeekdaySelectProps) => {
     return (
-        <Select
-            {...props.field}
-            label={props.label}
-            variant="standard"
-        >
-            <MenuItem value="MONDAY">Monday</MenuItem>
-            <MenuItem value="TUESDAY">Tuesday</MenuItem>
-            <MenuItem value="WEDNESDAY">Wednesday</MenuItem>
-            <MenuItem value="THURSDAY">Thursday</MenuItem>
-            <MenuItem value="FRIDAY">Friday</MenuItem>
-            <MenuItem value="SATURDAY">Saturday</MenuItem>
-            <MenuItem value="SUNDAY">Sunday</MenuItem>
-        </Select>
+        <React.Fragment>
+            <TextField 
+                {...props.field}
+                label={props.label}
+                variant="standard"
+                select
+            >
+                <MenuItem value="MONDAY">Monday</MenuItem>
+                <MenuItem value="TUESDAY">Tuesday</MenuItem>
+                <MenuItem value="WEDNESDAY">Wednesday</MenuItem>
+                <MenuItem value="THURSDAY">Thursday</MenuItem>
+                <MenuItem value="FRIDAY">Friday</MenuItem>
+                <MenuItem value="SATURDAY">Saturday</MenuItem>
+                <MenuItem value="SUNDAY">Sunday</MenuItem>
+            </TextField>
+        </React.Fragment>
     )
 }
 

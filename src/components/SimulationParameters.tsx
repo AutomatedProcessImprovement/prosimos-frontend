@@ -11,9 +11,7 @@ import ArrivalTimeDistr from './ArrivalTimeDistr';
 const tabs_name = {
     RESOURCE_PROFILES: "Resource Profiles",
     RESOURCE_CALENDARS: "Resource Calendars",
-    ARRIVAL_PARAMS: "Arrival Parameters",
-    ARRIVAL_TIME_DISTR: "Arrival Time Distribution",
-    ARRIVAL_TIME_CALENDAR: "Arrival Time Calendar",
+    ARRIVAL_TIME_PARAMS: "Arrival Time Parameters",
     BRANCHING_PROB: "Branching Probabilities",
     RESOURCE_ALLOCATION: "Resource Allocation"
 }
@@ -104,9 +102,8 @@ const SimulationParameters = () => {
                                 <Tab label={tabs_name.RESOURCE_PROFILES} wrapped {...tabProps(0)} />
                                 <Tab label={tabs_name.RESOURCE_CALENDARS} wrapped {...tabProps(1)} />
                                 <Tab label={tabs_name.RESOURCE_ALLOCATION} wrapped {...tabProps(2)} />
-                                <Tab label={tabs_name.ARRIVAL_TIME_CALENDAR} wrapped {...tabProps(3)} />
-                                <Tab label={tabs_name.ARRIVAL_TIME_DISTR} wrapped {...tabProps(4)} />
-                                <Tab label={tabs_name.BRANCHING_PROB} wrapped {...tabProps(5)} />
+                                <Tab label={tabs_name.ARRIVAL_TIME_PARAMS} wrapped {...tabProps(3)} />
+                                <Tab label={tabs_name.BRANCHING_PROB} wrapped {...tabProps(4)} />
                             </Tabs>
                             <TabPanel value={value} index={0}>
                                 {
@@ -118,20 +115,19 @@ const SimulationParameters = () => {
                                 }
                             </TabPanel>
                             <TabPanel value={value} index={1}>
-                                <ResourceCalendars/>
+                                <ResourceCalendars
+                                    formState={formState}
+                                />
                             </TabPanel>
                             <TabPanel value={value} index={2}>
                                 Item Three
                             </TabPanel>
                             <TabPanel value={value} index={3}>
-                                Item Three
-                            </TabPanel>
-                            <TabPanel value={value} index={4}>
                                 <ArrivalTimeDistr
                                    formState={formState}
                                    errors={errors} />
                             </TabPanel>
-                            <TabPanel value={value} index={5}>
+                            <TabPanel value={value} index={4}>
                                 {
                                     (jsonData?.gateway_branching_probabilities !== undefined)
                                         ? <AllGatewaysProbabilities

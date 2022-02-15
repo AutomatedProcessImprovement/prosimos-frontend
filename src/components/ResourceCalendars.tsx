@@ -1,68 +1,16 @@
 import { alpha } from '@mui/material/styles'
-import { Button, Checkbox, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Toolbar, Typography } from "@mui/material"
+import { Checkbox, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Toolbar, Typography } from "@mui/material"
 import { useState } from "react"
-import { useFieldArray, useForm } from "react-hook-form"
+import { useFieldArray, UseFormReturn } from "react-hook-form"
 import AddButtonToolbar from "./toolbar/AddButtonToolbar"
 import TimePeriodItem from "./calendars/TimePeriodItem"
 import DeleteButtonToolbar from './toolbar/DeleteButtonToolbar'
+import { JsonData } from './formData'
 
 
 interface ResourceCalendarsProps {
-
+    formState: UseFormReturn<JsonData, object>
 }
-
-interface TimePeriod {
-    from: string
-    to: string
-    beginTime: string
-    endTime: string
-}
-
-export interface ResourceCalendar {
-    id: string
-    time_periods: TimePeriod[]
-}
-
-export interface AllResourceCalendars {
-    calendars: ResourceCalendar[]
-}
-
-const example = [
-    {
-        id: "first schedule",
-        time_periods: [
-            {
-                from: "MONDAY",
-                to: "FRIDAY",
-                beginTime: "09:00:00.000",
-                endTime: "17:00:00.000"
-            },
-            {
-                from: "SATURDAY",
-                to: "SATURDAY",
-                beginTime: "09:00:00.000",
-                endTime: "13:00:00.000"
-            }
-        ]
-    },
-    {
-        id: "second schedule",
-        time_periods: [
-            {
-                from: "MONDAY",
-                to: "THURSDAY",
-                beginTime: "09:00:00.000",
-                endTime: "17:00:00.000"
-            },
-            {
-                from: "SATURDAY",
-                to: "SATURDAY",
-                beginTime: "09:00:00.000",
-                endTime: "13:00:00.000"
-            }
-        ]
-    }
-]
 
 const defaultTemplateSchedule = {
     id: "default schedule",
@@ -83,18 +31,12 @@ const defaultTemplateSchedule = {
 }
 
 const ResourceCalendars = (props: ResourceCalendarsProps) => {
-    // TODO: will be removed once the logic merged with the main form
-    const formState = useForm<AllResourceCalendars>({
-        defaultValues: { calendars: example }
-    })
-
-    const { control: formControl } = formState
-    const { handleSubmit } = formState
+    const { control: formControl } = props.formState
 
     const { fields, append: appendCalendarsFields, remove: removeCalendarsFields } = useFieldArray({
         keyName: 'key',
         control: formControl,
-        name: "calendars"
+        name: "resource_calendars"
     })
 
     const [selected, setSelected] = useState<readonly string[]>([])
@@ -110,8 +52,6 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
         removeCalendarsFields(selectedCalsIndex)
         setSelected([])
     }
-
-    const onSubmit = (data: any) => console.log(data)
 
     const handleClick = (name: string) => {
         const selectedIndex = selected.indexOf(name)
@@ -147,89 +87,81 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
     const calendarsCount = fields.length
 
     return (
-        <form>
-            <Grid container spacing={2}>
-                <Toolbar
-                    sx={{
-                        width: "100%",
-                        pl: { sm: 2 },
-                        pr: { xs: 1, sm: 1 },
-                        ...(numSelected > 0 && {
-                            bgcolor: (theme) =>
-                                alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
-                        }),
-                    }}>
-                    <Grid container>
-                        <Grid item xs={6} justifyContent="flex-start">
-                            {numSelected > 0 && (
-                                <Typography
-                                    color="inherit"
-                                >
-                                    {selected.length} calendar(s) selected
-                                </Typography>
-                            )}
-                        </Grid>
-
-                        <Grid item container justifyContent="flex-end" xs={6}>
-                            {numSelected > 0
-                                ? <DeleteButtonToolbar
-                                    onClick={onDeleteCalendars}
-                                    labelName="Delete"
-                                />
-                                : <AddButtonToolbar
-                                    onClick={onAddNewCalendar}
-                                    labelName="Add new calendar"
-                                />
-                            }
-                        </Grid>
+        <Grid container spacing={2}>
+            <Toolbar
+                sx={{
+                    width: "100%",
+                    pl: { sm: 2 },
+                    pr: { xs: 1, sm: 1 },
+                    ...(numSelected > 0 && {
+                        bgcolor: (theme) =>
+                            alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
+                    }),
+                }}>
+                <Grid container>
+                    <Grid item xs={6} justifyContent="flex-start">
+                        {numSelected > 0 && (
+                            <Typography
+                                color="inherit"
+                            >
+                                {selected.length} calendar(s) selected
+                            </Typography>
+                        )}
                     </Grid>
-                </Toolbar>
 
-                <TableContainer component={Paper}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell padding="checkbox">
-                                    <Checkbox
-                                        color="primary"
-                                        indeterminate={numSelected > 0 && numSelected < calendarsCount}
-                                        checked={calendarsCount > 0 && numSelected === calendarsCount}
-                                        onChange={handleSelectAllClick}
-                                    />
-                                </TableCell>
-                                <TableCell>Name</TableCell>
-                                <TableCell>Begin Day</TableCell>
-                                <TableCell>End Day</TableCell>
-                                <TableCell>Begin Time</TableCell>
-                                <TableCell>End Time</TableCell>
-                                <TableCell colSpan={2}>Actions</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {
-                                fields.map((calendar, index) => {
-                                    const isItemSelected = selected.indexOf(calendar.id) !== -1
+                    <Grid item container justifyContent="flex-end" xs={6}>
+                        {numSelected > 0
+                            ? <DeleteButtonToolbar
+                                onClick={onDeleteCalendars}
+                                labelName="Delete"
+                            />
+                            : <AddButtonToolbar
+                                onClick={onAddNewCalendar}
+                                labelName="Add new calendar"
+                            />
+                        }
+                    </Grid>
+                </Grid>
+            </Toolbar>
 
-                                    return <TimePeriodItem
-                                        key={`calendar_${index}_${calendar.key}`}
-                                        formState={formState}
-                                        index={index}
-                                        isItemSelected={isItemSelected}
-                                        handleClick={handleClick}
-                                    />
-                                })
-                            }
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </Grid>
-            <Grid item xs={12}>
-                <Button
-                    onClick={handleSubmit(onSubmit)}>
-                    Submit calendars
-                </Button>
-            </Grid>
-        </form>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell padding="checkbox">
+                                <Checkbox
+                                    color="primary"
+                                    indeterminate={numSelected > 0 && numSelected < calendarsCount}
+                                    checked={calendarsCount > 0 && numSelected === calendarsCount}
+                                    onChange={handleSelectAllClick}
+                                />
+                            </TableCell>
+                            <TableCell>Name</TableCell>
+                            <TableCell>Begin Day</TableCell>
+                            <TableCell>End Day</TableCell>
+                            <TableCell>Begin Time</TableCell>
+                            <TableCell>End Time</TableCell>
+                            <TableCell colSpan={2}>Actions</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {
+                            fields.map((calendar, index) => {
+                                const isItemSelected = selected.indexOf(calendar.id) !== -1
+
+                                return <TimePeriodItem
+                                    key={`calendar_${index}_${calendar.key}`}
+                                    formState={props.formState}
+                                    index={index}
+                                    isItemSelected={isItemSelected}
+                                    handleClick={handleClick}
+                                />
+                            })
+                        }
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </Grid>
     )
 }
 

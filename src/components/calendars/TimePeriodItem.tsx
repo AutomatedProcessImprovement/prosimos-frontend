@@ -1,15 +1,13 @@
-import moment from "moment"
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form"
-import { LocalizationProvider, TimePicker } from "@mui/lab"
-import AdapterMoment from "@mui/lab/AdapterMoment"
-import { TableRow, TableCell, Typography, TextField, IconButton, Checkbox } from "@mui/material"
+import { TableRow, TableCell, Typography, IconButton, Checkbox } from "@mui/material"
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import WeekdaySelect from "./WeekdaySelect"
-import { AllResourceCalendars } from "../ResourceCalendars"
+import TimePickerController from "./TimePickerController"
+import { JsonData } from "../formData"
 
 interface TimePeriodItemProps {
-    formState: UseFormReturn<AllResourceCalendars, object>
+    formState: UseFormReturn<JsonData, object>
     index: number,
     isItemSelected: boolean
     handleClick: (name: string) => void
@@ -28,10 +26,10 @@ const TimePeriodItem = (props: TimePeriodItemProps) => {
     const { fields: timePeriodsFields, append, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
-        name: `calendars.${index}.time_periods`
+        name: `resource_calendars.${index}.time_periods`
     })
 
-    const currCalendar = getValues(`calendars.${index}`)
+    const currCalendar = getValues(`resource_calendars.${index}`)
 
     const onTimePeriodAdd = () => {
         append(defaultTimePeriod)
@@ -71,77 +69,38 @@ const TimePeriodItem = (props: TimePeriodItemProps) => {
                 </TableCell>
                 <TableCell width="19%">
                     <Controller
-                        name={`calendars.${index}.time_periods.${tpIndex}.from`}
+                        name={`resource_calendars.${index}.time_periods.${tpIndex}.from`}
                         control={formControl}
                         rules={{ required: true }}
                         render={({ field }) => (
                             <WeekdaySelect
                                 field={field}
-                                label="Begin Day"
-                            />
-                        )}
-                    />
-
-                </TableCell>
-                <TableCell width="19%">
-                    <Controller
-                        name={`calendars.${index}.time_periods.${tpIndex}.to`}
-                        control={formControl}
-                        rules={{ required: true }}
-                        render={({ field }) => (
-                            <WeekdaySelect
-                                field={field}
-                                label="End Day"
                             />
                         )}
                     />
                 </TableCell>
                 <TableCell width="19%">
                     <Controller
-                        name={`calendars.${index}.time_periods.${tpIndex}.beginTime`}
+                        name={`resource_calendars.${index}.time_periods.${tpIndex}.to`}
                         control={formControl}
                         rules={{ required: true }}
-                        render={({ 
-                            field: { onChange, value },
-                         }) => (
-                            <LocalizationProvider dateAdapter={AdapterMoment}>
-                                <TimePicker
-                                    renderInput={(props) => <TextField {...props} variant="standard" />}
-                                    views={['hours', 'minutes']}
-                                    inputFormat={'HH:mm'}
-                                    mask="__:__"
-                                    value={moment(value, 'HH:mm:ss.SSS')}
-                                    onChange={(newValue) => {
-                                        const newValueString = moment(newValue).format('HH:mm:ss.SSS')
-                                        onChange(newValueString)
-                                    }}
-                                />
-                            </LocalizationProvider>
+                        render={({ field }) => (
+                            <WeekdaySelect
+                                field={field}
+                            />
                         )}
                     />
                 </TableCell>
                 <TableCell width="19%">
-                    <Controller
-                        name={`calendars.${index}.time_periods.${tpIndex}.endTime`}
-                        control={formControl}
-                        rules={{ required: true }}
-                        render={({ 
-                            field: { onChange, value }
-                         }) => (
-                            <LocalizationProvider dateAdapter={AdapterMoment}>
-                                <TimePicker
-                                    renderInput={(props) => <TextField {...props} variant="standard" />}
-                                    views={['hours', 'minutes']}
-                                    inputFormat={'HH:mm'}
-                                    mask="__:__"
-                                    value={moment(value, 'HH:mm:ss.SSS')}
-                                    onChange={(newValue) => {
-                                        const newValueString = moment(newValue).format('HH:mm:ss.SSS')
-                                        onChange(newValueString)
-                                    }}
-                                />
-                            </LocalizationProvider>
-                        )}
+                    <TimePickerController
+                        name={`resource_calendars.${index}.time_periods.${tpIndex}.beginTime` as unknown as keyof JsonData}
+                        formState={props.formState}
+                    />
+                </TableCell>
+                <TableCell width="19%">
+                    <TimePickerController
+                        name={`resource_calendars.${index}.time_periods.${tpIndex}.endTime` as unknown as keyof JsonData}
+                        formState={props.formState}
                     />
                 </TableCell>
                 <TableCell width="4%">
