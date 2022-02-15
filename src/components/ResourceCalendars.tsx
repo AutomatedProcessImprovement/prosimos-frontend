@@ -1,4 +1,5 @@
 import { alpha } from '@mui/material/styles'
+import { v4 as uuid } from "uuid";
 import { Checkbox, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Toolbar, Typography } from "@mui/material"
 import { useState } from "react"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
@@ -13,7 +14,8 @@ interface ResourceCalendarsProps {
 }
 
 const defaultTemplateSchedule = {
-    id: "default schedule",
+    id: "sid-" + uuid(),
+    name: "default schedule",
     time_periods: [
         {
             from: "MONDAY",
@@ -53,12 +55,12 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
         setSelected([])
     }
 
-    const handleClick = (name: string) => {
-        const selectedIndex = selected.indexOf(name)
+    const handleClick = (calendarId: string) => {
+        const selectedIndex = selected.indexOf(calendarId)
         let newSelected: readonly string[] = []
 
         if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, name)
+            newSelected = newSelected.concat(selected, calendarId)
         } else if (selectedIndex === 0) {
             newSelected = newSelected.concat(selected.slice(1))
         } else if (selectedIndex === selected.length - 1) {

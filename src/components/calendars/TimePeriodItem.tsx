@@ -1,10 +1,11 @@
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form"
-import { TableRow, TableCell, Typography, IconButton, Checkbox } from "@mui/material"
+import { TableRow, TableCell, IconButton, Checkbox, TextField } from "@mui/material"
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import WeekdaySelect from "./WeekdaySelect"
 import TimePickerController from "./TimePickerController"
 import { JsonData } from "../formData"
+import { REQUIRED_ERROR_MSG } from "../validationMessages"
 
 interface TimePeriodItemProps {
     formState: UseFormReturn<JsonData, object>
@@ -62,9 +63,20 @@ const TimePeriodItem = (props: TimePeriodItemProps) => {
                 </TableCell>
                 <TableCell width="20%">
                     {isFirstRow &&
-                        <Typography align="center" variant="body2">
-                            {currCalendar.id}
-                        </Typography>
+                        <Controller
+                            name={`resource_calendars.${index}.name`}
+                            control={formControl}
+                            rules={{ required: REQUIRED_ERROR_MSG }}
+                            render={({ field }) => (
+                                <TextField
+                                    {...field}
+                                    //error={nameError !== undefined}
+                                    //helperText={nameError?.message || ""}
+                                    variant="standard"
+                                    placeholder="Resource Name"
+                                />
+                            )}
+                        />
                     }
                 </TableCell>
                 <TableCell width="19%">

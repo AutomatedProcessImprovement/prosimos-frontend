@@ -38,6 +38,7 @@ const TimeDistribution = (props: TimeDistributionProps) => {
                         render={({ field }) => (
                             <TextField
                                 {...field}
+                                sx={{ width: "100%" }}
                                 error={distrErrors?.distribution_name !== undefined}
                                 helperText={distrErrors?.distribution_name?.message}
                                 variant="standard"

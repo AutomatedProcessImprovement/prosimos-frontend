@@ -12,6 +12,7 @@ const WeekdaySelect = (props: WeekdaySelectProps) => {
     return (
         <React.Fragment>
             <TextField 
+                sx={{ width: "100%" }}
                 {...props.field}
                 label={props.label}
                 variant="standard"

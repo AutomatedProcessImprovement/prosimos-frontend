@@ -50,5 +50,6 @@ export interface TimePeriod {
 
 export interface ResourceCalendar {
     id: string
+    name: string
     time_periods: TimePeriod[]
 }
