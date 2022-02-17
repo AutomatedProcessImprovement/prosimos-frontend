@@ -10,8 +10,8 @@ import ModifyCalendarDialog, { ModalInfo } from "./ModifyCalendarDialog";
 
 export interface UpdateResourceCalendarRequest {
     isNew: boolean
-    calendarIndex: number
     calendar: ResourceCalendar
+    resourceListIndex: number
 }
 
 interface ResourceProfilesTableProps {
@@ -24,14 +24,14 @@ interface ResourceProfilesTableProps {
 const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
     const [openModal, setOpenModal] = useState<boolean>(false)
     const [detailModal, setDetailModal] = useState<ModalInfo>()
-    const { formState: { control: formControl, trigger }, resourcePoolIndex } = props
+    const { formState: { control: formControl, trigger, setValue }, resourcePoolIndex } = props
     const { fields, append, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: `resource_profiles.${resourcePoolIndex}.resource_list`
     })
 
-    const { append: appendCalendar, update: updateCalendar  } = useFieldArray({
+    const { append: appendCalendar, update: updateCalendar } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: "resource_calendars"
@@ -68,15 +68,22 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
 
     const handleSaveModal = (r: UpdateResourceCalendarRequest) => {
         const calendar = {
-            id: "sid-" + uuid(),
-            name: "default schedule 10",
-            time_periods: r.calendar.time_periods
+            ...r.calendar,
+            id: "sid-" + uuid()
         }
+        console.log(calendar)
         if (r.isNew) {
             appendCalendar(calendar)
-
+            console.log("appending")
+            setValue(
+                `resource_profiles.${resourcePoolIndex}.resource_list.${r.resourceListIndex}.calendar`, 
+                calendar.id,
+                { shouldDirty: true })
         } else {
-            updateCalendar(r.calendarIndex, calendar)
+            setValue(
+                `resource_profiles.${resourcePoolIndex}.resource_list.${r.resourceListIndex}.calendar`,
+                r.calendar.id,
+                { shouldDirty: true })
         }
     }
 

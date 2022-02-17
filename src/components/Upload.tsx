@@ -28,7 +28,7 @@ const Upload = () => {
     }
 
     return (
-        <Grid container alignItems="center" justifyContent="center" spacing={3}>
+        <Grid container alignItems="center" justifyContent="center" spacing={3} className="UploadContainer">
             <Grid item xs={12}>
                 <Typography variant="h6">
                     Prosimos

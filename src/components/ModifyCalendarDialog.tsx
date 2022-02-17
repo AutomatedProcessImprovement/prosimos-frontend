@@ -1,6 +1,7 @@
 import { Dialog, DialogTitle, DialogContent, Grid, TextField, DialogActions, Button, MenuItem } from "@mui/material";
 import { useState } from "react";
 import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
+import CalendarNameDialog from "./CalendarNameDialog";
 import TimePeriodGridItem from "./calendars/TimePeriodGridItem";
 import { JsonData, ResourceCalendar } from "./formData";
 import { UpdateResourceCalendarRequest } from "./ResourceProfilesTable";
@@ -25,6 +26,7 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
         detailModal: { poolIndex, resourceIndex }
     } = props
     const [currCalendarIndex, setCurrCalendarIndex] = useState<number>(resourceIndex)
+    const [isNameDialogOpen, setIsNameDialogOpen] = useState<boolean>(false)
 
     const allCalendars = getValues("resource_calendars")
     const currCalendar = allCalendars[currCalendarIndex]
@@ -32,9 +34,7 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
     const formState = useForm<ResourceCalendar>({
         defaultValues: currCalendar
     })
-    const { formState: modalFormState, control: modalFormControl, reset, getValues: getModalValues } = formState
-
-    console.log(modalFormState.isDirty)
+    const { formState: { isDirty, dirtyFields }, control: modalFormControl, reset, getValues: getModalValues } = formState
 
     const { fields: currTimePeriods, append, remove } = useFieldArray({
         keyName: 'key',
@@ -51,11 +51,32 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
     }
 
     const onModalSave = () => {
+        if (isDirty) {
+            setIsNameDialogOpen(true)
+        } else {
+            handleSaveModal({
+                isNew: false,
+                calendar: getModalValues(),
+                resourceListIndex: resourceIndex
+            })
+        }
+    }
+
+    const onNameDialogClose = () => {
+        setIsNameDialogOpen(false)
+    }
+
+    const onModalFinalSave = (name: string) => {
         handleSaveModal({
-            isNew: modalFormState.isDirty,
-            calendarIndex: currCalendarIndex,
-            calendar: getModalValues()
+            isNew: isDirty,
+            calendar: {
+                ...getModalValues(),
+                name: name
+            },
+            resourceListIndex: resourceIndex
         })
+        setIsNameDialogOpen(false)
+        handleCloseModal()
     }
 
     return (
@@ -90,13 +111,15 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
                     </Grid>
                     <Grid item xs={12} container spacing={2}>
                         {currTimePeriods.map((item, index: number) => {
-                            return (<Grid item xs={12}>
-                                <TimePeriodGridItem
-                                    key={`calendar_${currCalendarIndex}_${index}`}
-                                    formState={formState}
-                                    objectFieldName={`time_periods.${index}` as unknown as keyof ResourceCalendar}
-                                />
-                            </Grid>)
+                            return (
+                                <Grid item xs={12} key={`grid_calendar_${currCalendarIndex}_${index}`}>
+                                    <TimePeriodGridItem
+                                        key={`calendar_${currCalendarIndex}_${index}`}
+                                        formState={formState}
+                                        objectFieldName={`time_periods.${index}` as unknown as keyof ResourceCalendar}
+                                    />
+                                </Grid>
+                            )
                         })}
                     </Grid>
                 </Grid>
@@ -105,6 +128,12 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
                 <Button onClick={handleCloseModal}>Cancel</Button>
                 <Button onClick={onModalSave}>Save</Button>
             </DialogActions>
+            {isNameDialogOpen &&
+            <CalendarNameDialog
+                modalOpen={isNameDialogOpen}
+                handleClose={onNameDialogClose}
+                handleSubmit={onModalFinalSave}
+            />}
         </Dialog>
     )
 }
