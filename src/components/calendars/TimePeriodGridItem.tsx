@@ -1,22 +1,23 @@
 import { Grid } from "@mui/material";
-import { Controller, UseFormReturn } from "react-hook-form";
-import { JsonData } from "../formData";
+import { Controller, Path, UseFormReturn } from "react-hook-form";
 import { REQUIRED_ERROR_MSG } from "../validationMessages";
 import TimePickerController from "./TimePickerController";
 import WeekdaySelect from "./WeekdaySelect";
 
-interface ArrivalTimePeriodProps {
-    formState: UseFormReturn<JsonData, object>
+
+interface TimePeriodGridItemProps<FieldValues> {
+    formState: UseFormReturn<FieldValues, object>
+    objectFieldName: keyof FieldValues
 }
 
-const ArrivalTimePeriod = (props: ArrivalTimePeriodProps) => {
-    const { control: formControl } = props.formState
+const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldValues>) => {
+    const { formState: { control: formControl }, objectFieldName } = props
     
     return (
         <Grid container spacing={2}>
             <Grid item xs={3}>
                 <Controller
-                    name={`arrival_time_calendar.from`}
+                    name={`${objectFieldName}.from` as Path<FieldValues>}
                     control={formControl}
                     rules={{ required: REQUIRED_ERROR_MSG }}
                     render={({ field }) => (
@@ -29,7 +30,7 @@ const ArrivalTimePeriod = (props: ArrivalTimePeriodProps) => {
             </Grid>
             <Grid item xs={3}>
                 <Controller
-                    name={`arrival_time_calendar.to`}
+                    name={`${objectFieldName}.to` as Path<FieldValues>}
                     control={formControl}
                     rules={{ required: REQUIRED_ERROR_MSG }}
                     render={({ field }) => (
@@ -42,14 +43,14 @@ const ArrivalTimePeriod = (props: ArrivalTimePeriodProps) => {
             </Grid>
             <Grid item xs={3}>
                 <TimePickerController
-                    name={"arrival_time_calendar.beginTime" as keyof JsonData}
+                    name={`${objectFieldName}.beginTime` as Path<FieldValues>}
                     formState={props.formState}
                     label="Begin Time"
                 />
             </Grid>
             <Grid item xs={3}>
                 <TimePickerController
-                    name={"arrival_time_calendar.endTime" as keyof JsonData}
+                    name={`${objectFieldName}.endTime` as Path<FieldValues>}
                     formState={props.formState}
                     label="End Time"
                 />
@@ -58,4 +59,4 @@ const ArrivalTimePeriod = (props: ArrivalTimePeriodProps) => {
     )
 }
 
-export default ArrivalTimePeriod;
+export default TimePeriodGridItem;

@@ -4,7 +4,7 @@ import { Checkbox, Grid, Paper, Table, TableBody, TableCell, TableContainer, Tab
 import { useState } from "react"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
 import AddButtonToolbar from "./toolbar/AddButtonToolbar"
-import TimePeriodItem from "./calendars/TimePeriodItem"
+import TimePeriodTableRows from "./calendars/TimePeriodTableRows"
 import DeleteButtonToolbar from './toolbar/DeleteButtonToolbar'
 import { JsonData } from './formData'
 
@@ -151,7 +151,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
                             fields.map((calendar, index) => {
                                 const isItemSelected = selected.indexOf(calendar.id) !== -1
 
-                                return <TimePeriodItem
+                                return <TimePeriodTableRows
                                     key={`calendar_${index}_${calendar.key}`}
                                     formState={props.formState}
                                     index={index}

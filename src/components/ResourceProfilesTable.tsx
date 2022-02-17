@@ -1,10 +1,18 @@
-import React from "react";
-import { Table, TableHead, TableRow, TableCell, TableBody, TextField, IconButton } from "@mui/material";
+import React, { useState } from "react";
+import { v4 as uuid } from "uuid";
+import { Table, TableHead, TableRow, TableCell, TableBody, TextField, IconButton, Link } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddButtonToolbar from "./toolbar/AddButtonToolbar";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
-import { JsonData } from "./formData";
+import { JsonData, ResourceCalendar } from "./formData";
 import { REQUIRED_ERROR_MSG } from "./validationMessages";
+import ModifyCalendarDialog, { ModalInfo } from "./ModifyCalendarDialog";
+
+export interface UpdateResourceCalendarRequest {
+    isNew: boolean
+    calendarIndex: number
+    calendar: ResourceCalendar
+}
 
 interface ResourceProfilesTableProps {
     poolUuid: string
@@ -14,12 +22,19 @@ interface ResourceProfilesTableProps {
 }
 
 const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
-    const { resourcePoolIndex } = props
-    const { control: formControl, trigger } = props.formState
+    const [openModal, setOpenModal] = useState<boolean>(false)
+    const [detailModal, setDetailModal] = useState<ModalInfo>()
+    const { formState: { control: formControl, trigger }, resourcePoolIndex } = props
     const { fields, append, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: `resource_profiles.${resourcePoolIndex}.resource_list`
+    })
+
+    const { append: appendCalendar, update: updateCalendar  } = useFieldArray({
+        keyName: 'key',
+        control: formControl,
+        name: "resource_calendars"
     })
 
     const onResourceProfileDelete = (index: number) => {
@@ -47,6 +62,24 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
         })
     }
 
+    const handleCloseModal = () => {
+        setOpenModal(false)
+    }
+
+    const handleSaveModal = (r: UpdateResourceCalendarRequest) => {
+        const calendar = {
+            id: "sid-" + uuid(),
+            name: "default schedule 10",
+            time_periods: r.calendar.time_periods
+        }
+        if (r.isNew) {
+            appendCalendar(calendar)
+
+        } else {
+            updateCalendar(r.calendarIndex, calendar)
+        }
+    }
+
     return (
         <React.Fragment>
             <AddButtonToolbar
@@ -59,6 +92,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                         <TableCell>Name</TableCell>
                         <TableCell>Cost per hour</TableCell>
                         <TableCell>Amount</TableCell>
+                        <TableCell>Calendar</TableCell>
                         <TableCell>Actions</TableCell>
                     </TableRow>
                 </TableHead>
@@ -129,6 +163,28 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                                 />
                             </TableCell>
                             <TableCell>
+                                <Controller
+                                    name={`resource_profiles.${resourcePoolIndex}.resource_list.${index}.calendar`}
+                                    control={formControl}
+                                    render={({ field: { value } }) => (
+                                        <Link
+                                            component="button"
+                                            type="button"
+                                            variant="body2"
+                                            onClick={(e) => {
+                                                setDetailModal({
+                                                    poolIndex: resourcePoolIndex,
+                                                    resourceIndex: index
+                                                })
+                                                setOpenModal(true)
+                                            }}
+                                        >
+                                            {value}
+                                        </Link>
+                                    )}
+                                />
+                            </TableCell>
+                            <TableCell>
                                 <IconButton
                                     size="small"
                                     onClick={() => onResourceProfileDelete(index)}
@@ -140,6 +196,13 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                     })}
                 </TableBody>
             </Table>
+            {detailModal && <ModifyCalendarDialog
+                openModal={openModal}
+                handleCloseModal={handleCloseModal}
+                handleSaveModal={handleSaveModal}
+                detailModal={detailModal}
+                formState={props.formState}
+            />}
         </React.Fragment>
     );
 }

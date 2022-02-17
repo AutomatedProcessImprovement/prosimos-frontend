@@ -1,14 +1,13 @@
 import React from "react";
 import { MenuItem, TextField } from "@mui/material";
 import { ControllerRenderProps } from "react-hook-form";
-import { JsonData } from "../formData";
 
-interface WeekdaySelectProps {
-    field: ControllerRenderProps<JsonData, any>,
+interface WeekdaySelectProps<FieldValues>{
+    field: ControllerRenderProps<FieldValues, any>,
     label?: string
 }
 
-const WeekdaySelect = (props: WeekdaySelectProps) => {
+const WeekdaySelect = <FieldValues,>(props: WeekdaySelectProps<FieldValues>) => {
     return (
         <React.Fragment>
             <TextField 

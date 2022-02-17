@@ -7,7 +7,7 @@ import TimePickerController from "./TimePickerController"
 import { JsonData } from "../formData"
 import { REQUIRED_ERROR_MSG } from "../validationMessages"
 
-interface TimePeriodItemProps {
+interface TimePeriodTableRowsProps {
     formState: UseFormReturn<JsonData, object>
     index: number,
     isItemSelected: boolean
@@ -21,7 +21,7 @@ const defaultTimePeriod = {
     endTime: "17:00:00.000"  
 }
 
-const TimePeriodItem = (props: TimePeriodItemProps) => {
+const TimePeriodTableRows = (props: TimePeriodTableRowsProps) => {
     const { formState: { control: formControl, getValues }, index, isItemSelected, handleClick } = props
 
     const { fields: timePeriodsFields, append, remove } = useFieldArray({
@@ -138,4 +138,4 @@ const TimePeriodItem = (props: TimePeriodItemProps) => {
     </>
 }
 
-export default TimePeriodItem;
+export default TimePeriodTableRows;

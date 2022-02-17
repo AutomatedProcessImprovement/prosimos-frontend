@@ -2,7 +2,7 @@ import { UseFormReturn } from "react-hook-form";
 import { JsonData } from "./formData";
 import TimeDistribution from "./distributions/TimeDistribution";
 import { Card, Grid, Typography } from "@mui/material";
-import ArrivalTimePeriod from "./calendars/ArrivalTimePeriod";
+import TimePeriodGridItem from "./calendars/TimePeriodGridItem";
 
 interface ArrivalTimeDistrProps {
     formState: UseFormReturn<JsonData, object>
@@ -22,8 +22,9 @@ const ArrivalTimeDistr = (props: ArrivalTimeDistrProps) => {
                             <Typography variant="h6" align="left">
                                 Arrival Time Calendar
                             </Typography>
-                            <ArrivalTimePeriod
+                            <TimePeriodGridItem
                                 formState={props.formState}
+                                objectFieldName="arrival_time_calendar"
                             />
                         </Grid>
                         <Grid item xs={12}>

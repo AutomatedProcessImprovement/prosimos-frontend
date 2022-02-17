@@ -28,7 +28,7 @@ export interface ResourceInfo {
     name: string,
     cost_per_hour: string
     amount: string
-    timetable: string
+    calendar: string
     assignedTasks: string []
 }
 

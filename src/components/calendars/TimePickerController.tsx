@@ -1,22 +1,21 @@
 import moment from "moment";
-import { Controller, UseFormReturn } from "react-hook-form";
+import { Controller, Path, UseFormReturn } from "react-hook-form";
 import { LocalizationProvider, TimePicker } from "@mui/lab";
 import AdapterMoment from "@mui/lab/AdapterMoment";
 import { TextField } from "@mui/material";
-import { JsonData } from "../formData";
 
-interface TimePickerControllerProps {
-    name: keyof JsonData
-    formState: UseFormReturn<JsonData, object>
+interface TimePickerControllerProps<FieldValues> {
+    name: Path<FieldValues>
+    formState: UseFormReturn<FieldValues, object>
     label?: string
 }
 
-const TimePickerController = (props: TimePickerControllerProps) => {
+const TimePickerController = <FieldValues, > (props: TimePickerControllerProps<FieldValues>) => {
     const { formState: { control: formControl }, name, label } = props
     
     return (
         <Controller
-            name={name}
+            name={name as Path<FieldValues>}
             control={formControl}
             rules={{ required: true }}
             render={({ 
