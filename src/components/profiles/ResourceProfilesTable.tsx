@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { v4 as uuid } from "uuid";
 import { Table, TableHead, TableRow, TableCell, TableBody, TextField, IconButton, Link } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
-import AddButtonToolbar from "./toolbar/AddButtonToolbar";
+import AddButtonToolbar from "../toolbar/AddButtonToolbar";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
-import { JsonData, ResourceCalendar } from "./formData";
-import { REQUIRED_ERROR_MSG } from "./validationMessages";
+import { CalendarMap, JsonData, ResourceCalendar } from "../formData";
+import { REQUIRED_ERROR_MSG } from "../validationMessages";
 import ModifyCalendarDialog, { ModalInfo } from "./ModifyCalendarDialog";
 
 export interface UpdateResourceCalendarRequest {
@@ -19,12 +19,13 @@ interface ResourceProfilesTableProps {
     resourcePoolIndex: number
     formState: UseFormReturn<JsonData, object>
     errors: any
+    calendars: CalendarMap
 }
 
 const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
     const [openModal, setOpenModal] = useState<boolean>(false)
     const [detailModal, setDetailModal] = useState<ModalInfo>()
-    const { formState: { control: formControl, trigger, setValue }, resourcePoolIndex } = props
+    const { formState: { control: formControl, trigger, setValue, getValues }, resourcePoolIndex } = props
     const { fields, append, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
@@ -71,10 +72,8 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
             ...r.calendar,
             id: "sid-" + uuid()
         }
-        console.log(calendar)
         if (r.isNew) {
             appendCalendar(calendar)
-            console.log("appending")
             setValue(
                 `resource_profiles.${resourcePoolIndex}.resource_list.${r.resourceListIndex}.calendar`, 
                 calendar.id,
@@ -173,7 +172,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                                 <Controller
                                     name={`resource_profiles.${resourcePoolIndex}.resource_list.${index}.calendar`}
                                     control={formControl}
-                                    render={({ field: { value } }) => (
+                                    render={({ field: { value: calendarId} }) => (
                                         <Link
                                             component="button"
                                             type="button"
@@ -181,12 +180,13 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                                             onClick={(e) => {
                                                 setDetailModal({
                                                     poolIndex: resourcePoolIndex,
-                                                    resourceIndex: index
+                                                    resourceIndex: index,
+                                                    calendarId: calendarId
                                                 })
                                                 setOpenModal(true)
                                             }}
                                         >
-                                            {value}
+                                            {props.calendars[calendarId]}
                                         </Link>
                                     )}
                                 />

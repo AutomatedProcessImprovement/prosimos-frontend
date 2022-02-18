@@ -7,8 +7,8 @@ import {
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import DeleteIcon from '@mui/icons-material/Delete';
-import { JsonData } from "./formData";
-import ResourceProfilesTable from "./ResourceProfilesTable";
+import { CalendarMap, JsonData } from "./formData";
+import ResourceProfilesTable from "./profiles/ResourceProfilesTable";
 import AddButtonToolbar from "./toolbar/AddButtonToolbar";
 import { Controller, useFieldArray, UseFieldArrayRemove, UseFormReturn } from "react-hook-form";
 import { REQUIRED_ERROR_MSG } from "./validationMessages";
@@ -36,6 +36,7 @@ interface RowProps {
     errors: {
         [x: string]: any;
     },
+    calendars: CalendarMap
 }
 
 function Row(props: RowProps) {
@@ -101,6 +102,7 @@ function Row(props: RowProps) {
                                 poolUuid={resourceTypeUid}
                                 formState={props.formState}
                                 errors={resourceListErrors && resourceListErrors.resource_list}
+                                calendars={props.calendars}
                             />}
                         </Box>
                     </Collapse>
@@ -111,12 +113,19 @@ function Row(props: RowProps) {
 }
 
 const ResourcePools = (props: ResourcePoolsProps) => {
-    const { control: formControl } = props.formState
+    const { control: formControl, getValues } = props.formState
     const { fields, append, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: `resource_profiles`
     })
+
+    const calendars = getValues("resource_calendars")?.reduce((acc, currItem) => {
+        return {
+            ...acc,
+            [currItem.id]: currItem.name
+        }
+    }, {} as CalendarMap)
 
     const onNewPoolCreation = () => {
         append({
@@ -153,6 +162,7 @@ const ResourcePools = (props: ResourcePoolsProps) => {
                                 onResourcePoolDelete={remove}
                                 formState={props.formState}
                                 errors={props.errors}
+                                calendars={calendars}
                             />
                         ))}
                     </TableBody>

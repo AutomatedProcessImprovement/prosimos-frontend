@@ -53,3 +53,7 @@ export interface ResourceCalendar {
     name: string
     time_periods: TimePeriod[]
 }
+
+export interface CalendarMap {
+    [key: string]: string
+}

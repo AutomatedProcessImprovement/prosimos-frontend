@@ -1,14 +1,15 @@
 import { Dialog, DialogTitle, DialogContent, Grid, TextField, DialogActions, Button, MenuItem } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
 import CalendarNameDialog from "./CalendarNameDialog";
-import TimePeriodGridItem from "./calendars/TimePeriodGridItem";
-import { JsonData, ResourceCalendar } from "./formData";
+import TimePeriodGridItem from "../calendars/TimePeriodGridItem";
+import { JsonData, ResourceCalendar } from "../formData";
 import { UpdateResourceCalendarRequest } from "./ResourceProfilesTable";
 
 export interface ModalInfo {
     poolIndex: number
     resourceIndex: number
+    calendarId: string
 }
 
 interface ModifyCalendarDialogProps {
@@ -23,18 +24,27 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
     const {
         openModal, handleCloseModal, handleSaveModal,
         formState: { getValues },
-        detailModal: { poolIndex, resourceIndex }
+        detailModal: { poolIndex, resourceIndex, calendarId }
     } = props
-    const [currCalendarIndex, setCurrCalendarIndex] = useState<number>(resourceIndex)
+    const [currCalendarIndex, setCurrCalendarIndex] = useState<number>()
     const [isNameDialogOpen, setIsNameDialogOpen] = useState<boolean>(false)
-
     const allCalendars = getValues("resource_calendars")
-    const currCalendar = allCalendars[currCalendarIndex]
 
+    useEffect(() => {
+        const currCalendarIndex = allCalendars.findIndex((item) => item.id === calendarId)
+        setCurrCalendarIndex(currCalendarIndex)
+    }, [calendarId, allCalendars])
+
+    const currCalendar = (currCalendarIndex !== undefined) ? allCalendars[currCalendarIndex] : {} 
     const formState = useForm<ResourceCalendar>({
         defaultValues: currCalendar
     })
     const { formState: { isDirty, dirtyFields }, control: modalFormControl, reset, getValues: getModalValues } = formState
+
+    useEffect(() => {
+        const currCalendar = (currCalendarIndex !== undefined) ? allCalendars[currCalendarIndex] : {}
+        reset(currCalendar)
+    }, [currCalendarIndex, allCalendars, reset])
 
     const { fields: currTimePeriods, append, remove } = useFieldArray({
         keyName: 'key',
@@ -59,6 +69,7 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
                 calendar: getModalValues(),
                 resourceListIndex: resourceIndex
             })
+            handleCloseModal()
         }
     }
 
