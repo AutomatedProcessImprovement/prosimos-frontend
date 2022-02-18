@@ -4,12 +4,13 @@ interface ButtonToolbarBaseProps {
     onClick: () => void
     labelName: string
     startIcon: React.ReactNode
+    variant: "text" | "outlined"
 }
 
 const ButtonToolbarBase = (props: ButtonToolbarBaseProps) => {
     return (
         <Button
-            variant="outlined"
+            variant={props.variant}
             startIcon={props.startIcon}
             onClick={props.onClick}
             size="small"

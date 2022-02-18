@@ -5,6 +5,7 @@ import CalendarNameDialog from "./CalendarNameDialog";
 import TimePeriodGridItem from "../calendars/TimePeriodGridItem";
 import { JsonData, ResourceCalendar } from "../formData";
 import { UpdateResourceCalendarRequest } from "./ResourceProfilesTable";
+import AddButtonBase from "../toolbar/AddButtonBase";
 
 export interface ModalInfo {
     poolIndex: number
@@ -90,11 +91,25 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
         handleCloseModal()
     }
 
+    const onTimePeriodRemove = (index: number) => {
+        remove(index)
+    }
+
+    const onTimePeriodAdd = () => {
+        append({
+            from: "MONDAY",
+            to: "THURSDAY",
+            beginTime: "09:00:00.000",
+            endTime: "17:00:00.000"
+        })
+    }
+
     return (
         <Dialog open={openModal} onClose={handleCloseModal}
             PaperProps={{
                 sx: {
-                    minHeight: "30vh"
+                    minHeight: "30vh",
+                    maxHeight: "40vh"
                 }
             }}
         >
@@ -128,10 +143,19 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
                                         key={`calendar_${currCalendarIndex}_${index}`}
                                         formState={formState}
                                         objectFieldName={`time_periods.${index}` as unknown as keyof ResourceCalendar}
+                                        isWithDeleteButton={true}
+                                        timePeriodIndex={index}
+                                        onDelete={onTimePeriodRemove}
                                     />
                                 </Grid>
                             )
                         })}
+                        <Grid item xs={12}>
+                            <AddButtonBase
+                                labelName="Add a time period"
+                                onClick={onTimePeriodAdd}
+                            />
+                        </Grid>
                     </Grid>
                 </Grid>
             </DialogContent>

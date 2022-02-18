@@ -1,20 +1,20 @@
-import AddIcon from '@mui/icons-material/Add';
 import ButtonToolbarBase from "./ButtonToolbarBase";
+import AddIcon from '@mui/icons-material/Add';
 
-interface AddButtonToolbarProps {
+interface AddButtonBaseProps {
     onClick: () => void
     labelName: string
 }
 
-const AddButtonToolbar = (props: AddButtonToolbarProps) => {
+const AddButtonBase = (props: AddButtonBaseProps) => {
     return (
         <ButtonToolbarBase
             onClick={props.onClick}
             labelName={props.labelName}
             startIcon={<AddIcon />}
-            variant="outlined"
+            variant="text"
         />
     )
 }
 
-export default AddButtonToolbar;
+export default AddButtonBase;

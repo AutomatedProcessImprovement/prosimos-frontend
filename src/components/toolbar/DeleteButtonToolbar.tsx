@@ -12,6 +12,7 @@ const DeleteButtonToolbar = (props: DeleteButtonToolbarProps) => {
             onClick={props.onClick}
             labelName={props.labelName}
             startIcon={<DeleteIcon />}
+            variant="text"
         />
     )
 }
