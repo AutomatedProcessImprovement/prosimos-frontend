@@ -3,7 +3,7 @@ export interface JsonData {
     arrival_time_distribution: ProbabilityDistribution
     arrival_time_calendar: TimePeriod
     gateway_branching_probabilities: GatewayBranchingProbability[]
-    task_resource_distribution: {}
+    task_resource_distribution: TaskResourceDistribution[]
     resource_calendars: ResourceCalendar[]
 }
 
@@ -56,4 +56,9 @@ export interface ResourceCalendar {
 
 export interface CalendarMap {
     [key: string]: string
+}
+
+export interface TaskResourceDistribution {
+    task_id: string
+    resources: ProbabilityDistributionForResource[]
 }

@@ -33,6 +33,7 @@ const ArrivalTimeDistr = (props: ArrivalTimeDistrProps) => {
                             </Typography>
                             <TimeDistribution
                                 formState={props.formState}
+                                objectNamePath="arrival_time_distribution"
                             />
                         </Grid>
                     </Grid>

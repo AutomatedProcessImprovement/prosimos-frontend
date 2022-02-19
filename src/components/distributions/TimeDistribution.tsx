@@ -6,16 +6,21 @@ import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove';
 import GridItemWithCenteredIcon from "./GridItemWithCenteredIcon";
 
+type AllowedName = "arrival_time_distribution.distribution_params" 
+    | `task_resource_distribution.${number}.resources.${number}.distribution_params`
+
 interface TimeDistributionProps {
     formState: UseFormReturn<JsonData, object>
+    objectNamePath: string
 }
 
 const TimeDistribution = (props: TimeDistributionProps) => {
     const { control: formControl, formState: { errors } } = props.formState
+    const { objectNamePath } = props
     const { fields, append, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
-        name: `arrival_time_distribution.distribution_params`
+        name: `${objectNamePath}.distribution_params` as AllowedName
     })
 
     const distrErrors = errors?.arrival_time_distribution
@@ -32,7 +37,7 @@ const TimeDistribution = (props: TimeDistributionProps) => {
             <Grid container item xs={4}>
                 <Grid item xs={12}>
                     <Controller
-                        name={`arrival_time_distribution.distribution_name`}
+                        name={`${objectNamePath}.distribution_name` as unknown as keyof JsonData} 
                         control={formControl}
                         rules={{ required: REQUIRED_ERROR_MSG }}
                         render={({ field }) => (
@@ -61,7 +66,7 @@ const TimeDistribution = (props: TimeDistributionProps) => {
                     return (
                         <Grid item xs={2} key={`arrival_distr_params_${paramIndex}`}>
                             <Controller
-                                name={`arrival_time_distribution.distribution_params.${paramIndex}.value`}
+                                name={`${objectNamePath}.distribution_params.${paramIndex}.value` as unknown as keyof JsonData}
                                 control={formControl}
                                 rules={{ required: REQUIRED_ERROR_MSG }}
                                 render={({ 

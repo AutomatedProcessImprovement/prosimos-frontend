@@ -7,6 +7,7 @@ import AllGatewaysProbabilities from './AllGatewaysProbabilities';
 import ResourcePools from './ResourcePools';
 import ResourceCalendars from './ResourceCalendars';
 import ArrivalTimeDistr from './ArrivalTimeDistr';
+import ResourceAllocation from './resource_allocation/ResourceAllocation';
 
 const tabs_name = {
     RESOURCE_PROFILES: "Resource Profiles",
@@ -120,7 +121,10 @@ const SimulationParameters = () => {
                                 />
                             </TabPanel>
                             <TabPanel value={value} index={2}>
-                                Item Three
+                                <ResourceAllocation
+                                   formState={formState}
+                                   errors={errors} 
+                                />
                             </TabPanel>
                             <TabPanel value={value} index={3}>
                                 <ArrivalTimeDistr
