@@ -38,6 +38,7 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
 
     const currCalendar = (currCalendarIndex !== undefined) ? allCalendars[currCalendarIndex] : {} 
     const formState = useForm<ResourceCalendar>({
+        mode: "onBlur", // validate on blur
         defaultValues: currCalendar
     })
     const { formState: { isDirty, dirtyFields }, control: modalFormControl, reset, getValues: getModalValues } = formState

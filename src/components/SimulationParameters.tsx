@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Box, Button, Grid, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Button, ButtonGroup, Grid, Tab, Tabs, Typography } from '@mui/material';
 import { JsonData } from './formData';
 import AllGatewaysProbabilities from './AllGatewaysProbabilities';
 import ResourcePools from './ResourcePools';
@@ -57,14 +57,18 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const SimulationParameters = () => {
-    const formState = useForm<JsonData>();
+    const formState = useForm<JsonData>({
+        mode: "onBlur" // validate on blur
+    })
     const { handleSubmit, reset, formState: { errors } } = formState
 
-    const [value, setValue] = useState(0);
-    const [jsonData, setJsonData] = useState<JsonData>();
+    const [value, setValue] = useState(0)
+    const [jsonData, setJsonData] = useState<JsonData>()
+    const [fileDownloadUrl, setFileDownloadUrl] = useState<string>("")
+    const linkDownloadRef = useRef<HTMLAnchorElement>(null)
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-        setValue(newValue);
+        setValue(newValue)
     };
 
     const { state } = useLocation()
@@ -72,7 +76,7 @@ const SimulationParameters = () => {
 
     useEffect(() => {
         const fileReader = new FileReader();
-        fileReader.readAsText(jsonFile, "UTF-8");
+        fileReader.readAsText(jsonFile, "UTF-8")
         fileReader.onload = e => {
             if (e.target?.result && typeof e.target?.result === 'string') {
                 const rawData = JSON.parse(e.target.result)
@@ -85,17 +89,50 @@ const SimulationParameters = () => {
         reset(jsonData)
     }, [jsonData, reset])
 
-    const onSubmit = (data: any) => console.log(data);
+    useEffect(() => {
+        if (fileDownloadUrl !== "" && fileDownloadUrl !== undefined) {
+            linkDownloadRef.current?.click()
+            URL.revokeObjectURL(fileDownloadUrl);
+        }
+    }, [fileDownloadUrl])
+
+    const onSubmit = (data: JsonData) => console.log(data);
+
+    const onDownload = (data: JsonData) => {
+        const content = JSON.stringify(data)
+        const blob = new Blob([content], { type: "text/plain" })
+        const fileDownloadUrl = URL.createObjectURL(blob);
+        setFileDownloadUrl(fileDownloadUrl)
+    }
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
-
-        <Grid container alignItems="center" justifyContent="center">
-            <Grid item xs={9}>
-                <Grid item xs={12}>
-                    <Box
-                        sx={{ flexGrow: 1, display: 'flex' }}
-                    >
+            <Grid container alignItems="center" justifyContent="center">
+                <Grid item xs={9}>
+                    <Grid item xs={12}>
+                        <Grid container alignItems="center" justifyContent="center">
+                            <ButtonGroup variant="outlined">
+                                <Button
+                                    type="submit"
+                                    onClick={handleSubmit(onDownload)}
+                                >Download as a .json</Button>
+                                <a
+                                    style={{ display: "none" }}
+                                    download={"json-file-name.json"}
+                                    href={fileDownloadUrl}
+                                    ref={linkDownloadRef}
+                                >Download json</a>
+                                <Button 
+                                    type="submit"
+                                    onClick={handleSubmit(onSubmit)}
+                                >Submit</Button>
+                            </ButtonGroup>
+                        </Grid>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box
+                            sx={{ flexGrow: 1, display: 'flex' }}
+                        >
                             <Tabs value={value}
                                 onChange={handleTabChange}
                                 variant="scrollable"
@@ -111,7 +148,7 @@ const SimulationParameters = () => {
                                     (jsonData?.resource_profiles !== undefined)
                                         ? <ResourcePools
                                             formState={formState}
-                                            errors={errors}/>
+                                            errors={errors} />
                                         : <Typography>No resource profiles</Typography>
                                 }
                             </TabPanel>
@@ -122,14 +159,14 @@ const SimulationParameters = () => {
                             </TabPanel>
                             <TabPanel value={value} index={2}>
                                 <ResourceAllocation
-                                   formState={formState}
-                                   errors={errors} 
+                                    formState={formState}
+                                    errors={errors}
                                 />
                             </TabPanel>
                             <TabPanel value={value} index={3}>
                                 <ArrivalTimeDistr
-                                   formState={formState}
-                                   errors={errors} />
+                                    formState={formState}
+                                    errors={errors} />
                             </TabPanel>
                             <TabPanel value={value} index={4}>
                                 {
@@ -141,15 +178,10 @@ const SimulationParameters = () => {
                                 }
                             </TabPanel>
 
-                    </Box>
-                </Grid>
-                <Grid item xs={12}>
-                    <Button type="submit">
-                        Submit
-                    </Button>
+                        </Box>
+                    </Grid>
                 </Grid>
             </Grid>
-        </Grid>
         </form>
     );
 }
