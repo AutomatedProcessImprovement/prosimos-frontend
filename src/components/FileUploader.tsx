@@ -17,7 +17,7 @@ const FileUploader = (props: FileUploaderProps) => {
         setIsFilePicked(true);
         props.onFileChange(selectedFile)
     };
-
+    
     return (<>
         <Grid>
             <Typography variant="body1">

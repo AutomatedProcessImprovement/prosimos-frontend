@@ -6,10 +6,12 @@ import { REQUIRED_ERROR_MSG } from "../validationMessages";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import ResourceDistribution from "./ResourceDistribution";
+import { ModelTask } from "../modelData";
 
 const TASK_RESOURCE_DISTR = "task_resource_distribution"
 
 interface ResourceAllocationProps {
+    tasksFromModel: ModelTask[]
     formState: UseFormReturn<JsonData, object>
     errors: {
         [x: string]: any;

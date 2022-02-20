@@ -8,6 +8,8 @@ import ResourcePools from './ResourcePools';
 import ResourceCalendars from './ResourceCalendars';
 import ArrivalTimeDistr from './ArrivalTimeDistr';
 import ResourceAllocation from './resource_allocation/ResourceAllocation';
+import BpmnModeler from "bpmn-js/lib/Modeler";
+import { ModelTask } from './modelData';
 
 const tabs_name = {
     RESOURCE_PROFILES: "Resource Profiles",
@@ -73,16 +75,57 @@ const SimulationParameters = () => {
 
     const { state } = useLocation()
     const { bpmnFile, jsonFile } = state as LocationState
+    const [xmlData, setXmlData] = useState()
+    const [tasksFromModel, setTasksFromModel] = useState<ModelTask[]>([])
 
     useEffect(() => {
-        const fileReader = new FileReader();
-        fileReader.readAsText(jsonFile, "UTF-8")
-        fileReader.onload = e => {
+        const bpmnFileReader = new FileReader()
+        bpmnFileReader.readAsText(bpmnFile)
+        bpmnFileReader.onloadend = () => {
+            const importXml = async () => {
+                const fileData = bpmnFileReader.result as string
+                const modeler = new BpmnModeler()
+                const result = await modeler.importXML(fileData)
+                setXmlData(result)
+
+                const { warnings } = result;
+                console.log(warnings);
+
+                // moddle
+                // const moddle = new BpmnModdle()
+                // const res = await moddle.fromXML(fileData)
+                // console.log(res)
+
+                const elementRegistry = modeler.get('elementRegistry');
+                const tasks = elementRegistry
+                    .filter((e: { type: string; }) => e.type === 'bpmn:Task')
+                    .map((t: any)=> (
+                        {
+                            id: t.id,
+                            name: t.businessObject.name
+                        }
+                    ))
+                setTasksFromModel(tasks)
+            }
+
+            try {
+                importXml()
+            }
+            catch (err: any) {
+                console.log(err.message, err.warnings);
+            }
+        }
+    }, [bpmnFile])
+
+    useEffect(() => {
+        const jsonFileReader = new FileReader();
+        jsonFileReader.readAsText(jsonFile, "UTF-8")
+        jsonFileReader.onload = e => {
             if (e.target?.result && typeof e.target?.result === 'string') {
                 const rawData = JSON.parse(e.target.result)
                 setJsonData(rawData)
             }
-        };
+        }
     }, [jsonFile])
 
     useEffect(() => {
@@ -122,7 +165,7 @@ const SimulationParameters = () => {
                                     href={fileDownloadUrl}
                                     ref={linkDownloadRef}
                                 >Download json</a>
-                                <Button 
+                                <Button
                                     type="submit"
                                     onClick={handleSubmit(onSubmit)}
                                 >Submit</Button>
@@ -159,6 +202,7 @@ const SimulationParameters = () => {
                             </TabPanel>
                             <TabPanel value={value} index={2}>
                                 <ResourceAllocation
+                                    tasksFromModel={tasksFromModel}
                                     formState={formState}
                                     errors={errors}
                                 />
@@ -177,7 +221,6 @@ const SimulationParameters = () => {
                                         : <Typography>No branching</Typography>
                                 }
                             </TabPanel>
-
                         </Box>
                     </Grid>
                 </Grid>

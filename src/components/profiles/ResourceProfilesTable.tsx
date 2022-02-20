@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { v4 as uuid } from "uuid";
-import { Table, TableHead, TableRow, TableCell, TableBody, TextField, IconButton, Link, Grid } from "@mui/material";
+import { Table, TableHead, TableRow, TableCell, TableBody, TextField, IconButton, Link, Grid, Toolbar } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddButtonToolbar from "../toolbar/AddButtonToolbar";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
@@ -88,14 +88,12 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
 
     return (
         <React.Fragment>
-            <Grid container justifyContent="flex-end">
-                <Grid item xs={12}>
-                    <AddButtonToolbar
-                        labelName="Add new resource"
-                        onClick={onResourceAdd}
-                    />
-                </Grid>
-            </Grid>
+            <Toolbar sx={{ justifyContent: "flex-end", marginLeft: "auto" }}>
+                <AddButtonToolbar
+                    labelName="Add new resource"
+                    onClick={onResourceAdd}
+                />
+            </Toolbar>
             <Table size="small">
                 <TableHead>
                     <TableRow>
