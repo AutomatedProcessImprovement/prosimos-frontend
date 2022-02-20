@@ -1,4 +1,7 @@
 export interface ModelTask {
-    id: string
     name: string
+}
+
+export interface AllModelTasks {
+    [id: string]: ModelTask
 }

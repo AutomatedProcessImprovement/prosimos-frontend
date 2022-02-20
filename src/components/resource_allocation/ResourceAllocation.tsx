@@ -1,17 +1,16 @@
 import { Box, Collapse, Grid, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import React, { useState } from "react";
-import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
+import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { JsonData } from "../formData";
-import { REQUIRED_ERROR_MSG } from "../validationMessages";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import ResourceDistribution from "./ResourceDistribution";
-import { ModelTask } from "../modelData";
+import { AllModelTasks } from "../modelData";
 
 const TASK_RESOURCE_DISTR = "task_resource_distribution"
 
 interface ResourceAllocationProps {
-    tasksFromModel: ModelTask[]
+    tasksFromModel: AllModelTasks
     formState: UseFormReturn<JsonData, object>
     errors: {
         [x: string]: any;
@@ -19,15 +18,16 @@ interface ResourceAllocationProps {
 }
 
 interface RowProps {
+    taskName: string
+    allocationIndex: number
     formState: UseFormReturn<JsonData, object>
     errors: {
         [x: string]: any;
-    },
-    allocationIndex: number
+    }
 }
 
 const Row = (props: RowProps) => {
-    const { allocationIndex } = props
+    const { allocationIndex, taskName } = props
     const { formState: { control: formControl } } = props
     const [openModule, setOpenModule] = useState(false);
 
@@ -49,16 +49,9 @@ const Row = (props: RowProps) => {
                     </IconButton>
                 </TableCell>
                 <TableCell>
-                    <Controller
-                        name={`${TASK_RESOURCE_DISTR}.${allocationIndex}.task_id` as unknown as keyof JsonData}
-                        control={formControl}
-                        rules={{ required: REQUIRED_ERROR_MSG }}
-                        render={({ field: { value } }) => (
-                            <Typography>
-                                {value}
-                            </Typography>
-                        )}
-                    />
+                    <Typography>
+                        {taskName}
+                    </Typography>
                 </TableCell>
             </TableRow>
             <TableRow>
@@ -86,6 +79,7 @@ const Row = (props: RowProps) => {
 }
 
 const ResourceAllocation = (props: ResourceAllocationProps) => {
+    const { tasksFromModel } = props
     const { control: formControl, getValues } = props.formState
     const { fields, append, remove } = useFieldArray({
         keyName: 'key',
@@ -106,6 +100,7 @@ const ResourceAllocation = (props: ResourceAllocationProps) => {
                     <TableBody>
                         {fields.map((allocation, index) => (
                             <Row key={allocation.task_id}
+                                taskName={tasksFromModel[allocation.task_id].name}
                                 allocationIndex={index}
                                 formState={props.formState}
                                 errors={props.errors}

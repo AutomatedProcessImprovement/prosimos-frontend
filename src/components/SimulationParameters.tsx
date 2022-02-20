@@ -9,7 +9,7 @@ import ResourceCalendars from './ResourceCalendars';
 import ArrivalTimeDistr from './ArrivalTimeDistr';
 import ResourceAllocation from './resource_allocation/ResourceAllocation';
 import BpmnModeler from "bpmn-js/lib/Modeler";
-import { ModelTask } from './modelData';
+import { AllModelTasks } from './modelData';
 
 const tabs_name = {
     RESOURCE_PROFILES: "Resource Profiles",
@@ -76,7 +76,7 @@ const SimulationParameters = () => {
     const { state } = useLocation()
     const { bpmnFile, jsonFile } = state as LocationState
     const [xmlData, setXmlData] = useState()
-    const [tasksFromModel, setTasksFromModel] = useState<ModelTask[]>([])
+    const [tasksFromModel, setTasksFromModel] = useState<AllModelTasks>({})
 
     useEffect(() => {
         const bpmnFileReader = new FileReader()
@@ -99,12 +99,12 @@ const SimulationParameters = () => {
                 const elementRegistry = modeler.get('elementRegistry');
                 const tasks = elementRegistry
                     .filter((e: { type: string; }) => e.type === 'bpmn:Task')
-                    .map((t: any)=> (
+                    .reduce((acc: [], t: any) => (
                         {
-                            id: t.id,
-                            name: t.businessObject.name
+                            ...acc,
+                            [t.id]: { name: t.businessObject.name } 
                         }
-                    ))
+                    ), [])
                 setTasksFromModel(tasks)
             }
 
