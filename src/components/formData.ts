@@ -58,6 +58,14 @@ export interface CalendarMap {
     [key: string]: string
 }
 
+export interface ResourceMap {
+    [key: string]: { // resource profile name
+        [resourceId: string]: { // resource id
+            name: string
+        }
+    }
+}
+
 export interface TaskResourceDistribution {
     task_id: string
     resources: ProbabilityDistributionForResource[]

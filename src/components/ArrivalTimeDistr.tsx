@@ -6,12 +6,11 @@ import TimePeriodGridItemWithoutDelete from "./calendars/TimePeriodGridItemWitho
 
 interface ArrivalTimeDistrProps {
     formState: UseFormReturn<JsonData, object>
-    errors: {
-        [x: string]: any;
-    }
 }
 
 const ArrivalTimeDistr = (props: ArrivalTimeDistrProps) => {
+    const { formState: { errors } } = props.formState    
+    const currentErrors = errors?.arrival_time_distribution
 
     return (
         <Grid container>
@@ -34,6 +33,7 @@ const ArrivalTimeDistr = (props: ArrivalTimeDistrProps) => {
                             <TimeDistribution
                                 formState={props.formState}
                                 objectNamePath="arrival_time_distribution"
+                                errors={currentErrors}
                             />
                         </Grid>
                     </Grid>

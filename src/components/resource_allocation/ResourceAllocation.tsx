@@ -1,7 +1,7 @@
 import { Box, Collapse, Grid, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import React, { useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
-import { JsonData } from "../formData";
+import { JsonData, ResourceMap, ResourcePool } from "../formData";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import ResourceDistribution from "./ResourceDistribution";
@@ -20,6 +20,7 @@ interface ResourceAllocationProps {
 interface RowProps {
     taskName: string
     allocationIndex: number
+    allowedResources: { [key: string]: { name: string } }
     formState: UseFormReturn<JsonData, object>
     errors: {
         [x: string]: any;
@@ -66,6 +67,7 @@ const Row = (props: RowProps) => {
                                             resourceDistr={resourceDistr}
                                             allocationIndex={allocationIndex}
                                             resourceIndex={index}
+                                            allowedResources={props.allowedResources}
                                         />
                                     </Grid>
                                 ))}
@@ -87,6 +89,19 @@ const ResourceAllocation = (props: ResourceAllocationProps) => {
         name: TASK_RESOURCE_DISTR
     })
 
+    const profiles = getValues("resource_profiles")?.reduce((acc: ResourceMap, currProfile: ResourcePool) => {
+        const resources = currProfile.resource_list?.reduce((accResource, item) => { return {
+            ...accResource,
+            [item.id]: { name: item.name }
+        }}, {})
+        const profileNameWoSpaces = currProfile.name.replace(/\s/g, "")
+
+        return {
+            ...acc,
+            [profileNameWoSpaces]: resources
+        } as ResourceMap
+    }, {} as ResourceMap)
+
     return (
         <Grid container spacing={2}>
             <TableContainer component={Paper}>
@@ -98,14 +113,17 @@ const ResourceAllocation = (props: ResourceAllocationProps) => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {fields.map((allocation, index) => (
-                            <Row key={allocation.task_id}
-                                taskName={tasksFromModel[allocation.task_id].name}
+                        {fields.map((allocation, index) => {
+                            const currentTask = tasksFromModel[allocation.task_id]
+
+                            return <Row key={allocation.task_id}
+                                taskName={currentTask.name}
                                 allocationIndex={index}
+                                allowedResources={profiles[currentTask.resource]}
                                 formState={props.formState}
                                 errors={props.errors}
                             />
-                        ))}
+                        })}
                     </TableBody>
                 </Table>
             </TableContainer>

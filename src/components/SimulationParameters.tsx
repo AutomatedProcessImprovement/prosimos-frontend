@@ -10,6 +10,7 @@ import ArrivalTimeDistr from './ArrivalTimeDistr';
 import ResourceAllocation from './resource_allocation/ResourceAllocation';
 import BpmnModeler from "bpmn-js/lib/Modeler";
 import { AllModelTasks } from './modelData';
+import BpmnModdle from "bpmn-moddle";
 
 const tabs_name = {
     RESOURCE_PROFILES: "Resource Profiles",
@@ -84,6 +85,7 @@ const SimulationParameters = () => {
         bpmnFileReader.onloadend = () => {
             const importXml = async () => {
                 const fileData = bpmnFileReader.result as string
+                console.log(fileData)
                 const modeler = new BpmnModeler()
                 const result = await modeler.importXML(fileData)
                 setXmlData(result)
@@ -92,17 +94,21 @@ const SimulationParameters = () => {
                 console.log(warnings);
 
                 // moddle
-                // const moddle = new BpmnModdle()
-                // const res = await moddle.fromXML(fileData)
-                // console.log(res)
+                const moddle = new BpmnModdle()
+                const res = await moddle.fromXML(fileData)
+                console.log(res)
 
-                const elementRegistry = modeler.get('elementRegistry');
+                const elementRegistry = modeler.get('elementRegistry')
+                console.log(elementRegistry)
                 const tasks = elementRegistry
                     .filter((e: { type: string; }) => e.type === 'bpmn:Task')
                     .reduce((acc: [], t: any) => (
                         {
                             ...acc,
-                            [t.id]: { name: t.businessObject.name } 
+                            [t.id]: { 
+                                name: t.businessObject.name,
+                                resource: JSON.parse(t.businessObject.documentation[0].text).resource
+                            } 
                         }
                     ), [])
                 setTasksFromModel(tasks)
@@ -210,7 +216,7 @@ const SimulationParameters = () => {
                             <TabPanel value={value} index={3}>
                                 <ArrivalTimeDistr
                                     formState={formState}
-                                    errors={errors} />
+                                />
                             </TabPanel>
                             <TabPanel value={value} index={4}>
                                 {

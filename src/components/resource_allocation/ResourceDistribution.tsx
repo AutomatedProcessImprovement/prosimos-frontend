@@ -1,36 +1,37 @@
-import { Grid, Paper, TextField, Typography } from "@mui/material";
-import { UseFormReturn, Controller } from "react-hook-form";
+import { Grid, Paper, Typography } from "@mui/material";
+import { UseFormReturn } from "react-hook-form";
 import TimeDistribution from "../distributions/TimeDistribution";
 import { JsonData, ProbabilityDistributionForResource } from "../formData";
-import { REQUIRED_ERROR_MSG } from "../validationMessages";
+import ResourceSelect from "./ResourceSelect";
 
 interface ResourceDistributionProps {
     formState: UseFormReturn<JsonData, object>
     resourceDistr: ProbabilityDistributionForResource
     allocationIndex: number
     resourceIndex: number
+    allowedResources: { [key: string]: { name: string } }
 }
 
 const ResourceDistribution = (props: ResourceDistributionProps) => {
-    const { formState: { control: formControl }, allocationIndex, resourceIndex } = props
+    const { formState, allocationIndex, resourceIndex, allowedResources } = props
+    const { formState: { errors } } = formState
+    
+    const currentErrors = errors?.task_resource_distribution?.[allocationIndex]?.resources?.[resourceIndex]
+    const distrErrors = {
+        distribution_name: currentErrors?.distribution_name,
+        distribution_params: currentErrors?.distribution_params
+    }
 
     return (
         <Paper elevation={5} sx={{ p: 2 }}>
             <Grid container spacing={2}>
                 <Grid item xs={12}>
-                    <Controller
-                        name={`task_resource_distribution.${allocationIndex}.resources.${resourceIndex}.resource_id`}
-                        control={formControl}
-                        rules={{ required: REQUIRED_ERROR_MSG }}
-                        render={({ field }) => (
-                            <TextField
-                                {...field}
-                                variant="standard"
-                                placeholder="Resource name"
-                                label="Resource"
-                                sx={{ width: "100%"}}
-                            />
-                        )}
+                    <ResourceSelect
+                        formState={formState}
+                        allocationIndex={allocationIndex}
+                        resourceIndex={resourceIndex}
+                        allowedResources={allowedResources}
+                        currentError={currentErrors?.resource_id}
                     />
                 </Grid>
                 <Grid item xs={12}>
@@ -38,8 +39,9 @@ const ResourceDistribution = (props: ResourceDistributionProps) => {
                         Duration
                     </Typography>
                     <TimeDistribution
-                        formState={props.formState}
+                        formState={formState}
                         objectNamePath={`task_resource_distribution.${allocationIndex}.resources.${resourceIndex}`}
+                        errors={distrErrors}
                     />
                 </Grid>
             </Grid>

@@ -1,5 +1,5 @@
 import { Grid, TextField } from "@mui/material";
-import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
+import { Controller, FieldError, useFieldArray, UseFormReturn } from "react-hook-form";
 import { JsonData } from "../formData";
 import { REQUIRED_ERROR_MSG } from "../validationMessages";
 import AddIcon from '@mui/icons-material/Add'
@@ -12,19 +12,21 @@ type AllowedName = "arrival_time_distribution.distribution_params"
 interface TimeDistributionProps {
     formState: UseFormReturn<JsonData, object>
     objectNamePath: string
+    errors?: {
+        distribution_name?: FieldError
+        distribution_params?: { value?: FieldError }[]
+    }
 }
 
 const TimeDistribution = (props: TimeDistributionProps) => {
-    const { control: formControl, formState: { errors } } = props.formState
-    const { objectNamePath } = props
+    const { control: formControl } = props.formState
+    const { objectNamePath, errors: distrErrors } = props
     const { fields, append, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: `${objectNamePath}.distribution_params` as AllowedName
     })
-
-    const distrErrors = errors?.arrival_time_distribution
-
+    
     const onDistrFuncParamAdd = () => append({ value: 0 })
 
     const onDistrFuncParamRemove = () => {
