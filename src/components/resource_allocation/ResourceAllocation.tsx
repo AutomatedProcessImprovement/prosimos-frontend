@@ -1,13 +1,23 @@
 import { Box, Collapse, Grid, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import React, { useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
-import { JsonData, ResourceMap, ResourcePool } from "../formData";
+import { JsonData, ProbabilityDistributionForResource, ResourceMap, ResourcePool } from "../formData";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import ResourceDistribution from "./ResourceDistribution";
 import { AllModelTasks } from "../modelData";
+import AddButtonBase from "../toolbar/AddButtonBase";
 
 const TASK_RESOURCE_DISTR = "task_resource_distribution"
+
+const defaultResourceAllocationDist = {
+    distribution_name: "norm",
+    distribution_params: [
+        { value: 0 },
+        { value: 0 }
+    ],
+    resource_id: ""
+} as ProbabilityDistributionForResource
 
 interface ResourceAllocationProps {
     tasksFromModel: AllModelTasks
@@ -28,8 +38,8 @@ interface RowProps {
 }
 
 const Row = (props: RowProps) => {
-    const { allocationIndex, taskName } = props
-    const { formState: { control: formControl } } = props
+    const { allocationIndex, taskName, allowedResources } = props
+    const { formState: { control: formControl, getValues } } = props
     const [openModule, setOpenModule] = useState(false);
 
     const { fields, append, remove } = useFieldArray({
@@ -37,7 +47,18 @@ const Row = (props: RowProps) => {
         control: formControl,
         name: `${TASK_RESOURCE_DISTR}.${allocationIndex}.resources`
     })
-        
+
+    // only if not all resources from the pool were allocated
+    const isAdditionAllowed = () => {
+        const allocatedResourcesCount = getValues(`task_resource_distribution.${allocationIndex}.resources`).length
+        const allowedResourcesCount = Object.entries(allowedResources).length
+        return allowedResourcesCount > allocatedResourcesCount
+    }
+
+    const onResourceAllocationAdd = () => {
+        append(defaultResourceAllocationDist)
+    }
+
     return (
         <React.Fragment>
             <TableRow hover>
@@ -67,10 +88,21 @@ const Row = (props: RowProps) => {
                                             resourceDistr={resourceDistr}
                                             allocationIndex={allocationIndex}
                                             resourceIndex={index}
-                                            allowedResources={props.allowedResources}
+                                            allowedResources={allowedResources}
                                         />
                                     </Grid>
                                 ))}
+                                {isAdditionAllowed() && 
+                                    <Grid item xs={12}>
+                                        <Paper elevation={5} sx={{ p: 2 }}>
+                                            <Grid>
+                                                <AddButtonBase
+                                                    labelName="Add a new resource allocation"
+                                                    onClick={onResourceAllocationAdd}
+                                                />
+                                            </Grid>
+                                        </Paper>
+                                    </Grid>}
                             </Grid>
                         </Box>
                     </Collapse>

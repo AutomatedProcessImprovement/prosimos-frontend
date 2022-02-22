@@ -136,7 +136,6 @@ const SimulationParameters = () => {
                             }
                         }
                     }, {} as Gateways)
-                console.log(gateways)
                 setGateways(gateways)
             }
 
