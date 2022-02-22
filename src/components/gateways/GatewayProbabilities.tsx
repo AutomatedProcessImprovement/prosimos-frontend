@@ -1,8 +1,9 @@
 import React from "react";
 import { Grid, Typography, TextField } from "@mui/material";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
-import { JsonData } from "./formData";
-import { REQUIRED_ERROR_MSG, SUMMATION_ONE_MSG } from "./validationMessages";
+import { JsonData } from "../formData";
+import { REQUIRED_ERROR_MSG, SUMMATION_ONE_MSG } from "../validationMessages";
+import { GatewayInfo } from "../modelData";
 
 interface BranchingProbProps {
     gatewayKey: string
@@ -11,11 +12,12 @@ interface BranchingProbProps {
     errors: {
         [x: string]: any;
     }
+    gateway: GatewayInfo
 }
 
 const GatewayProbabilities = (props: BranchingProbProps) => {
     const { gatewayKey, index: gatewayIndex, 
-        formState : { control: formControl, getValues, trigger }, errors } = props
+        formState : { control: formControl, getValues, trigger }, errors, gateway } = props
 
     const { fields } = useFieldArray({
         keyName: 'key',
@@ -34,16 +36,17 @@ const GatewayProbabilities = (props: BranchingProbProps) => {
         <Grid container spacing={1} key={gatewayKey + 'Grid'}>
             <Grid item xs={12}>
                 <Typography key={gatewayKey + 'Key'} variant="h6" align="left">
-                    {gatewayKey}
+                    {gateway.name || gatewayKey}
                 </Typography>
             </Grid>
             {fields.map(({ path_id: activityKey }, index) => {
                 const fieldError = errors?.gateway_branching_probabilities?.[gatewayIndex]?.probabilities?.[index]?.value
+                const businessObject = gateway.childs?.[activityKey]
 
                 return <React.Fragment key={`${activityKey}Fr`} >
                     <Grid key={`${activityKey}NameGrid`} item xs={6}>
                         <Typography key={activityKey + 'Name'} align="center" variant="body2">
-                            {activityKey}
+                            {businessObject.name || activityKey}
                         </Typography>
                     </Grid>
                     <Grid key={activityKey + 'ValueGrid'} item xs={6}>

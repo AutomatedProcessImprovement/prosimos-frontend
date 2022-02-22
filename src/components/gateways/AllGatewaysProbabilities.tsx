@@ -1,23 +1,25 @@
 import { Card, Grid } from "@mui/material";
-import { JsonData } from "./formData";
+import { JsonData } from "../formData";
 import GatewayProbabilities from "./GatewayProbabilities";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
+import { Gateways } from "../modelData";
 
 interface GatewayBranchingProbProps {
     formState: UseFormReturn<JsonData, object>
     errors: {
         [x: string]: any;
     }
+    gateways: Gateways
 }
 
 const AllGatewaysProbabilities = (props: GatewayBranchingProbProps) => {
-    const { control: formControl } = props.formState
+    const { formState: { control: formControl }, gateways } = props
     const { fields } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: `gateway_branching_probabilities`
     })
-
+    
     return (
         <Grid container spacing={2}>
             {fields.map((probability, index) => {
@@ -28,7 +30,8 @@ const AllGatewaysProbabilities = (props: GatewayBranchingProbProps) => {
                             gatewayKey={gatewayKey}
                             index={index}
                             formState={props.formState}
-                            errors={props.errors} 
+                            errors={props.errors}
+                            gateway={gateways?.[gatewayKey]}
                         />
                     </Card>
                 </Grid>

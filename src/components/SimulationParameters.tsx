@@ -3,13 +3,13 @@ import { useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Box, Button, ButtonGroup, Grid, Tab, Tabs, Typography } from '@mui/material';
 import { JsonData } from './formData';
-import AllGatewaysProbabilities from './AllGatewaysProbabilities';
+import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
 import ResourcePools from './ResourcePools';
 import ResourceCalendars from './ResourceCalendars';
 import ArrivalTimeDistr from './ArrivalTimeDistr';
 import ResourceAllocation from './resource_allocation/ResourceAllocation';
 import BpmnModeler from "bpmn-js/lib/Modeler";
-import { AllModelTasks } from './modelData';
+import { AllModelTasks, Gateways, SequenceElements } from './modelData';
 import BpmnModdle from "bpmn-moddle";
 
 const tabs_name = {
@@ -78,6 +78,7 @@ const SimulationParameters = () => {
     const { bpmnFile, jsonFile } = state as LocationState
     const [xmlData, setXmlData] = useState()
     const [tasksFromModel, setTasksFromModel] = useState<AllModelTasks>({})
+    const [gateways, setGateways] = useState<Gateways>({})
 
     useEffect(() => {
         const bpmnFileReader = new FileReader()
@@ -112,6 +113,31 @@ const SimulationParameters = () => {
                         }
                     ), [])
                 setTasksFromModel(tasks)
+
+                const gateways = elementRegistry
+                    .filter((e: { type: string; }) => e.type === "bpmn:ExclusiveGateway")
+                    //.map((value: {id: string}) => value.id)
+                    .reduce((acc: any, current: { id: any; businessObject: any, type: any }) => {
+                        const childs = current.businessObject.outgoing.reduce((acc: [], item: any) => (
+                            {
+                                ...acc,
+                                [item.id]: {
+                                    name: item.name
+                                }
+                            }
+                        ), {} as SequenceElements)
+
+                        return {
+                            ...acc,
+                            [current.id]: {
+                                type: current.type,
+                                name: current.businessObject.name,
+                                childs: childs
+                            }
+                        }
+                    }, {} as Gateways)
+                console.log(gateways)
+                setGateways(gateways)
             }
 
             try {
@@ -223,7 +249,8 @@ const SimulationParameters = () => {
                                     (jsonData?.gateway_branching_probabilities !== undefined)
                                         ? <AllGatewaysProbabilities
                                             formState={formState}
-                                            errors={errors} />
+                                            errors={errors}
+                                            gateways={gateways} />
                                         : <Typography>No branching</Typography>
                                 }
                             </TabPanel>
