@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { v4 as uuid } from "uuid";
-import { Table, TableHead, TableRow, TableCell, TableBody, TextField, IconButton, Link, Grid, Toolbar } from "@mui/material";
+import { Table, TableHead, TableRow, TableCell, TableBody, TextField, IconButton, Link, Toolbar } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddButtonToolbar from "../toolbar/AddButtonToolbar";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
@@ -25,14 +25,14 @@ interface ResourceProfilesTableProps {
 const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
     const [openModal, setOpenModal] = useState<boolean>(false)
     const [detailModal, setDetailModal] = useState<ModalInfo>()
-    const { formState: { control: formControl, trigger, setValue, getValues }, resourcePoolIndex } = props
+    const { formState: { control: formControl, trigger, setValue }, resourcePoolIndex, calendars } = props
     const { fields, append, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: `resource_profiles.${resourcePoolIndex}.resource_list`
     })
 
-    const { append: appendCalendar, update: updateCalendar } = useFieldArray({
+    const { append: appendCalendar } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: "resource_calendars"
@@ -59,7 +59,8 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
             id: props.poolUuid + "_" + nextResourceNum,
             name: "",
             cost_per_hour: "",
-            amount: ""
+            amount: "",
+            calendar: Object.keys(calendars)[0]
         })
     }
 
@@ -188,7 +189,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                                                 setOpenModal(true)
                                             }}
                                         >
-                                            {props.calendars[calendarId]}
+                                            {calendars[calendarId]}
                                         </Link>
                                     )}
                                 />
