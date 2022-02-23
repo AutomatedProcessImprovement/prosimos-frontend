@@ -11,13 +11,15 @@ import ResourceAllocation from './resource_allocation/ResourceAllocation';
 import BpmnModeler from "bpmn-js/lib/Modeler";
 import { AllModelTasks, Gateways, SequenceElements } from './modelData';
 import BpmnModdle from "bpmn-moddle";
+import BPMNModelViewer from './model/BPMNModelViewer';
 
 const tabs_name = {
     RESOURCE_PROFILES: "Resource Profiles",
     RESOURCE_CALENDARS: "Resource Calendars",
     ARRIVAL_TIME_PARAMS: "Arrival Time Parameters",
     BRANCHING_PROB: "Branching Probabilities",
-    RESOURCE_ALLOCATION: "Resource Allocation"
+    RESOURCE_ALLOCATION: "Resource Allocation",
+    MODEL_VIEWER: "Model Viewer"
 }
 
 interface LocationState {
@@ -76,7 +78,7 @@ const SimulationParameters = () => {
 
     const { state } = useLocation()
     const { bpmnFile, jsonFile } = state as LocationState
-    const [xmlData, setXmlData] = useState()
+    const [xmlData, setXmlData] = useState<string>("")
     const [tasksFromModel, setTasksFromModel] = useState<AllModelTasks>({})
     const [gateways, setGateways] = useState<Gateways>({})
 
@@ -87,10 +89,10 @@ const SimulationParameters = () => {
             const importXml = async () => {
                 const fileData = bpmnFileReader.result as string
                 console.log(fileData)
+                setXmlData(fileData)
+
                 const modeler = new BpmnModeler()
                 const result = await modeler.importXML(fileData)
-                setXmlData(result)
-
                 const { warnings } = result;
                 console.log(warnings);
 
@@ -216,6 +218,7 @@ const SimulationParameters = () => {
                                 <Tab label={tabs_name.RESOURCE_ALLOCATION} wrapped {...tabProps(2)} />
                                 <Tab label={tabs_name.ARRIVAL_TIME_PARAMS} wrapped {...tabProps(3)} />
                                 <Tab label={tabs_name.BRANCHING_PROB} wrapped {...tabProps(4)} />
+                                <Tab label={tabs_name.MODEL_VIEWER} wrapped {...tabProps(5)} />
                             </Tabs>
                             <TabPanel value={value} index={0}>
                                 {
@@ -252,6 +255,11 @@ const SimulationParameters = () => {
                                             gateways={gateways} />
                                         : <Typography>No branching</Typography>
                                 }
+                            </TabPanel>
+                            <TabPanel value={value} index={5}>
+                                <BPMNModelViewer
+                                    xmlData={xmlData}
+                                />
                             </TabPanel>
                         </Box>
                     </Grid>

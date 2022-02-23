@@ -14,7 +14,7 @@ interface ResourceDistributionProps {
 
 const ResourceDistribution = (props: ResourceDistributionProps) => {
     const { formState, allocationIndex, resourceIndex, allowedResources } = props
-    const { formState: { errors }, getValues } = formState
+    const { formState: { errors } } = formState
     
     const currentErrors = errors?.task_resource_distribution?.[allocationIndex]?.resources?.[resourceIndex]
     const distrErrors = {

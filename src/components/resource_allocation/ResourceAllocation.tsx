@@ -42,7 +42,7 @@ const Row = (props: RowProps) => {
     const { formState: { control: formControl, getValues } } = props
     const [openModule, setOpenModule] = useState(false);
 
-    const { fields, append, remove } = useFieldArray({
+    const { fields, append } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: `${TASK_RESOURCE_DISTR}.${allocationIndex}.resources`
@@ -115,7 +115,7 @@ const Row = (props: RowProps) => {
 const ResourceAllocation = (props: ResourceAllocationProps) => {
     const { tasksFromModel } = props
     const { control: formControl, getValues } = props.formState
-    const { fields, append, remove } = useFieldArray({
+    const { fields } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: TASK_RESOURCE_DISTR
