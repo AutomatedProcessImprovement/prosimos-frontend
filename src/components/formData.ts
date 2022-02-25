@@ -70,3 +70,8 @@ export interface TaskResourceDistribution {
     task_id: string
     resources: ProbabilityDistributionForResource[]
 }
+
+export interface ScenarioProperties {
+    num_processes: number
+    start_date: string
+}

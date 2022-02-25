@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Box, Button, ButtonGroup, Grid, Tab, Tabs, Typography } from '@mui/material';
-import { JsonData } from './formData';
+import { JsonData, ScenarioProperties } from './formData';
 import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
 import ResourcePools from './ResourcePools';
 import ResourceCalendars from './ResourceCalendars';
@@ -12,8 +12,11 @@ import BpmnModeler from "bpmn-js/lib/Modeler";
 import { AllModelTasks, Gateways, SequenceElements } from './modelData';
 import BpmnModdle from "bpmn-moddle";
 import BPMNModelViewer from './model/BPMNModelViewer';
+import ScenarioSpecification from './scenario_specification.tsx/ScenarioSpecification';
+import moment from 'moment';
 
 const tabs_name = {
+    SCENARIO_SPECIFICATION: "Scenario Specification",
     RESOURCE_PROFILES: "Resource Profiles",
     RESOURCE_CALENDARS: "Resource Calendars",
     ARRIVAL_TIME_PARAMS: "Arrival Time Parameters",
@@ -66,6 +69,15 @@ const SimulationParameters = () => {
         mode: "onBlur" // validate on blur
     })
     const { handleSubmit, reset, formState: { errors } } = formState
+
+    const scenarioState = useForm<ScenarioProperties>({
+        mode: "onBlur",
+        defaultValues: {
+            num_processes: 10,
+            start_date: moment().format("YYYY-MM-DDTHH:mm:ss.sssZ")
+        }
+    })
+    const { getValues: getScenarioValues } = scenarioState
 
     const [value, setValue] = useState(0)
     const [jsonData, setJsonData] = useState<JsonData>()
@@ -172,7 +184,10 @@ const SimulationParameters = () => {
         }
     }, [fileDownloadUrl])
 
-    const onSubmit = (data: JsonData) => console.log(data);
+    const onSubmit = (data: JsonData) => {
+        console.log(getScenarioValues())
+        console.log(data)
+    }
 
     const onDownload = (data: JsonData) => {
         const content = JSON.stringify(data)
@@ -213,6 +228,7 @@ const SimulationParameters = () => {
                                 onChange={handleTabChange}
                                 variant="scrollable"
                                 orientation="vertical">
+                                <Tab label={tabs_name.SCENARIO_SPECIFICATION} wrapped {...tabProps(0)} /> 
                                 <Tab label={tabs_name.RESOURCE_PROFILES} wrapped {...tabProps(0)} />
                                 <Tab label={tabs_name.RESOURCE_CALENDARS} wrapped {...tabProps(1)} />
                                 <Tab label={tabs_name.RESOURCE_ALLOCATION} wrapped {...tabProps(2)} />
@@ -221,6 +237,11 @@ const SimulationParameters = () => {
                                 <Tab label={tabs_name.MODEL_VIEWER} wrapped {...tabProps(5)} />
                             </Tabs>
                             <TabPanel value={value} index={0}>
+                                <ScenarioSpecification
+                                    formState={scenarioState}
+                                />
+                            </TabPanel>
+                            <TabPanel value={value} index={1}>
                                 {
                                     (jsonData?.resource_profiles !== undefined)
                                         ? <ResourcePools
@@ -229,24 +250,24 @@ const SimulationParameters = () => {
                                         : <Typography>No resource profiles</Typography>
                                 }
                             </TabPanel>
-                            <TabPanel value={value} index={1}>
+                            <TabPanel value={value} index={2}>
                                 <ResourceCalendars
                                     formState={formState}
                                 />
                             </TabPanel>
-                            <TabPanel value={value} index={2}>
+                            <TabPanel value={value} index={3}>
                                 <ResourceAllocation
                                     tasksFromModel={tasksFromModel}
                                     formState={formState}
                                     errors={errors}
                                 />
                             </TabPanel>
-                            <TabPanel value={value} index={3}>
+                            <TabPanel value={value} index={4}>
                                 <ArrivalTimeDistr
                                     formState={formState}
                                 />
                             </TabPanel>
-                            <TabPanel value={value} index={4}>
+                            <TabPanel value={value} index={5}>
                                 {
                                     (jsonData?.gateway_branching_probabilities !== undefined)
                                         ? <AllGatewaysProbabilities
@@ -256,7 +277,7 @@ const SimulationParameters = () => {
                                         : <Typography>No branching</Typography>
                                 }
                             </TabPanel>
-                            <TabPanel value={value} index={5}>
+                            <TabPanel value={value} index={6}>
                                 <BPMNModelViewer
                                     xmlData={xmlData}
                                 />
