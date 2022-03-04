@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import moment from 'moment';
+import axios from 'axios';
+import BpmnModdle from "bpmn-moddle";
+import BpmnModeler from "bpmn-js/lib/Modeler";
 import { Box, Button, ButtonGroup, Grid, Tab, Tabs, Typography } from '@mui/material';
 import { JsonData, ScenarioProperties } from './formData';
 import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
@@ -8,12 +12,10 @@ import ResourcePools from './ResourcePools';
 import ResourceCalendars from './ResourceCalendars';
 import ArrivalTimeDistr from './ArrivalTimeDistr';
 import ResourceAllocation from './resource_allocation/ResourceAllocation';
-import BpmnModeler from "bpmn-js/lib/Modeler";
 import { AllModelTasks, Gateways, SequenceElements } from './modelData';
-import BpmnModdle from "bpmn-moddle";
 import BPMNModelViewer from './model/BPMNModelViewer';
 import ScenarioSpecification from './scenario_specification.tsx/ScenarioSpecification';
-import moment from 'moment';
+import paths from '../router/paths';
 
 const tabs_name = {
     SCENARIO_SPECIFICATION: "Scenario Specification",
@@ -65,6 +67,8 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const SimulationParameters = () => {
+    const navigate = useNavigate()
+
     const formState = useForm<JsonData>({
         mode: "onBlur" // validate on blur
     })
@@ -185,8 +189,23 @@ const SimulationParameters = () => {
     }, [fileDownloadUrl])
 
     const onSubmit = (data: JsonData) => {
-        console.log(getScenarioValues())
-        console.log(data)
+        const { num_processes, start_date } = getScenarioValues()
+        axios.post(
+            'http://localhost:5000/prosimos',
+            { 
+                "jsonData": data,
+                "numProcesses": num_processes,
+                "startDate": start_date,
+                "xmlData": xmlData
+            }).then(((res: any) => {
+                console.log(res.data)
+                navigate(paths.SIMULATOR_RESULTS_PATH, {
+                    state: {
+                        output: res.data,
+                    }
+                })
+            })
+        )
     }
 
     const onDownload = (data: JsonData) => {
