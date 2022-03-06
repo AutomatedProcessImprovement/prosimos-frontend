@@ -1,5 +1,6 @@
 import { Grid } from "@mui/material";
 import { useLocation } from "react-router-dom";
+import ResourceUtilization from "./ResourceUtilization";
 import TaskStatistics from "./TaskStatistics";
 
 interface SimulationResultsProps {
@@ -31,7 +32,11 @@ const SimulationResults = (props: SimulationResultsProps) => {
                     data={output["Individual Task Statistics"]}
                 />
             </Grid>
-
+            <Grid item xs={8}>
+                <ResourceUtilization 
+                    data={output["Resource Utilization"]}
+                />
+            </Grid>
         </Grid>
     )
 }
