@@ -15,7 +15,7 @@ const makeFirstLetterUppercase = (str: string) => {
 
 const ScenarioStatistics = (props: ScenarioStatisticsProps) => {
     const { data } = props
-    const [processedData, setProcessedData] = useState(data)
+    const [processedData, setProcessedData] = useState([])
 
     useEffect(() => {
         const processed = data.map((item: any) => {
@@ -25,6 +25,7 @@ const ScenarioStatistics = (props: ScenarioStatisticsProps) => {
 
                     return {
                         ...acc,
+                        "KPI": value,
                         "KPI_display_name": displayName
                     }
                 }
