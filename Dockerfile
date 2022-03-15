@@ -5,9 +5,10 @@ COPY package.json package.json
 COPY package-lock.json package-lock.json
 RUN npm ci
 
-COPY public/ public
-COPY src/ src
-RUN npm install
+COPY tsconfig.json tsconfig.json
+COPY ./public/ ./public
+COPY ./src/ ./src
+COPY ./nginx/ ./nginx
 RUN npm run build
 
 FROM nginx:stable-alpine as production
