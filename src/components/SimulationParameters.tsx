@@ -90,7 +90,8 @@ const SimulationParameters = () => {
     const { bpmnFile, jsonFile } = state as LocationState
     const { xmlData, tasksFromModel, gateways } = useBpmnFile(bpmnFile)
     const { jsonData } = useJsonFile(jsonFile)
-    const { formState, handleSubmit, errors } = useFormState(jsonData)
+    
+    const { formState, handleSubmit, errors } = useFormState(tasksFromModel, jsonData)
 
     useEffect(() => {
         if (fileDownloadUrl !== "" && fileDownloadUrl !== undefined) {
@@ -109,7 +110,6 @@ const SimulationParameters = () => {
                 "startDate": start_date,
                 "xmlData": xmlData
             }).then(((res: any) => {
-                console.log(res)
                 navigate(paths.SIMULATOR_RESULTS_PATH, {
                     state: {
                         output: res.data,

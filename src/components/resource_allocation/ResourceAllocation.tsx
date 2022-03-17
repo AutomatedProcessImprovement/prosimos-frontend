@@ -1,5 +1,5 @@
 import { Box, Collapse, Grid, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { JsonData, ProbabilityDistributionForResource, ResourceMap, ResourcePool } from "../formData";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -7,7 +7,6 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import ResourceDistribution from "./ResourceDistribution";
 import { AllModelTasks } from "../modelData";
 import AddButtonBase from "../toolbar/AddButtonBase";
-import { TaskResourceDistribution } from "../formData";
 
 const TASK_RESOURCE_DISTR = "task_resource_distribution"
 
@@ -115,31 +114,13 @@ const Row = (props: RowProps) => {
 
 const ResourceAllocation = (props: ResourceAllocationProps) => {
     const { tasksFromModel } = props
+
     const { control: formControl, getValues } = props.formState
-    const { fields, append } = useFieldArray({
+    const { fields } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: TASK_RESOURCE_DISTR
     })
-
-    // add to the json object missed tasks from the bpmn model
-    useEffect(() => {
-        console.log(fields)
-        console.log(tasksFromModel)
-        const alreadyExistingTaskIds = fields.map((i) => i.task_id)
-        // [key: string, task: ModelTask]
-        const newTasksFromModel = Object.keys(tasksFromModel).reduce<TaskResourceDistribution[]>((acc, key) => {
-            if (alreadyExistingTaskIds.includes(key))
-                return acc
-            
-            acc.push({"task_id": key, resources: []})
-            return acc
-        }, [])
-
-        console.log(newTasksFromModel)
-
-        append(newTasksFromModel)
-    }, [tasksFromModel, fields, append]);
 
     const profiles = getValues("resource_profiles")?.reduce((acc: ResourceMap, currProfile: ResourcePool) => {
         const resources = currProfile.resource_list?.reduce((accResource, item) => { return {

@@ -7,30 +7,25 @@ const useBpmnFile = (bpmnFile: any) => {
     const [xmlData, setXmlData] = useState<string>("")
     const [tasksFromModel, setTasksFromModel] = useState<AllModelTasks>({})
     const [gateways, setGateways] = useState<Gateways>({})
-    console.log("general bpmn file")
 
     useEffect(() => {
-        console.log("useEffect bpmn file")
         const bpmnFileReader = new FileReader()
         bpmnFileReader.readAsText(bpmnFile)
         bpmnFileReader.onloadend = () => {
             const importXml = async () => {
                 const fileData = bpmnFileReader.result as string
-                console.log(fileData)
                 setXmlData(fileData)
 
                 const modeler = new BpmnModeler()
                 const result = await modeler.importXML(fileData)
                 const { warnings } = result;
-                console.log(warnings);
 
                 // moddle
                 const moddle = new BpmnModdle()
                 const res = await moddle.fromXML(fileData)
-                console.log(res)
 
                 const elementRegistry = modeler.get('elementRegistry')
-                console.log(elementRegistry)
+
                 const tasks = elementRegistry
                     .filter((e: { type: string; }) => e.type === 'bpmn:Task')
                     .reduce((acc: {}, t: any) => (
@@ -43,7 +38,6 @@ const useBpmnFile = (bpmnFile: any) => {
                         }
                     ), {})
                 setTasksFromModel(tasks)
-                console.log(tasks)
 
                 // const resources = elementRegistry.map((e: { type: any; }) => e.type)
                 // console.log(resources)

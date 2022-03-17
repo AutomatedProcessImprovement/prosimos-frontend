@@ -5,7 +5,6 @@ const useJsonFile = (jsonFile: any) => {
     const [jsonData, setJsonData] = useState<JsonData>()
 
     useEffect(() => {
-        console.log(jsonFile)
         if (jsonFile !== undefined && jsonFile !== "") {
             const jsonFileReader = new FileReader();
             jsonFileReader.readAsText(jsonFile, "UTF-8")
