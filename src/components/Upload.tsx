@@ -1,21 +1,29 @@
 import { useState } from 'react';
-import { Button, Grid, Paper, Typography } from "@mui/material";
+import { Button, FormControlLabel, Grid, Paper, Radio, RadioGroup, Typography } from "@mui/material";
 import FileUploader from './FileUploader';
 import { useNavigate } from 'react-router-dom';
 import paths from '../router/paths'
 
+enum Source {
+    empty,
+    existing,
+    logs
+} 
+
 const Upload = () => {
     const [selectedBpmnFile, setSelectedBpmnFile] = useState<any>();
     const [selectedJsonFile, setSelectedJsonFile] = useState<any>();
+    const [simParamsSource, setSimParamsSource] = useState<Source>(Source.empty);
 
     const navigate = useNavigate()
 
     const onBpmnFileChange = (file: any) => {
-        setSelectedBpmnFile(file);
+        setSelectedBpmnFile(file)
     };
 
     const onJsonFileChange = (file: any) => {
-        setSelectedJsonFile(file);
+        setSelectedJsonFile(file)
+        setSimParamsSource(Source.existing)
     };
 
     const onContinueClick = () => {
@@ -25,7 +33,11 @@ const Upload = () => {
                 jsonFile: selectedJsonFile
             }
         })
-    }
+    };
+
+    const onSimParamsSourceChange = (event: React.ChangeEvent<HTMLInputElement>, value: string) => {
+        setSimParamsSource(parseInt(value))
+    };
 
     return (
         <Grid container alignItems="center" justifyContent="center" spacing={3} className="UploadContainer">
@@ -41,16 +53,38 @@ const Upload = () => {
                             <FileUploader
                                 ext="bpmn"
                                 onFileChange={onBpmnFileChange}
+                                showHeader={true}
                             />
                         </Paper>
                     </Grid>
 
                     <Grid item xs={12} md={6}>
                         <Paper elevation={5} sx={{ p: 3, minHeight: '12vw' }}>
-                            <FileUploader
-                                ext="json"
-                                onFileChange={onJsonFileChange}
-                            />
+                            <RadioGroup
+                                value={simParamsSource}
+                                onChange={onSimParamsSourceChange}
+                            >
+                                <Grid container>
+                                    <Grid item xs={12}>
+                                        <FormControlLabel value={Source.empty} control={<Radio />} label="Load simulation parameters from scratch" />
+                                    </Grid>
+                                </Grid>
+                                <Grid container>
+                                    <Grid item xs={12}>
+                                        <FormControlLabel value={Source.existing} control={<Radio />} label="Use existing simulation parameters" />
+                                        <FileUploader
+                                            ext="json"
+                                            onFileChange={onJsonFileChange}
+                                            showHeader={false}
+                                        />
+                                    </Grid>
+                                </Grid>
+                                <Grid container>
+                                    <Grid item xs={12}>
+                                        <FormControlLabel disabled value={Source.logs} control={<Radio />} label="Generate the simulation parameters based on logs" />
+                                    </Grid>
+                                </Grid>
+                            </RadioGroup>
                         </Paper>
                     </Grid>
                 </Grid>
