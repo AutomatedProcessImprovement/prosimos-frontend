@@ -3,8 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import moment from 'moment';
 import axios from 'axios';
-import BpmnModdle from "bpmn-moddle";
-import BpmnModeler from "bpmn-js/lib/Modeler";
 import { Box, Button, ButtonGroup, Grid, Tab, Tabs, Typography } from '@mui/material';
 import { JsonData, ScenarioProperties } from './formData';
 import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
@@ -12,10 +10,12 @@ import ResourcePools from './ResourcePools';
 import ResourceCalendars from './ResourceCalendars';
 import ArrivalTimeDistr from './ArrivalTimeDistr';
 import ResourceAllocation from './resource_allocation/ResourceAllocation';
-import { AllModelTasks, Gateways, SequenceElements } from './modelData';
 import BPMNModelViewer from './model/BPMNModelViewer';
 import ScenarioSpecification from './scenario_specification.tsx/ScenarioSpecification';
 import paths from '../router/paths';
+import useBpmnFile from './simulationParameters/useBpmnFile';
+import useJsonFile from './simulationParameters/useJsonFile';
+import useFormState from './simulationParameters/useFormState';
 
 const tabs_name = {
     SCENARIO_SPECIFICATION: "Scenario Specification",
@@ -69,11 +69,6 @@ function TabPanel(props: TabPanelProps) {
 const SimulationParameters = () => {
     const navigate = useNavigate()
 
-    const formState = useForm<JsonData>({
-        mode: "onBlur" // validate on blur
-    })
-    const { handleSubmit, reset, formState: { errors } } = formState
-
     const scenarioState = useForm<ScenarioProperties>({
         mode: "onBlur",
         defaultValues: {
@@ -84,7 +79,6 @@ const SimulationParameters = () => {
     const { getValues: getScenarioValues } = scenarioState
 
     const [value, setValue] = useState(0)
-    const [jsonData, setJsonData] = useState<JsonData>()
     const [fileDownloadUrl, setFileDownloadUrl] = useState<string>("")
     const linkDownloadRef = useRef<HTMLAnchorElement>(null)
 
@@ -94,99 +88,16 @@ const SimulationParameters = () => {
 
     const { state } = useLocation()
     const { bpmnFile, jsonFile } = state as LocationState
-    const [xmlData, setXmlData] = useState<string>("")
-    const [tasksFromModel, setTasksFromModel] = useState<AllModelTasks>({})
-    const [gateways, setGateways] = useState<Gateways>({})
-
-    useEffect(() => {
-        const bpmnFileReader = new FileReader()
-        bpmnFileReader.readAsText(bpmnFile)
-        bpmnFileReader.onloadend = () => {
-            const importXml = async () => {
-                const fileData = bpmnFileReader.result as string
-                console.log(fileData)
-                setXmlData(fileData)
-
-                const modeler = new BpmnModeler()
-                const result = await modeler.importXML(fileData)
-                const { warnings } = result;
-                console.log(warnings);
-
-                // moddle
-                const moddle = new BpmnModdle()
-                const res = await moddle.fromXML(fileData)
-                console.log(res)
-
-                const elementRegistry = modeler.get('elementRegistry')
-                console.log(elementRegistry)
-                const tasks = elementRegistry
-                    .filter((e: { type: string; }) => e.type === 'bpmn:Task')
-                    .reduce((acc: [], t: any) => (
-                        {
-                            ...acc,
-                            [t.id]: { 
-                                name: t.businessObject.name,
-                                resource: JSON.parse(t.businessObject.documentation[0].text).resource
-                            } 
-                        }
-                    ), [])
-                setTasksFromModel(tasks)
-
-                const gateways = elementRegistry
-                    .filter((e: { type: string; }) => e.type === "bpmn:ExclusiveGateway")
-                    //.map((value: {id: string}) => value.id)
-                    .reduce((acc: any, current: { id: any; businessObject: any, type: any }) => {
-                        const childs = current.businessObject.outgoing.reduce((acc: [], item: any) => (
-                            {
-                                ...acc,
-                                [item.id]: {
-                                    name: item.name
-                                }
-                            }
-                        ), {} as SequenceElements)
-
-                        return {
-                            ...acc,
-                            [current.id]: {
-                                type: current.type,
-                                name: current.businessObject.name,
-                                childs: childs
-                            }
-                        }
-                    }, {} as Gateways)
-                setGateways(gateways)
-            }
-
-            try {
-                importXml()
-            }
-            catch (err: any) {
-                console.log(err.message, err.warnings);
-            }
-        }
-    }, [bpmnFile])
-
-    useEffect(() => {
-        const jsonFileReader = new FileReader();
-        jsonFileReader.readAsText(jsonFile, "UTF-8")
-        jsonFileReader.onload = e => {
-            if (e.target?.result && typeof e.target?.result === 'string') {
-                const rawData = JSON.parse(e.target.result)
-                setJsonData(rawData)
-            }
-        }
-    }, [jsonFile])
-
-    useEffect(() => {
-        reset(jsonData)
-    }, [jsonData, reset])
+    const { xmlData, tasksFromModel, gateways } = useBpmnFile(bpmnFile)
+    const { jsonData } = useJsonFile(jsonFile)
+    const { formState, handleSubmit, errors } = useFormState(jsonData)
 
     useEffect(() => {
         if (fileDownloadUrl !== "" && fileDownloadUrl !== undefined) {
             linkDownloadRef.current?.click()
             URL.revokeObjectURL(fileDownloadUrl);
         }
-    }, [fileDownloadUrl])
+    }, [fileDownloadUrl]);
 
     const onSubmit = (data: JsonData) => {
         const { num_processes, start_date } = getScenarioValues()
@@ -198,7 +109,7 @@ const SimulationParameters = () => {
                 "startDate": start_date,
                 "xmlData": xmlData
             }).then(((res: any) => {
-                console.log(res.data)
+                console.log(res)
                 navigate(paths.SIMULATOR_RESULTS_PATH, {
                     state: {
                         output: res.data,
@@ -206,14 +117,14 @@ const SimulationParameters = () => {
                 })
             })
         )
-    }
+    };
 
     const onDownload = (data: JsonData) => {
         const content = JSON.stringify(data)
         const blob = new Blob([content], { type: "text/plain" })
         const fileDownloadUrl = URL.createObjectURL(blob);
         setFileDownloadUrl(fileDownloadUrl)
-    }
+    };
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -261,13 +172,10 @@ const SimulationParameters = () => {
                                 />
                             </TabPanel>
                             <TabPanel value={value} index={1}>
-                                {
-                                    (jsonData?.resource_profiles !== undefined)
-                                        ? <ResourcePools
-                                            formState={formState}
-                                            errors={errors} />
-                                        : <Typography>No resource profiles</Typography>
-                                }
+                                <ResourcePools
+                                    formState={formState}
+                                    errors={errors}
+                                />
                             </TabPanel>
                             <TabPanel value={value} index={2}>
                                 <ResourceCalendars
