@@ -15,6 +15,9 @@ const useJsonFile = (jsonFile: any) => {
                 }
             }
         }
+        else {
+            setJsonData({} as JsonData)
+        }
     }, [jsonFile]);
     
     return { jsonData }
