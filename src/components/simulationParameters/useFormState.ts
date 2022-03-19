@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { JsonData, TaskResourceDistribution } from "../formData";
 import { AllModelTasks } from "../modelData";
+import { defaultTemplateSchedule } from "./defaultValues";
 
 const useFormState = (tasksFromModel: AllModelTasks, jsonData?: JsonData) => {
     const [data, setData] = useState({})
@@ -28,9 +29,9 @@ const useFormState = (tasksFromModel: AllModelTasks, jsonData?: JsonData) => {
                 task_resource_distribution: [
                     ...jsonData?.["task_resource_distribution"] ?? [],
                     ...newTasksFromModel
-                ]
+                ],
+                resource_calendars: [defaultTemplateSchedule(false)]
             }
-    
             setData(updData)
         }
     }, [tasksFromModel, jsonData]);

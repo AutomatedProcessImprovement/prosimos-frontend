@@ -38,10 +38,7 @@ const useBpmnFile = (bpmnFile: any) => {
                         }
                     ), {})
                 setTasksFromModel(tasks)
-
-                // const resources = elementRegistry.map((e: { type: any; }) => e.type)
-                // console.log(resources)
-
+                
                 const gateways = elementRegistry
                     .filter((e: { type: string; }) => e.type === "bpmn:ExclusiveGateway")
                     .reduce((acc: any, current: { id: any; businessObject: any, type: any }) => {
