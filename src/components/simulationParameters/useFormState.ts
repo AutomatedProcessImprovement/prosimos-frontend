@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { JsonData } from "../formData";
 import { AllModelTasks, Gateways } from "../modelData";
-import { defaultTemplateSchedule } from "./defaultValues";
+import { defaultTemplateSchedule, defaultArrivalTimeDistribution} from "./defaultValues";
 
 const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonData?: JsonData) => {
     const [data, setData] = useState({})
@@ -43,7 +43,8 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
             const updData = {
                 task_resource_distribution: mappedTasksFromModel,
                 resource_calendars: [defaultTemplateSchedule(false)],
-                gateway_branching_probabilities: mappedGateways
+                gateway_branching_probabilities: mappedGateways,
+                arrival_time_distribution: defaultArrivalTimeDistribution(),
             }
             setData(updData)
         }

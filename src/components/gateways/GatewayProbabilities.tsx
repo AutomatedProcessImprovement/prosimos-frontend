@@ -25,11 +25,11 @@ const GatewayProbabilities = (props: BranchingProbProps) => {
         name: `gateway_branching_probabilities.${gatewayIndex}.probabilities`
     })
 
-    const isProbSumLessThanOne = () => {
+    const isProbSumEqualOne = () => {
         const values = getValues(`gateway_branching_probabilities.${gatewayIndex}.probabilities`)
         const valuesSum = values.reduce((acc, curr) => Number(acc) + Number(curr.value) , 0)
 
-        return valuesSum <= 1
+        return valuesSum === 1
     }
 
     return (
@@ -55,7 +55,7 @@ const GatewayProbabilities = (props: BranchingProbProps) => {
                             control={formControl}
                             rules={{ 
                                 required: REQUIRED_ERROR_MSG,
-                                validate: () => { return isProbSumLessThanOne() || SUMMATION_ONE_MSG }
+                                validate: () => { return isProbSumEqualOne() || SUMMATION_ONE_MSG }
                             }}
                             render={({ field }) => {
                                 const {onChange} = field

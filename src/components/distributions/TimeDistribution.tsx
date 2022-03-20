@@ -49,8 +49,8 @@ const TimeDistribution = (props: TimeDistributionProps) => {
                                 error={distrErrors?.distribution_name !== undefined}
                                 helperText={distrErrors?.distribution_name?.message}
                                 variant="standard"
-                                placeholder="Function name"
-                                label="Distribution"
+                                placeholder="norm"
+                                label="Distribution function"
                             />
                         )}
                     />

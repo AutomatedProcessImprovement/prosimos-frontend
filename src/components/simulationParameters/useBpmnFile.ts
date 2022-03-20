@@ -61,12 +61,10 @@ const useBpmnFile = (bpmnFile: any) => {
                         }
 
                         const childs = bObj.outgoing.reduce((acc: {}, item: any) => {
-                            let taskName = getTargetTaskNameForGateway(item, elementRegistry)
-
                             return {
                                 ...acc,
                                 [item.id]: {
-                                    name: item.name ?? taskName
+                                    name: item.name ?? getTargetTaskNameForGateway(item, elementRegistry)
                                 }
                             }
                         }, {} as SequenceElements)
