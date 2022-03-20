@@ -12,7 +12,14 @@ interface TimePickerControllerProps<FieldValues> {
 
 const TimePickerController = <FieldValues, > (props: TimePickerControllerProps<FieldValues>) => {
     const { formState: { control: formControl }, name, label } = props
-    
+
+    const getCurrentValue = (value: any) => {
+        if (value === "")
+            return null
+        else 
+            return moment(value as string, 'HH:mm:ss.SSS')
+    }
+
     return (
         <Controller
             name={name as Path<FieldValues>}
@@ -28,7 +35,7 @@ const TimePickerController = <FieldValues, > (props: TimePickerControllerProps<F
                         views={['hours', 'minutes']}
                         inputFormat={'HH:mm'}
                         mask="__:__"
-                        value={moment(value as string, 'HH:mm:ss.SSS')}
+                        value={getCurrentValue(value)}
                         onChange={(newValue) => {
                             const newValueString = moment(newValue).format('HH:mm:ss.SSS')
                             onChange(newValueString)

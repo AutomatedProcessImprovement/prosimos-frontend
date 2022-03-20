@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid";
-import { ProbabilityDistribution } from "../formData";
+import { ProbabilityDistribution, TimePeriod } from "../formData";
 
 export const defaultTemplateSchedule = (withWeekends: boolean) => {
     const tp = [{
@@ -31,4 +31,11 @@ export const defaultArrivalTimeDistribution = () => ({
         { value: 0 },
         { value: 0 }
     ]
-} as ProbabilityDistribution) 
+} as ProbabilityDistribution)
+
+export const defaultArrivalCalendar = () => ({
+    from: "",
+    to: "",
+    beginTime: "",
+    endTime: ""
+} as TimePeriod)
