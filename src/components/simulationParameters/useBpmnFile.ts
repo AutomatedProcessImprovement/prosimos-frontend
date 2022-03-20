@@ -8,6 +8,19 @@ const useBpmnFile = (bpmnFile: any) => {
     const [tasksFromModel, setTasksFromModel] = useState<AllModelTasks>({})
     const [gateways, setGateways] = useState<Gateways>({})
 
+    const getTargetTaskNameForGateway = (item: any, elementRegistry: any) => {
+        let taskName = ""
+        if (item.name === undefined) {
+            const flowObjId = item.targetRef.id
+            const el = elementRegistry._elements[flowObjId]?.element
+            if (el?.type === "bpmn:Task") {
+                taskName = el.businessObject.name
+            }
+        }
+
+        return taskName
+    };
+
     useEffect(() => {
         const bpmnFileReader = new FileReader()
         bpmnFileReader.readAsText(bpmnFile)
@@ -42,14 +55,21 @@ const useBpmnFile = (bpmnFile: any) => {
                 const gateways = elementRegistry
                     .filter((e: { type: string; }) => e.type === "bpmn:ExclusiveGateway")
                     .reduce((acc: any, current: { id: any; businessObject: any, type: any }) => {
-                        const childs = current.businessObject.outgoing.reduce((acc: {}, item: any) => (
-                            {
+                        const bObj = current.businessObject
+                        if (bObj.gatewayDirection !== "Diverging" && bObj.outgoing.length < 2) {
+                            return acc
+                        }
+
+                        const childs = bObj.outgoing.reduce((acc: {}, item: any) => {
+                            let taskName = getTargetTaskNameForGateway(item, elementRegistry)
+
+                            return {
                                 ...acc,
                                 [item.id]: {
-                                    name: item.name
+                                    name: item.name ?? taskName
                                 }
                             }
-                        ), {} as SequenceElements)
+                        }, {} as SequenceElements)
 
                         return {
                             ...acc,

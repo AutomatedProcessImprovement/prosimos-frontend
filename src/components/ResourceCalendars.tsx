@@ -8,7 +8,6 @@ import TimePeriodTableRows from "./calendars/TimePeriodTableRows"
 import DeleteButtonToolbar from './toolbar/DeleteButtonToolbar'
 import { JsonData } from './formData'
 
-
 interface ResourceCalendarsProps {
     formState: UseFormReturn<JsonData, object>
 }

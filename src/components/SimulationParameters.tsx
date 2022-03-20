@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import moment from 'moment';
 import axios from 'axios';
-import { Box, Button, ButtonGroup, Grid, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Button, ButtonGroup, Grid, Tab, Tabs } from '@mui/material';
 import { JsonData, ScenarioProperties } from './formData';
 import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
 import ResourcePools from './ResourcePools';
@@ -91,7 +91,7 @@ const SimulationParameters = () => {
     const { xmlData, tasksFromModel, gateways } = useBpmnFile(bpmnFile)
     const { jsonData } = useJsonFile(jsonFile)
     
-    const { formState, handleSubmit, errors } = useFormState(tasksFromModel, jsonData)
+    const { formState, handleSubmit, errors } = useFormState(tasksFromModel, gateways, jsonData)
 
     useEffect(() => {
         if (fileDownloadUrl !== "" && fileDownloadUrl !== undefined) {
@@ -195,14 +195,11 @@ const SimulationParameters = () => {
                                 />
                             </TabPanel>
                             <TabPanel value={value} index={5}>
-                                {
-                                    (jsonData?.gateway_branching_probabilities !== undefined)
-                                        ? <AllGatewaysProbabilities
-                                            formState={formState}
-                                            errors={errors}
-                                            gateways={gateways} />
-                                        : <Typography>No branching</Typography>
-                                }
+                                <AllGatewaysProbabilities
+                                    formState={formState}
+                                    errors={errors}
+                                    gateways={gateways}
+                                />
                             </TabPanel>
                             <TabPanel value={value} index={6}>
                                 <BPMNModelViewer
