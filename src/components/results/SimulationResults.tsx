@@ -4,7 +4,7 @@ import ResourceUtilization from "./ResourceUtilization";
 import ScenarioStatistics from "./ScenarioStatistics";
 import TaskStatistics from "./TaskStatistics";
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from 'axios';
 import CustomizedSnackbar from "./CustomizedSnackbar";
 
@@ -26,8 +26,12 @@ interface ResultLocationState {
 const SimulationResults = (props: SimulationResultsProps) => {
     const { state } = useLocation()
     const { output } = state as ResultLocationState
-    const [logFileName, setLogFileName] = useState(output["LogFileName"])
-    const [errorMessage, setErrorMessage] = useState<string>("")
+    const [logFileName, setLogFileName] = useState("")
+    const [errorMessage, setErrorMessage] = useState("")
+
+    useEffect(() => {
+        setLogFileName(output["LogFileName"])
+    }, [output])
 
     const onLogFileDownload = () => {
         axios
