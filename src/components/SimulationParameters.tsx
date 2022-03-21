@@ -132,6 +132,10 @@ const SimulationParameters = () => {
         setFileDownloadUrl(fileDownloadUrl)
     };
 
+    const onSnackbarClose = () => {
+        setErrorMessage("")
+    };
+    
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
             <Grid container alignItems="center" justifyContent="center">
@@ -219,6 +223,7 @@ const SimulationParameters = () => {
             </Grid>
             <CustomizedSnackbar
                 message={errorSnack}
+                onSnackbarClose={onSnackbarClose}
             />
         </form>
     );

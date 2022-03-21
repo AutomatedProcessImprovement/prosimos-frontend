@@ -31,7 +31,7 @@ const SimulationResults = (props: SimulationResultsProps) => {
 
     useEffect(() => {
         setLogFileName(output["LogFileName"])
-    }, [output])
+    }, [output]);
 
     const onLogFileDownload = () => {
         axios
@@ -53,7 +53,11 @@ const SimulationResults = (props: SimulationResultsProps) => {
                 console.log(error.response)
                 setErrorMessage(error.response.data.displayMessage)
             })
-    }
+    };
+
+    const onSnackbarClose = () => {
+        setErrorMessage("")
+    };
 
     return (<>
         <Grid
@@ -92,6 +96,7 @@ const SimulationResults = (props: SimulationResultsProps) => {
         </Grid>
         <CustomizedSnackbar
             message={errorMessage}
+            onSnackbarClose={onSnackbarClose}
         />
     </>)
 }
