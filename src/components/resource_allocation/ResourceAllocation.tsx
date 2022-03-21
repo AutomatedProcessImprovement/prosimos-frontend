@@ -1,30 +1,22 @@
 import { Box, Collapse, Grid, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import React, { useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
-import { JsonData, ProbabilityDistributionForResource, ResourceMap, ResourcePool } from "../formData";
+import { JsonData, ResourceMap, ResourcePool } from "../formData";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import ResourceDistribution from "./ResourceDistribution";
 import { AllModelTasks } from "../modelData";
 import AddButtonBase from "../toolbar/AddButtonBase";
+import { defaultResourceAllocationDist } from "../simulationParameters/defaultValues";
 
 const TASK_RESOURCE_DISTR = "task_resource_distribution"
-
-const defaultResourceAllocationDist = {
-    distribution_name: "norm",
-    distribution_params: [
-        { value: 0 },
-        { value: 0 }
-    ],
-    resource_id: ""
-} as ProbabilityDistributionForResource
-
 interface ResourceAllocationProps {
     tasksFromModel: AllModelTasks
     formState: UseFormReturn<JsonData, object>
     errors: {
         [x: string]: any;
     }
+    setErrorMessage: (value: string) => void
 }
 
 interface RowProps {
@@ -35,11 +27,12 @@ interface RowProps {
     errors: {
         [x: string]: any;
     }
+    setErrorMessage: (value: string) => void
 }
 
 const Row = (props: RowProps) => {
-    const { allocationIndex, taskName, allowedResources } = props
-    const { formState: { control: formControl, getValues } } = props
+    const { allocationIndex, taskName, allowedResources, setErrorMessage } = props
+    const { formState: { control: formControl } } = props
     const [openModule, setOpenModule] = useState(false);
 
     const { fields, append } = useFieldArray({
@@ -48,14 +41,12 @@ const Row = (props: RowProps) => {
         name: `${TASK_RESOURCE_DISTR}.${allocationIndex}.resources`
     })
 
-    // only if not all resources from the pool were allocated
-    const isAdditionAllowed = () => {
-        const allocatedResourcesCount = getValues(`task_resource_distribution.${allocationIndex}.resources`).length
-        const allowedResourcesCount = Object.entries(allowedResources).length
-        return allowedResourcesCount > allocatedResourcesCount
-    }
-
     const onResourceAllocationAdd = () => {
+        if (!allowedResources || Object.keys(allowedResources).length === 0) {
+            setErrorMessage("Provide resource profiles before proceeding")
+            return
+        }
+        
         append(defaultResourceAllocationDist)
     }
 
@@ -92,17 +83,16 @@ const Row = (props: RowProps) => {
                                         />
                                     </Grid>
                                 ))}
-                                {isAdditionAllowed() && 
-                                    <Grid item xs={12}>
-                                        <Paper elevation={5} sx={{ p: 2 }}>
-                                            <Grid>
-                                                <AddButtonBase
-                                                    labelName="Add a new resource allocation"
-                                                    onClick={onResourceAllocationAdd}
-                                                />
-                                            </Grid>
-                                        </Paper>
-                                    </Grid>}
+                                <Grid item xs={12}>
+                                    <Paper elevation={5} sx={{ p: 2 }}>
+                                        <Grid>
+                                            <AddButtonBase
+                                                labelName="Add a new resource allocation"
+                                                onClick={onResourceAllocationAdd}
+                                            />
+                                        </Grid>
+                                    </Paper>
+                                </Grid>
                             </Grid>
                         </Box>
                     </Collapse>
@@ -123,17 +113,16 @@ const ResourceAllocation = (props: ResourceAllocationProps) => {
     })
 
     const profiles = getValues("resource_profiles")?.reduce((acc: ResourceMap, currProfile: ResourcePool) => {
-        const resources = currProfile.resource_list?.reduce((accResource, item) => { return {
+        const resources = currProfile.resource_list?.reduce((accResource, item) => ({
             ...accResource,
             [item.id]: { name: item.name }
-        }}, {})
-        const profileNameWoSpaces = currProfile.name.replace(/\s/g, "")
+        }), {})
 
         return {
             ...acc,
-            [profileNameWoSpaces]: resources
+            ...resources
         } as ResourceMap
-    }, {} as ResourceMap)
+    }, {})
 
     return (
         <Grid container spacing={2}>
@@ -152,9 +141,10 @@ const ResourceAllocation = (props: ResourceAllocationProps) => {
                             return <Row key={allocation.task_id}
                                 taskName={currentTask.name}
                                 allocationIndex={index}
-                                allowedResources={profiles[currentTask.resource]}
+                                allowedResources={profiles}
                                 formState={props.formState}
                                 errors={props.errors}
+                                setErrorMessage={props.setErrorMessage}
                             />
                         })}
                     </TableBody>

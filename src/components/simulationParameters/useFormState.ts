@@ -44,8 +44,8 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
                 task_resource_distribution: mappedTasksFromModel,
                 resource_calendars: [defaultTemplateSchedule(false)],
                 gateway_branching_probabilities: mappedGateways,
-                arrival_time_distribution: defaultArrivalTimeDistribution(),
-                arrival_time_calendar: defaultArrivalCalendar()
+                arrival_time_distribution: defaultArrivalTimeDistribution,
+                arrival_time_calendar: defaultArrivalCalendar
             }
             setData(updData)
         }

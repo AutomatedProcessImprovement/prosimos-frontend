@@ -16,6 +16,7 @@ import paths from '../router/paths';
 import useBpmnFile from './simulationParameters/useBpmnFile';
 import useJsonFile from './simulationParameters/useJsonFile';
 import useFormState from './simulationParameters/useFormState';
+import CustomizedSnackbar from './results/CustomizedSnackbar';
 
 const tabs_name = {
     SCENARIO_SPECIFICATION: "Scenario Specification",
@@ -78,12 +79,17 @@ const SimulationParameters = () => {
     })
     const { getValues: getScenarioValues } = scenarioState
 
-    const [value, setValue] = useState(0)
-    const [fileDownloadUrl, setFileDownloadUrl] = useState<string>("")
+    const [tabValue, setTabValue] = useState(0)
+    const [fileDownloadUrl, setFileDownloadUrl] = useState("")
+    const [errorSnack, setErrorSnack] = useState("")
     const linkDownloadRef = useRef<HTMLAnchorElement>(null)
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-        setValue(newValue)
+        setTabValue(newValue)
+    };
+
+    const setErrorMessage = (value: string) => {
+        setErrorSnack(value)
     };
 
     const { state } = useLocation()
@@ -154,7 +160,7 @@ const SimulationParameters = () => {
                         <Box
                             sx={{ flexGrow: 1, display: 'flex' }}
                         >
-                            <Tabs value={value}
+                            <Tabs value={tabValue}
                                 onChange={handleTabChange}
                                 variant="scrollable"
                                 orientation="vertical">
@@ -166,42 +172,43 @@ const SimulationParameters = () => {
                                 <Tab label={tabs_name.BRANCHING_PROB} wrapped {...tabProps(4)} />
                                 <Tab label={tabs_name.MODEL_VIEWER} wrapped {...tabProps(5)} />
                             </Tabs>
-                            <TabPanel value={value} index={0}>
+                            <TabPanel value={tabValue} index={0}>
                                 <ScenarioSpecification
                                     formState={scenarioState}
                                 />
                             </TabPanel>
-                            <TabPanel value={value} index={1}>
+                            <TabPanel value={tabValue} index={1}>
                                 <ResourcePools
                                     formState={formState}
                                     errors={errors}
                                 />
                             </TabPanel>
-                            <TabPanel value={value} index={2}>
+                            <TabPanel value={tabValue} index={2}>
                                 <ResourceCalendars
                                     formState={formState}
                                 />
                             </TabPanel>
-                            <TabPanel value={value} index={3}>
+                            <TabPanel value={tabValue} index={3}>
                                 <ResourceAllocation
                                     tasksFromModel={tasksFromModel}
                                     formState={formState}
                                     errors={errors}
+                                    setErrorMessage={setErrorMessage}
                                 />
                             </TabPanel>
-                            <TabPanel value={value} index={4}>
+                            <TabPanel value={tabValue} index={4}>
                                 <ArrivalTimeDistr
                                     formState={formState}
                                 />
                             </TabPanel>
-                            <TabPanel value={value} index={5}>
+                            <TabPanel value={tabValue} index={5}>
                                 <AllGatewaysProbabilities
                                     formState={formState}
                                     errors={errors}
                                     gateways={gateways}
                                 />
                             </TabPanel>
-                            <TabPanel value={value} index={6}>
+                            <TabPanel value={tabValue} index={6}>
                                 <BPMNModelViewer
                                     xmlData={xmlData}
                                 />
@@ -210,6 +217,9 @@ const SimulationParameters = () => {
                     </Grid>
                 </Grid>
             </Grid>
+            <CustomizedSnackbar
+                message={errorSnack}
+            />
         </form>
     );
 }
