@@ -22,22 +22,15 @@ const tabs_name = {
     SCENARIO_SPECIFICATION: "Scenario Specification",
     RESOURCE_PROFILES: "Resource Profiles",
     RESOURCE_CALENDARS: "Resource Calendars",
+    RESOURCE_ALLOCATION: "Resource Allocation",
     ARRIVAL_TIME_PARAMS: "Arrival Time Parameters",
     BRANCHING_PROB: "Branching Probabilities",
-    RESOURCE_ALLOCATION: "Resource Allocation",
     MODEL_VIEWER: "Model Viewer"
 }
 
 interface LocationState {
     bpmnFile: any
     jsonFile: any
-}
-
-function tabProps(index: number) {
-    return {
-        id: `simple-tab-${index}`,
-        'aria-controls': `simple-tabpanel-${index}`,
-    };
 }
 
 interface TabPanelProps {
@@ -53,8 +46,6 @@ function TabPanel(props: TabPanelProps) {
         <div
             role="tabpanel"
             hidden={value !== index}
-            id={`simple-tabpanel-${index}`}
-            aria-labelledby={`simple-tab-${index}`}
             style={{ width: "100%" }}
             {...other}
         >
@@ -84,6 +75,20 @@ const SimulationParameters = () => {
     const [errorSnack, setErrorSnack] = useState("")
     const linkDownloadRef = useRef<HTMLAnchorElement>(null)
 
+    const { state } = useLocation()
+    const { bpmnFile, jsonFile } = state as LocationState
+    const { xmlData, tasksFromModel, gateways } = useBpmnFile(bpmnFile)
+    const { jsonData } = useJsonFile(jsonFile)
+
+    const { formState, handleSubmit } = useFormState(tasksFromModel, gateways, jsonData)
+    const { formState: { errors, isValid, isSubmitted, submitCount } } = formState
+
+    useEffect(() => {
+        if (isSubmitted && !isValid) {
+            setErrorMessage("There are validation errors")
+        }
+    }, [isValid, isSubmitted, submitCount, errors])
+
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue)
     };
@@ -91,13 +96,6 @@ const SimulationParameters = () => {
     const setErrorMessage = (value: string) => {
         setErrorSnack(value)
     };
-
-    const { state } = useLocation()
-    const { bpmnFile, jsonFile } = state as LocationState
-    const { xmlData, tasksFromModel, gateways } = useBpmnFile(bpmnFile)
-    const { jsonData } = useJsonFile(jsonFile)
-    
-    const { formState, handleSubmit, errors } = useFormState(tasksFromModel, gateways, jsonData)
 
     useEffect(() => {
         if (fileDownloadUrl !== "" && fileDownloadUrl !== undefined) {
@@ -110,7 +108,7 @@ const SimulationParameters = () => {
         const { num_processes, start_date } = getScenarioValues()
         axios.post(
             'http://localhost:5000/prosimos',
-            { 
+            {
                 "jsonData": data,
                 "numProcesses": num_processes,
                 "startDate": start_date,
@@ -122,7 +120,7 @@ const SimulationParameters = () => {
                     }
                 })
             })
-        )
+            )
     };
 
     const onDownload = (data: JsonData) => {
@@ -135,7 +133,7 @@ const SimulationParameters = () => {
     const onSnackbarClose = () => {
         setErrorMessage("")
     };
-    
+
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
             <Grid container alignItems="center" justifyContent="center">
@@ -168,13 +166,9 @@ const SimulationParameters = () => {
                                 onChange={handleTabChange}
                                 variant="scrollable"
                                 orientation="vertical">
-                                <Tab label={tabs_name.SCENARIO_SPECIFICATION} wrapped {...tabProps(0)} /> 
-                                <Tab label={tabs_name.RESOURCE_PROFILES} wrapped {...tabProps(0)} />
-                                <Tab label={tabs_name.RESOURCE_CALENDARS} wrapped {...tabProps(1)} />
-                                <Tab label={tabs_name.RESOURCE_ALLOCATION} wrapped {...tabProps(2)} />
-                                <Tab label={tabs_name.ARRIVAL_TIME_PARAMS} wrapped {...tabProps(3)} />
-                                <Tab label={tabs_name.BRANCHING_PROB} wrapped {...tabProps(4)} />
-                                <Tab label={tabs_name.MODEL_VIEWER} wrapped {...tabProps(5)} />
+                                {Object.values(tabs_name).map((item) => (
+                                    <Tab key={item} label={item} wrapped />
+                                ))}
                             </Tabs>
                             <TabPanel value={tabValue} index={0}>
                                 <ScenarioSpecification
@@ -184,7 +178,7 @@ const SimulationParameters = () => {
                             <TabPanel value={tabValue} index={1}>
                                 <ResourcePools
                                     formState={formState}
-                                    errors={errors}
+                                    setErrorMessage={setErrorMessage}
                                 />
                             </TabPanel>
                             <TabPanel value={tabValue} index={2}>

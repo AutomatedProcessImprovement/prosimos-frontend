@@ -59,11 +59,9 @@ export interface CalendarMap {
 }
 
 export interface ResourceMap {
-    // [key: string]: { // resource profile name
-        [resourceId: string]: { // resource id
-            name: string
-        }
-    // }
+    [resourceId: string]: {
+        name: string
+    }
 }
 
 export interface TaskResourceDistribution {

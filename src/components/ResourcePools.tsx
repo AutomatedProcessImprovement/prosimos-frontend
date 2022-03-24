@@ -10,7 +10,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { CalendarMap, JsonData } from "./formData";
 import ResourceProfilesTable from "./profiles/ResourceProfilesTable";
 import AddButtonToolbar from "./toolbar/AddButtonToolbar";
-import { Controller, useFieldArray, UseFieldArrayRemove, UseFormReturn } from "react-hook-form";
+import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
 import { REQUIRED_ERROR_MSG } from "./validationMessages";
 
 
@@ -23,30 +23,28 @@ export interface ResourceInfo {
 
 interface ResourcePoolsProps {
     formState: UseFormReturn<JsonData, object>
-    errors: {
-        [x: string]: any;
-    }
+    setErrorMessage: (value: string) => void
 }
 
 interface RowProps {
     resourceTypeUid: string
     resourcePoolIndex: number
-    onResourcePoolDelete: UseFieldArrayRemove
+    onResourcePoolDelete: (index: number) => void
     formState: UseFormReturn<JsonData, object>
-    errors: {
-        [x: string]: any;
-    },
     calendars: CalendarMap
+    setErrorMessage: (value: string) => void
 }
 
 function Row(props: RowProps) {
     const { resourcePoolIndex } = props
 
-    const { resourceTypeUid, onResourcePoolDelete, formState: { control: formControl, watch } } = props
+    const { resourceTypeUid, onResourcePoolDelete, formState: { control: formControl, watch, formState: { errors } } } = props
     const [openModule, setOpenModule] = useState(false);
 
-    const { resource_profiles: resourceProfilesErrors } = props.errors
-    const resourceListErrors = resourceProfilesErrors && resourceProfilesErrors[resourcePoolIndex]
+    const { resource_profiles: resourceProfilesErrors } = errors as any
+    const resourceListErrors = resourceProfilesErrors?.[resourcePoolIndex]
+    const areAnyErrors = resourceListErrors?.name !== undefined || resourceListErrors?.resource_list !== undefined
+    const errorMessage = resourceListErrors?.name?.message || resourceListErrors?.resource_list?.message
 
     const resourceListValues = watch(`resource_profiles.${resourcePoolIndex}.resource_list`)
 
@@ -69,8 +67,8 @@ function Row(props: RowProps) {
                         render={({ field }) => (
                             <TextField
                                 {...field}
-                                error={resourceListErrors?.name !== undefined}
-                                helperText={resourceListErrors?.name?.message}
+                                error={areAnyErrors}
+                                helperText={errorMessage}
                                 variant="standard"
                                 placeholder="Pool Name"
                             />
@@ -101,8 +99,9 @@ function Row(props: RowProps) {
                                 resourcePoolIndex={resourcePoolIndex}
                                 poolUuid={resourceTypeUid}
                                 formState={props.formState}
-                                errors={resourceListErrors && resourceListErrors.resource_list}
+                                errors={resourceListErrors?.resource_list}
                                 calendars={props.calendars}
+                                setErrorMessage={props.setErrorMessage}
                             />}
                         </Box>
                     </Collapse>
@@ -113,6 +112,7 @@ function Row(props: RowProps) {
 }
 
 const ResourcePools = (props: ResourcePoolsProps) => {
+    const { setErrorMessage } = props
     const { control: formControl, getValues } = props.formState
     const { fields, append, remove } = useFieldArray({
         keyName: 'key',
@@ -133,6 +133,15 @@ const ResourcePools = (props: ResourcePoolsProps) => {
             name: "",
             resource_list: []
         })
+    }
+
+    const onResourcePoolDeletion = (index: number) => {
+        if (fields.length === 1) {
+            setErrorMessage("At least one resource profile should be defined")
+            return
+        }
+
+        remove(index)
     }
 
     return (
@@ -159,10 +168,10 @@ const ResourcePools = (props: ResourcePoolsProps) => {
                             <Row key={profile.id}
                                 resourcePoolIndex={index}
                                 resourceTypeUid={profile.id}
-                                onResourcePoolDelete={remove}
+                                onResourcePoolDelete={onResourcePoolDeletion}
                                 formState={props.formState}
-                                errors={props.errors}
                                 calendars={calendars}
+                                setErrorMessage={setErrorMessage}
                             />
                         ))}
                     </TableBody>

@@ -29,7 +29,7 @@ const Upload = () => {
     };
 
     const isNeededFileProvided = () => {
-        const isBpmnFileProvided = (selectedBpmnFile !== undefined)
+        const isBpmnFileProvided = (selectedBpmnFile)
         let isJsonFileValidInput = false
         switch(simParamsSource) {
             case Source.empty:
@@ -37,10 +37,10 @@ const Upload = () => {
                 break;
             case Source.existing:
                 // if json file is provided, we treat it as valid
-                isJsonFileValidInput = selectedJsonFile !== undefined
+                isJsonFileValidInput = selectedJsonFile
                 break;                
         }
-        
+
         if (!isBpmnFileProvided || !isJsonFileValidInput) {
             setErrorMessage("Please provide the correct selection for the files")
             return false
@@ -65,6 +65,10 @@ const Upload = () => {
     const onSimParamsSourceChange = (event: React.ChangeEvent<HTMLInputElement>, value: string) => {
         setSimParamsSource(parseInt(value))
     };
+
+    const onSnackbarClose = () => {
+        setErrorMessage("")
+    }
 
     return (
         <>
@@ -127,6 +131,7 @@ const Upload = () => {
             </Grid>
             <CustomizedSnackbar
                 message={errorMessage}
+                onSnackbarClose={onSnackbarClose}
             />
         </>
     );

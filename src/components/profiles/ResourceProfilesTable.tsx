@@ -5,7 +5,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddButtonToolbar from "../toolbar/AddButtonToolbar";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
 import { CalendarMap, JsonData, ResourceCalendar } from "../formData";
-import { REQUIRED_ERROR_MSG } from "../validationMessages";
 import ModifyCalendarDialog, { ModalInfo } from "./ModifyCalendarDialog";
 
 export interface UpdateResourceCalendarRequest {
@@ -20,12 +19,17 @@ interface ResourceProfilesTableProps {
     formState: UseFormReturn<JsonData, object>
     errors: any
     calendars: CalendarMap
+    setErrorMessage: (value: string) => void
 }
 
 const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
     const [openModal, setOpenModal] = useState<boolean>(false)
     const [detailModal, setDetailModal] = useState<ModalInfo>()
-    const { formState: { control: formControl, trigger, setValue }, resourcePoolIndex, calendars } = props
+    const { 
+        formState: { control: formControl, trigger, setValue }, 
+        resourcePoolIndex, calendars, errors, setErrorMessage
+    } = props
+
     const { fields, append, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
@@ -39,29 +43,43 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
     })
 
     const onResourceProfileDelete = (index: number) => {
+        if (fields.length === 1) {
+            setErrorMessage("At least one resource should be provided")
+            return
+        }
+
         remove(index)
     }
 
-    const onResourceAdd = async () => {
-        const arePrevResourcesValid = await trigger(`resource_profiles.${resourcePoolIndex}.resource_list`)
-
-        if (!arePrevResourcesValid) return
-
+    const getIdForNewResource = (poolUuid: string, lastElem: any) => {
         let nextResourceNum = 1
-        let [lastResource] = fields.slice(-1)
+        let [lastResource] = lastElem
 
         if (lastResource) {
             const lastResourceId = lastResource.id
             nextResourceNum = Number(Number(lastResourceId.split('_').pop()!) + 1)
         }
 
+        return poolUuid + "_" + nextResourceNum
+    }
+
+    const onResourceAdd = async () => {
+        const lastItemIndex = fields.length - 1
+        const arePrevResourcesValid = await trigger(`resource_profiles.${resourcePoolIndex}.resource_list.${lastItemIndex}`) // ?? true
+
+        if (!arePrevResourcesValid) return
+
         append({
-            id: props.poolUuid + "_" + nextResourceNum,
+            id: getIdForNewResource(props.poolUuid, fields.slice(-1)),
             name: "",
             cost_per_hour: "",
             amount: "",
             calendar: Object.keys(calendars)[0]
         })
+
+        // re-validate fields in the parent component only if we already have error about array length
+        if (errors?.type === "min")
+            trigger('resource_profiles')
     }
 
     const handleCloseModal = () => {
@@ -107,17 +125,16 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                 </TableHead>
                 <TableBody>
                     {fields.map((childrenRow: any, index: any) => {
-                        const isError = props.errors && props.errors[index]
-                        const nameError = isError && props.errors[index].name
-                        const costPerHourError = isError && props.errors[index].cost_per_hour
-                        const amountError = isError && props.errors[index].amount
+                        const isError = errors?.[index] //errors !== undefined && errors[index] !== undefined
+                        const nameError = isError && errors?.[index].name
+                        const costPerHourError = isError && errors?.[index].cost_per_hour
+                        const amountError = isError && errors?.[index].amount
 
                         return <TableRow key={childrenRow.id} hover>
                             <TableCell>
                                 <Controller
                                     name={`resource_profiles.${resourcePoolIndex}.resource_list.${index}.name`}
                                     control={formControl}
-                                    rules={{ required: REQUIRED_ERROR_MSG }}
                                     render={({ field }) => (
                                         <TextField
                                             {...field}
@@ -133,7 +150,6 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                                 <Controller
                                     name={`resource_profiles.${resourcePoolIndex}.resource_list.${index}.cost_per_hour`}
                                     control={formControl}
-                                    rules={{ required: REQUIRED_ERROR_MSG }}
                                     render={({ field }) => (
                                         <TextField
                                             {...field}
@@ -154,7 +170,6 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                                 <Controller
                                     name={`resource_profiles.${resourcePoolIndex}.resource_list.${index}.amount`}
                                     control={formControl}
-                                    rules={{ required: REQUIRED_ERROR_MSG }}
                                     render={({ field }) => (
                                         <TextField
                                             {...field}
