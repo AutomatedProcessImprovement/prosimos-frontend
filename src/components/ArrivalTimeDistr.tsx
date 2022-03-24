@@ -6,6 +6,7 @@ import TimePeriodGridItemWithoutDelete from "./calendars/TimePeriodGridItemWitho
 
 interface ArrivalTimeDistrProps {
     formState: UseFormReturn<JsonData, object>
+    setErrorMessage: (value: string) => void
 }
 
 const ArrivalTimeDistr = (props: ArrivalTimeDistrProps) => {

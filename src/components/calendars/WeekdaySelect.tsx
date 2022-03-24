@@ -1,10 +1,11 @@
 import React from "react";
 import { MenuItem, TextField } from "@mui/material";
-import { ControllerRenderProps } from "react-hook-form";
+import { ControllerRenderProps, FieldError } from "react-hook-form";
 
 interface WeekdaySelectProps<FieldValues>{
     field: ControllerRenderProps<FieldValues, any>,
     label?: string
+    fieldError?: FieldError
 }
 
 const WeekdaySelect = <FieldValues,>(props: WeekdaySelectProps<FieldValues>) => {
@@ -12,6 +13,8 @@ const WeekdaySelect = <FieldValues,>(props: WeekdaySelectProps<FieldValues>) => 
         <TextField 
             sx={{ width: "100%" }}
             {...props.field}
+            error={props.fieldError !== undefined}
+            helperText={props.fieldError?.message}
             label={props.label}
             variant="standard"
             select

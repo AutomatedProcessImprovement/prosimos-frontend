@@ -15,8 +15,10 @@ interface TimePeriodGridItemProps<FieldValues> {
 }
 
 const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldValues>) => {
-    const { formState: { control: formControl }, objectFieldName, isWithDeleteButton, timePeriodIndex, onDelete } = props
+    const { formState: { control: formControl, formState: { errors } }, objectFieldName, isWithDeleteButton, timePeriodIndex, onDelete } = props
     const itemSize = isWithDeleteButton ? 2.5 : 3
+    const currErrors = (errors as any)?.[objectFieldName]
+
     return (
         <Grid container spacing={2}>
             <Grid item xs={itemSize}>
@@ -28,6 +30,7 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
                         <WeekdaySelect
                             field={field}
                             label="Begin Day"
+                            fieldError={currErrors?.from}
                         />
                     )}
                 />
@@ -41,6 +44,7 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
                         <WeekdaySelect
                             field={field}
                             label="End Day"
+                            fieldError={currErrors?.to}
                         />
                     )}
                 />
@@ -50,6 +54,7 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
                     name={`${objectFieldName}.beginTime` as Path<FieldValues>}
                     formState={props.formState}
                     label="Begin Time"
+                    fieldError={currErrors?.beginTime}
                 />
             </Grid>
             <Grid item xs={itemSize}>
@@ -57,6 +62,7 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
                     name={`${objectFieldName}.endTime` as Path<FieldValues>}
                     formState={props.formState}
                     label="End Time"
+                    fieldError={currErrors?.endTime}
                 />
             </Grid>
             {isWithDeleteButton && <Grid item xs={2}>

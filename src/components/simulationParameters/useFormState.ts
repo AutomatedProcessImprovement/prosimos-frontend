@@ -85,14 +85,14 @@ const taskValidationSchema = yup.object().shape({
         .of(
             yup.object().shape({
                 id: yup.string(),
-                name: yup.string().required(),
+                name: yup.string().required(REQUIRED_ERROR_MSG),
                 time_periods: yup.array()
                     .of(
                         yup.object().shape({
-                            from: yup.string().required(),
-                            to: yup.string().required(),
-                            beginTime: yup.string().required(),
-                            endTime: yup.string().required(),
+                            from: yup.string().required(REQUIRED_ERROR_MSG),
+                            to: yup.string().required(REQUIRED_ERROR_MSG),
+                            beginTime: yup.string().required(REQUIRED_ERROR_MSG),
+                            endTime: yup.string().required(REQUIRED_ERROR_MSG),
                         })
                     )
                     .required()
@@ -137,14 +137,16 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
                     }))
                 }
             })
+
+            const defaultResourceCalendars = defaultTemplateSchedule(false)
     
             const updData = {
                 task_resource_distribution: mappedTasksFromModel,
-                resource_calendars: [defaultTemplateSchedule(false)],
+                resource_calendars: [defaultResourceCalendars],
                 gateway_branching_probabilities: mappedGateways,
                 arrival_time_distribution: defaultArrivalTimeDistribution,
                 arrival_time_calendar: defaultArrivalCalendar,
-                resource_profiles: defaultResourceProfiles()
+                resource_profiles: defaultResourceProfiles(defaultResourceCalendars.id)
             }
             setData(updData)
         }

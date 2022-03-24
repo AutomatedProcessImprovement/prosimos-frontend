@@ -1,5 +1,4 @@
 import { alpha } from '@mui/material/styles'
-import { v4 as uuid } from "uuid";
 import { Checkbox, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Toolbar, Typography } from "@mui/material"
 import { useState } from "react"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
@@ -7,32 +6,17 @@ import AddButtonToolbar from "./toolbar/AddButtonToolbar"
 import TimePeriodTableRows from "./calendars/TimePeriodTableRows"
 import DeleteButtonToolbar from './toolbar/DeleteButtonToolbar'
 import { JsonData } from './formData'
+import { defaultTemplateSchedule } from './simulationParameters/defaultValues'
+import { MIN_LENGTH_REQUIRED } from './validationMessages'
 
 interface ResourceCalendarsProps {
     formState: UseFormReturn<JsonData, object>
-}
-
-const defaultTemplateSchedule = {
-    id: "sid-" + uuid(),
-    name: "default schedule",
-    time_periods: [
-        {
-            from: "MONDAY",
-            to: "THURSDAY",
-            beginTime: "09:00:00.000",
-            endTime: "17:00:00.000"
-        },
-        {
-            from: "SATURDAY",
-            to: "SATURDAY",
-            beginTime: "09:00:00.000",
-            endTime: "13:00:00.000"
-        }
-    ]
+    setErrorMessage: (value: string) => void
 }
 
 const ResourceCalendars = (props: ResourceCalendarsProps) => {
     const { control: formControl } = props.formState
+    const { setErrorMessage } = props
 
     const { fields, append: appendCalendarsFields, remove: removeCalendarsFields } = useFieldArray({
         keyName: 'key',
@@ -43,10 +27,15 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
     const [selected, setSelected] = useState<readonly string[]>([])
 
     const onAddNewCalendar = () => {
-        appendCalendarsFields(defaultTemplateSchedule)
+        appendCalendarsFields(defaultTemplateSchedule(true))
     }
 
     const onDeleteCalendars = () => {
+        if (fields.length === 1) {
+            setErrorMessage(MIN_LENGTH_REQUIRED("calendar"))
+            return
+        }
+
         const fieldsNames = fields.reduce((acc, curr) => acc.concat(curr.id), [] as string[])
         const selectedCalsIndex = selected.map((val) => fieldsNames.indexOf(val))
 

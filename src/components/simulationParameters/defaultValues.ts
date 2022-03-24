@@ -2,7 +2,6 @@ import { v4 as uuid } from "uuid";
 import { ProbabilityDistribution, ProbabilityDistributionForResource, ResourceInfo, ResourcePool, TimePeriod } from "../formData";
 
 const DEFAULT_SCHEDULE_NAME = "default schedule"
-const DEFAULT_SCHEDULE_UUID = "sid-" + uuid()
 
 export const defaultTemplateSchedule = (withWeekends: boolean) => {
     const tp = [{
@@ -22,13 +21,13 @@ export const defaultTemplateSchedule = (withWeekends: boolean) => {
     }
 
     return {
-        id: DEFAULT_SCHEDULE_UUID,
+        id: "sid-" + uuid(),
         name: DEFAULT_SCHEDULE_NAME,
         time_periods: tp
     }
 }
 
-export const defaultResourceProfiles = () => {
+export const defaultResourceProfiles = (calendarUuid: string) => {
     const resourceProfileId = "sid-" + uuid()
     return [{
         id: resourceProfileId,
@@ -38,7 +37,7 @@ export const defaultResourceProfiles = () => {
             name: "Default resource profile 1",
             cost_per_hour: "0",
             amount: "1",
-            calendar: DEFAULT_SCHEDULE_UUID,
+            calendar: calendarUuid,
             assignedTasks: []
         } as ResourceInfo] as ResourceInfo[]
     } as ResourcePool]

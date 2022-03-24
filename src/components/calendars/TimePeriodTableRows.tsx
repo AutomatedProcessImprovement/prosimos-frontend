@@ -5,7 +5,6 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import WeekdaySelect from "./WeekdaySelect"
 import TimePickerController from "./TimePickerController"
 import { JsonData } from "../formData"
-import { REQUIRED_ERROR_MSG } from "../validationMessages"
 
 interface TimePeriodTableRowsProps {
     formState: UseFormReturn<JsonData, object>
@@ -22,7 +21,7 @@ const defaultTimePeriod = {
 }
 
 const TimePeriodTableRows = (props: TimePeriodTableRowsProps) => {
-    const { formState: { control: formControl, getValues }, index, isItemSelected, handleClick } = props
+    const { formState: { control: formControl, getValues, formState: { errors } }, index, isItemSelected, handleClick } = props
 
     const { fields: timePeriodsFields, append, remove } = useFieldArray({
         keyName: 'key',
@@ -31,6 +30,7 @@ const TimePeriodTableRows = (props: TimePeriodTableRowsProps) => {
     })
 
     const currCalendar = getValues(`resource_calendars.${index}`)
+    const calErrors = errors.resource_calendars?.[index]
 
     const onTimePeriodAdd = () => {
         append(defaultTimePeriod)
@@ -44,7 +44,8 @@ const TimePeriodTableRows = (props: TimePeriodTableRowsProps) => {
         {timePeriodsFields.map((timePeriod, tpIndex) => {
             const isOnlyOneRow = timePeriodsFields.length === 1
             const isLastRow = (timePeriodsFields.length-1) === tpIndex
-            const isFirstRow = (tpIndex === 0) 
+            const isFirstRow = (tpIndex === 0)
+            const currErrors = calErrors?.time_periods?.[tpIndex]
 
             return <TableRow 
                 key={`timePeriod_${index}_${timePeriod.key}`}
@@ -66,12 +67,11 @@ const TimePeriodTableRows = (props: TimePeriodTableRowsProps) => {
                         <Controller
                             name={`resource_calendars.${index}.name`}
                             control={formControl}
-                            rules={{ required: REQUIRED_ERROR_MSG }}
                             render={({ field }) => (
                                 <TextField
                                     {...field}
-                                    //error={nameError !== undefined}
-                                    //helperText={nameError?.message || ""}
+                                    error={calErrors?.name !== undefined}
+                                    helperText={calErrors?.name?.message || ""}
                                     variant="standard"
                                     placeholder="Resource Name"
                                 />
@@ -83,10 +83,10 @@ const TimePeriodTableRows = (props: TimePeriodTableRowsProps) => {
                     <Controller
                         name={`resource_calendars.${index}.time_periods.${tpIndex}.from`}
                         control={formControl}
-                        rules={{ required: true }}
                         render={({ field }) => (
                             <WeekdaySelect
                                 field={field}
+                                fieldError={currErrors?.from}
                             />
                         )}
                     />
@@ -95,10 +95,10 @@ const TimePeriodTableRows = (props: TimePeriodTableRowsProps) => {
                     <Controller
                         name={`resource_calendars.${index}.time_periods.${tpIndex}.to`}
                         control={formControl}
-                        rules={{ required: true }}
                         render={({ field }) => (
                             <WeekdaySelect
                                 field={field}
+                                fieldError={currErrors?.to}
                             />
                         )}
                     />
@@ -107,12 +107,14 @@ const TimePeriodTableRows = (props: TimePeriodTableRowsProps) => {
                     <TimePickerController
                         name={`resource_calendars.${index}.time_periods.${tpIndex}.beginTime` as unknown as keyof JsonData}
                         formState={props.formState}
+                        fieldError={currErrors?.beginTime}
                     />
                 </TableCell>
                 <TableCell width="19%">
                     <TimePickerController
                         name={`resource_calendars.${index}.time_periods.${tpIndex}.endTime` as unknown as keyof JsonData}
                         formState={props.formState}
+                        fieldError={currErrors?.endTime}
                     />
                 </TableCell>
                 <TableCell width="4%">

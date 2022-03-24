@@ -184,6 +184,7 @@ const SimulationParameters = () => {
                             <TabPanel value={tabValue} index={2}>
                                 <ResourceCalendars
                                     formState={formState}
+                                    setErrorMessage={setErrorMessage}
                                 />
                             </TabPanel>
                             <TabPanel value={tabValue} index={3}>
@@ -197,6 +198,7 @@ const SimulationParameters = () => {
                             <TabPanel value={tabValue} index={4}>
                                 <ArrivalTimeDistr
                                     formState={formState}
+                                    setErrorMessage={setErrorMessage}
                                 />
                             </TabPanel>
                             <TabPanel value={tabValue} index={5}>

@@ -11,7 +11,7 @@ import { CalendarMap, JsonData } from "./formData";
 import ResourceProfilesTable from "./profiles/ResourceProfilesTable";
 import AddButtonToolbar from "./toolbar/AddButtonToolbar";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
-import { REQUIRED_ERROR_MSG } from "./validationMessages";
+import { MIN_LENGTH_REQUIRED, REQUIRED_ERROR_MSG } from "./validationMessages";
 
 
 export interface ResourceInfo {
@@ -137,7 +137,7 @@ const ResourcePools = (props: ResourcePoolsProps) => {
 
     const onResourcePoolDeletion = (index: number) => {
         if (fields.length === 1) {
-            setErrorMessage("At least one resource profile should be defined")
+            setErrorMessage(MIN_LENGTH_REQUIRED("resource profile"))
             return
         }
 
