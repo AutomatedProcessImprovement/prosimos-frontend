@@ -35,6 +35,7 @@ const ArrivalTimeDistr = (props: ArrivalTimeDistrProps) => {
                                 formState={props.formState}
                                 objectNamePath="arrival_time_distribution"
                                 errors={currentErrors}
+                                setErrorMessage={props.setErrorMessage}
                             />
                         </Grid>
                     </Grid>

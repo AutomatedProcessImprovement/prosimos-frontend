@@ -80,6 +80,7 @@ const Row = (props: RowProps) => {
                                             allocationIndex={allocationIndex}
                                             resourceIndex={index}
                                             allowedResources={allowedResources}
+                                            setErrorMessage={setErrorMessage}
                                         />
                                     </Grid>
                                 ))}

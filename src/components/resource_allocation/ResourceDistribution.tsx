@@ -10,10 +10,11 @@ interface ResourceDistributionProps {
     allocationIndex: number
     resourceIndex: number
     allowedResources: { [key: string]: { name: string } }
+    setErrorMessage: (value: string) => void
 }
 
 const ResourceDistribution = (props: ResourceDistributionProps) => {
-    const { formState, allocationIndex, resourceIndex, allowedResources } = props
+    const { formState, allocationIndex, resourceIndex, allowedResources, setErrorMessage } = props
     const { formState: { errors } } = formState
     
     const currentErrors = errors?.task_resource_distribution?.[allocationIndex]?.resources?.[resourceIndex]
@@ -42,6 +43,7 @@ const ResourceDistribution = (props: ResourceDistributionProps) => {
                         formState={formState}
                         objectNamePath={`task_resource_distribution.${allocationIndex}.resources.${resourceIndex}`}
                         errors={distrErrors}
+                        setErrorMessage={setErrorMessage}
                     />
                 </Grid>
             </Grid>

@@ -16,6 +16,7 @@ interface TimeDistributionProps {
         distribution_name?: FieldError
         distribution_params?: { value?: FieldError }[]
     }
+    setErrorMessage: (value: string) => void
 }
 
 const TimeDistribution = (props: TimeDistributionProps) => {
@@ -30,7 +31,13 @@ const TimeDistribution = (props: TimeDistributionProps) => {
     const onDistrFuncParamAdd = () => append({ value: 0 })
 
     const onDistrFuncParamRemove = () => {
-        const lastIndex = fields.length - 1
+        const fieldsLength = fields.length
+        if (fieldsLength === 2) {
+            props.setErrorMessage("Two required parameters should be defined")
+            return
+        }
+
+        const lastIndex = fieldsLength - 1
         remove(lastIndex)
     }
 
