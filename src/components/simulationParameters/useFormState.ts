@@ -5,7 +5,7 @@ import { AllModelTasks, Gateways } from "../modelData";
 import { defaultTemplateSchedule, defaultArrivalTimeDistribution, defaultArrivalCalendar, defaultResourceProfiles } from "./defaultValues";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { REQUIRED_ERROR_MSG } from "./../validationMessages";
+import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, SUMMATION_ONE_MSG } from "./../validationMessages";
 
 const taskValidationSchema = yup.object().shape({
     resource_profiles: yup.array()
@@ -19,24 +19,25 @@ const taskValidationSchema = yup.object().shape({
                             id: yup.string(),
                             name: yup.string().required(REQUIRED_ERROR_MSG),
                             cost_per_hour: yup.string().required(REQUIRED_ERROR_MSG),
-                            amount: yup.number().typeError('Should be a number').required(REQUIRED_ERROR_MSG),
+                            amount: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG),
                             calendar: yup.string().required(REQUIRED_ERROR_MSG),
                             assignedTasks: yup.array()
                         })
                     )
-                    .min(1, "At least one resource should be provided")
+                    .min(1, MIN_LENGTH_REQUIRED_MSG("resource"))
             })
         )
-        .min(1, "At least one resource profile should be provided"),
+        .min(1, MIN_LENGTH_REQUIRED_MSG("resource profile")),
     arrival_time_distribution: yup.object().shape({
         distribution_name: yup.string().required(REQUIRED_ERROR_MSG),
         distribution_params: yup.array()
             .of(
                 yup.object().shape({
-                    value: yup.number().required(REQUIRED_ERROR_MSG)
+                    value: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG)
                 })
             )
             .required()
+            .min(2, "At least two required parameters should be provided")
     }),
     arrival_time_calendar: yup.object().shape({
         from: yup.string().required(REQUIRED_ERROR_MSG),
@@ -52,10 +53,17 @@ const taskValidationSchema = yup.object().shape({
                     .of(
                         yup.object().shape({
                             path_id: yup.string().required(),
-                            value: yup.string().required()
+                            value: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG)
                         })
                     )
-                    .required()
+                    .test(
+                        'sum',
+                        SUMMATION_ONE_MSG,
+                        (probs = []) => {
+                            const total = probs.reduce((acc, curr) => Number(acc) + Number(curr.value) , 0)
+                            return total === 1;
+                        }
+                    )
             })
         )
         .required(),
@@ -71,7 +79,7 @@ const taskValidationSchema = yup.object().shape({
                             distribution_params: yup.array()
                                 .of(
                                     yup.object().shape({
-                                        value: yup.number().required()
+                                        value: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG)
                                     })
                                 )
                                 .required()
@@ -118,7 +126,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
             // const newTasksFromModel = Object.keys(tasksFromModel).reduce<TaskResourceDistribution[]>((acc, key) => {
             //     if (existingTaskIds.includes(key))
             //         return acc
-                
+
             //     acc.push({"task_id": key, resources: []})
             //     return acc
             // }, [])
@@ -139,7 +147,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
             })
 
             const defaultResourceCalendars = defaultTemplateSchedule(false)
-    
+
             const updData = {
                 task_resource_distribution: mappedTasksFromModel,
                 resource_calendars: [defaultResourceCalendars],
@@ -161,7 +169,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
             reset(jsonData)
         }
     }, [jsonData, reset]);
-    
+
     return { formState, handleSubmit }
 }
 

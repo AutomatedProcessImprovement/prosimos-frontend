@@ -6,9 +6,6 @@ import { Gateways } from "../modelData";
 
 interface GatewayBranchingProbProps {
     formState: UseFormReturn<JsonData, object>
-    errors: {
-        [x: string]: any;
-    }
     gateways: Gateways
 }
 
@@ -30,7 +27,6 @@ const AllGatewaysProbabilities = (props: GatewayBranchingProbProps) => {
                             gatewayKey={gatewayKey}
                             index={index}
                             formState={props.formState}
-                            errors={props.errors}
                             gateway={gateways?.[gatewayKey]}
                         />
                     </Card>

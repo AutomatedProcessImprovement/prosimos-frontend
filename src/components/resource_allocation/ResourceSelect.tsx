@@ -1,7 +1,7 @@
 import { TextField, MenuItem } from "@mui/material";
 import { UseFormReturn, Controller, FieldError } from "react-hook-form";
 import { JsonData } from "../formData";
-import { REQUIRED_ERROR_MSG, RESOURCE_ALLOCATION_DUPLICATES } from "../validationMessages";
+import { REQUIRED_ERROR_MSG, RESOURCE_ALLOCATION_DUPLICATES_MSG } from "../validationMessages";
 
 interface ResourceSelectProps {
     formState: UseFormReturn<JsonData, object>
@@ -32,7 +32,7 @@ const ResourceSelect = (props: ResourceSelectProps) => {
             control={formControl}
             rules={{ 
                 required: REQUIRED_ERROR_MSG,
-                validate: () => { return areResourcesUnique() || RESOURCE_ALLOCATION_DUPLICATES }
+                validate: () => { return areResourcesUnique() || RESOURCE_ALLOCATION_DUPLICATES_MSG }
             }}
             render={({ field }) => (
                 <TextField 

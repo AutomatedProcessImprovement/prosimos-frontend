@@ -81,7 +81,7 @@ const SimulationParameters = () => {
     const { jsonData } = useJsonFile(jsonFile)
 
     const { formState, handleSubmit } = useFormState(tasksFromModel, gateways, jsonData)
-    const { formState: { errors, isValid, isSubmitted, submitCount } } = formState
+    const { formState: { errors, isValid, isSubmitted, submitCount }, getValues } = formState
 
     useEffect(() => {
         if (isSubmitted && !isValid) {
@@ -123,8 +123,8 @@ const SimulationParameters = () => {
             )
     };
 
-    const onDownload = (data: JsonData) => {
-        const content = JSON.stringify(data)
+    const onDownload = () => {
+        const content = JSON.stringify(getValues())
         const blob = new Blob([content], { type: "text/plain" })
         const fileDownloadUrl = URL.createObjectURL(blob);
         setFileDownloadUrl(fileDownloadUrl)
@@ -142,8 +142,8 @@ const SimulationParameters = () => {
                         <Grid container alignItems="center" justifyContent="center">
                             <ButtonGroup variant="outlined">
                                 <Button
-                                    type="submit"
-                                    onClick={handleSubmit(onDownload)}
+                                    type="button"
+                                    onClick={(_e) => onDownload()}
                                 >Download as a .json</Button>
                                 <a
                                     style={{ display: "none" }}
@@ -204,7 +204,6 @@ const SimulationParameters = () => {
                             <TabPanel value={tabValue} index={5}>
                                 <AllGatewaysProbabilities
                                     formState={formState}
-                                    errors={errors}
                                     gateways={gateways}
                                 />
                             </TabPanel>

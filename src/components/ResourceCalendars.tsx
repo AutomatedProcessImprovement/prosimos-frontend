@@ -7,7 +7,7 @@ import TimePeriodTableRows from "./calendars/TimePeriodTableRows"
 import DeleteButtonToolbar from './toolbar/DeleteButtonToolbar'
 import { JsonData } from './formData'
 import { defaultTemplateSchedule } from './simulationParameters/defaultValues'
-import { MIN_LENGTH_REQUIRED } from './validationMessages'
+import { MIN_LENGTH_REQUIRED_MSG } from './validationMessages'
 
 interface ResourceCalendarsProps {
     formState: UseFormReturn<JsonData, object>
@@ -32,7 +32,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
 
     const onDeleteCalendars = () => {
         if (fields.length === 1) {
-            setErrorMessage(MIN_LENGTH_REQUIRED("calendar"))
+            setErrorMessage(MIN_LENGTH_REQUIRED_MSG("calendar"))
             return
         }
 
