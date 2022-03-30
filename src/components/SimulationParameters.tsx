@@ -84,6 +84,7 @@ const SimulationParameters = () => {
     const { formState: { errors, isValid, isSubmitted, submitCount }, getValues } = formState
 
     useEffect(() => {
+        console.log(errors)
         if (isSubmitted && !isValid) {
             setErrorMessage("There are validation errors")
         }
@@ -107,7 +108,7 @@ const SimulationParameters = () => {
     const onSubmit = (data: JsonData) => {
         const { num_processes, start_date } = getScenarioValues()
         axios.post(
-            'http://localhost:5000/prosimos',
+            'http://localhost:5000/api/prosimos',
             {
                 "jsonData": data,
                 "numProcesses": num_processes,
@@ -119,8 +120,7 @@ const SimulationParameters = () => {
                         output: res.data,
                     }
                 })
-            })
-            )
+            }))
     };
 
     const onDownload = () => {
@@ -191,7 +191,6 @@ const SimulationParameters = () => {
                                 <ResourceAllocation
                                     tasksFromModel={tasksFromModel}
                                     formState={formState}
-                                    errors={errors}
                                     setErrorMessage={setErrorMessage}
                                 />
                             </TabPanel>

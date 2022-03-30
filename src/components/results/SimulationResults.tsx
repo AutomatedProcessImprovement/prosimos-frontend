@@ -35,7 +35,7 @@ const SimulationResults = (props: SimulationResultsProps) => {
 
     const onLogFileDownload = () => {
         axios
-            .get(`http://localhost:5000/file?filePath=${logFileName}`)
+            .get(`http://localhost:5000/api/file?filePath=${logFileName}`)
             .then((data: any) => {
                 const mimeType = "text/csv"
                 const blob = new Blob([data.data], { type: mimeType })
