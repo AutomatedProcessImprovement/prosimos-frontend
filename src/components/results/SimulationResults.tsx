@@ -5,7 +5,7 @@ import ScenarioStatistics from "./ScenarioStatistics";
 import TaskStatistics from "./TaskStatistics";
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { useEffect, useState } from "react";
-import axios from 'axios';
+import axios from './../../axios';
 import CustomizedSnackbar from "./CustomizedSnackbar";
 
 interface SimulationResultsProps {
@@ -35,7 +35,7 @@ const SimulationResults = (props: SimulationResultsProps) => {
 
     const onLogFileDownload = () => {
         axios
-            .get(`http://localhost:5000/api/file?filePath=${logFileName}`)
+            .get(`/api/file?filePath=${logFileName}`)
             .then((data: any) => {
                 const mimeType = "text/csv"
                 const blob = new Blob([data.data], { type: mimeType })

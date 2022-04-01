@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import moment from 'moment';
-import axios from 'axios';
+import axios from './../axios';
 import { Box, Button, ButtonGroup, Grid, Tab, Tabs } from '@mui/material';
 import { JsonData, ScenarioProperties } from './formData';
 import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
@@ -108,7 +108,7 @@ const SimulationParameters = () => {
     const onSubmit = (data: JsonData) => {
         const { num_processes, start_date } = getScenarioValues()
         axios.post(
-            'http://localhost:5000/api/prosimos',
+            '/api/prosimos',
             {
                 "jsonData": data,
                 "numProcesses": num_processes,
