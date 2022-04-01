@@ -116,16 +116,16 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
             <Table size="small">
                 <TableHead>
                     <TableRow>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Cost per hour</TableCell>
-                        <TableCell>Amount</TableCell>
-                        <TableCell>Calendar</TableCell>
-                        <TableCell>Actions</TableCell>
+                        <TableCell width="40%">Name</TableCell>
+                        <TableCell width="15%">Cost per hour</TableCell>
+                        <TableCell width="15%">Amount</TableCell>
+                        <TableCell width="20%">Calendar</TableCell>
+                        <TableCell width="10%">Actions</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {fields.map((childrenRow: any, index: any) => {
-                        const isError = errors?.[index] //errors !== undefined && errors[index] !== undefined
+                        const isError = errors?.[index]
                         const nameError = isError && errors?.[index].name
                         const costPerHourError = isError && errors?.[index].cost_per_hour
                         const amountError = isError && errors?.[index].amount
@@ -138,6 +138,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                                     render={({ field }) => (
                                         <TextField
                                             {...field}
+                                            style={{ width: "100%" }}
                                             error={nameError !== undefined}
                                             helperText={nameError?.message || ""}
                                             variant="standard"
@@ -160,7 +161,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                                             inputProps={{
                                                 min: 0
                                             }}
-                                            style={{ width: "50%" }}
+                                            style={{ width: "100%" }}
                                             placeholder="Cost"
                                         />
                                     )}
@@ -180,7 +181,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                                             inputProps={{
                                                 min: 0
                                             }}
-                                            style={{ width: "50%" }}
+                                            style={{ width: "100%" }}
                                             placeholder="Amount"
                                         />
                                     )}

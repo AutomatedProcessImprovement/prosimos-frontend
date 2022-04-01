@@ -1,8 +1,9 @@
-import { Grid, Paper, Typography } from "@mui/material";
+import { Grid, IconButton, Paper, Typography } from "@mui/material";
 import { UseFormReturn } from "react-hook-form";
 import TimeDistribution from "../distributions/TimeDistribution";
 import { JsonData, ProbabilityDistributionForResource } from "../formData";
 import ResourceSelect from "./ResourceSelect";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 interface ResourceDistributionProps {
     formState: UseFormReturn<JsonData, object>
@@ -26,7 +27,7 @@ const ResourceDistribution = (props: ResourceDistributionProps) => {
     return (
         <Paper elevation={5} sx={{ p: 2 }}>
             <Grid container spacing={2}>
-                <Grid item xs={12}>
+                <Grid item xs={11}>
                     <ResourceSelect
                         formState={formState}
                         allocationIndex={allocationIndex}
@@ -34,6 +35,11 @@ const ResourceDistribution = (props: ResourceDistributionProps) => {
                         allowedResources={allowedResources}
                         currentError={currentErrors?.resource_id}
                     />
+                </Grid>
+                <Grid item xs={1}>
+                    <IconButton component="span" onClick={() => { console.log("hello") }}>
+                        <DeleteIcon />
+                    </IconButton>
                 </Grid>
                 <Grid item xs={12}>
                     <Typography variant="subtitle2" align="left">

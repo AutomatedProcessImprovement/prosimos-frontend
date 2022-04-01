@@ -74,18 +74,18 @@ const taskValidationSchema = yup.object().shape({
                 resources: yup.array()
                     .of(
                         yup.object().shape({
-                            resource_id: yup.string().required(),
-                            distribution_name: yup.string().required(),
+                            resource_id: yup.string().required(REQUIRED_ERROR_MSG),
+                            distribution_name: yup.string().required(REQUIRED_ERROR_MSG),
                             distribution_params: yup.array()
                                 .of(
                                     yup.object().shape({
                                         value: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG)
                                     })
                                 )
-                                .required()
+                                .min(2, "At least two required parameters should be provided")
                         })
                     )
-                    .required()
+                    .min(1, MIN_LENGTH_REQUIRED_MSG("allocated resource"))
             })
         )
         .required(),

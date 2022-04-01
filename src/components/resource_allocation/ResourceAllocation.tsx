@@ -8,14 +8,12 @@ import ResourceDistribution from "./ResourceDistribution";
 import { AllModelTasks } from "../modelData";
 import AddButtonBase from "../toolbar/AddButtonBase";
 import { defaultResourceAllocationDist } from "../simulationParameters/defaultValues";
+import { FormHelperText } from '@mui/material';
 
 const TASK_RESOURCE_DISTR = "task_resource_distribution"
 interface ResourceAllocationProps {
     tasksFromModel: AllModelTasks
     formState: UseFormReturn<JsonData, object>
-    errors: {
-        [x: string]: any;
-    }
     setErrorMessage: (value: string) => void
 }
 
@@ -24,16 +22,15 @@ interface RowProps {
     allocationIndex: number
     allowedResources: { [key: string]: { name: string } }
     formState: UseFormReturn<JsonData, object>
-    errors: {
-        [x: string]: any;
-    }
     setErrorMessage: (value: string) => void
 }
 
 const Row = (props: RowProps) => {
     const { allocationIndex, taskName, allowedResources, setErrorMessage } = props
-    const { formState: { control: formControl } } = props
-    const [openModule, setOpenModule] = useState(false);
+    const { formState: { control: formControl, trigger, formState: { errors }} } = props
+    const [openModule, setOpenModule] = useState(false)
+
+    const rowErrors = errors?.task_resource_distribution?.[allocationIndex]?.resources as any
 
     const { fields, append } = useFieldArray({
         keyName: 'key',
@@ -48,6 +45,7 @@ const Row = (props: RowProps) => {
         }
         
         append(defaultResourceAllocationDist)
+        trigger(`${TASK_RESOURCE_DISTR}.${allocationIndex}.resources`)
     }
 
     return (
@@ -61,10 +59,15 @@ const Row = (props: RowProps) => {
                         {openModule ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                     </IconButton>
                 </TableCell>
-                <TableCell>
+                <TableCell
+                    style={{ paddingBottom: "0px" }}    
+                >
                     <Typography>
                         {taskName}
                     </Typography>
+                    <FormHelperText
+                        error={rowErrors !== undefined}
+                    >{rowErrors?.message || " "}</FormHelperText>
                 </TableCell>
             </TableRow>
             <TableRow>
@@ -144,7 +147,6 @@ const ResourceAllocation = (props: ResourceAllocationProps) => {
                                 allocationIndex={index}
                                 allowedResources={profiles}
                                 formState={props.formState}
-                                errors={props.errors}
                                 setErrorMessage={props.setErrorMessage}
                             />
                         })}

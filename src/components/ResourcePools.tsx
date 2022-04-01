@@ -67,6 +67,7 @@ function Row(props: RowProps) {
                         render={({ field }) => (
                             <TextField
                                 {...field}
+                                style={{ width: "100%" }}
                                 error={areAnyErrors}
                                 helperText={errorMessage}
                                 variant="standard"
