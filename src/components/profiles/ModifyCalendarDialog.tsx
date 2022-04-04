@@ -2,11 +2,10 @@ import { Dialog, DialogTitle, DialogContent, Grid, TextField, DialogActions, But
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
 import CalendarNameDialog from "./CalendarNameDialog";
-import TimePeriodGridItem from "../calendars/TimePeriodGridItem";
 import { JsonData, ResourceCalendar } from "../formData";
 import { UpdateResourceCalendarRequest } from "./ResourceProfilesTable";
-import AddButtonBase from "../toolbar/AddButtonBase";
 import { defaultWorkWeekTimePeriod } from "../simulationParameters/defaultValues";
+import TimePeriodGridItemsWithAdd from "../calendars/TimePeriodGridItemsWithAdd";
 
 export interface ModalInfo {
     poolIndex: number
@@ -132,28 +131,13 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
                             ))}
                         </TextField>
                     </Grid>
-                    <Grid item xs={12} container spacing={2}>
-                        {currTimePeriods.map((item, index: number) => {
-                            return (
-                                <Grid item xs={12} key={`grid_calendar_${currCalendarIndex}_${index}`}>
-                                    <TimePeriodGridItem
-                                        key={`calendar_${currCalendarIndex}_${index}`}
-                                        formState={formState}
-                                        objectFieldName={`time_periods.${index}` as unknown as keyof ResourceCalendar}
-                                        isWithDeleteButton={true}
-                                        timePeriodIndex={index}
-                                        onDelete={onTimePeriodRemove}
-                                    />
-                                </Grid>
-                            )
-                        })}
-                        <Grid item xs={12}>
-                            <AddButtonBase
-                                labelName="Add a time period"
-                                onClick={onTimePeriodAdd}
-                            />
-                        </Grid>
-                    </Grid>
+                    <TimePeriodGridItemsWithAdd
+                        fields={currTimePeriods}
+                        formState={formState}
+                        objectFieldNamePart={"time_periods"}
+                        onTimePeriodRemove={onTimePeriodRemove}
+                        onTimePeriodAdd={onTimePeriodAdd}
+                    />
                 </Grid>
             </DialogContent>
             <DialogActions>

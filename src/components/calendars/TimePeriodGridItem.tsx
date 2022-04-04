@@ -19,6 +19,12 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
     const itemSize = isWithDeleteButton ? 2.5 : 3
     const currErrors = (errors as any)?.[objectFieldName]
 
+    const onDeleteClicked = () => {
+        if (onDelete && timePeriodIndex !== undefined) {
+            onDelete(timePeriodIndex)
+        }
+    }
+
     return (
         <Grid container spacing={2}>
             <Grid item xs={itemSize}>
@@ -73,7 +79,7 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
             }}>
                 <IconButton
                     size="small"
-                    onClick={() => (onDelete && timePeriodIndex) && onDelete(timePeriodIndex)}
+                    onClick={onDeleteClicked}
                 >
                     <DeleteIcon />
                 </IconButton>

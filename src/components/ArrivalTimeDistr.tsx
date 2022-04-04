@@ -2,10 +2,9 @@ import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { JsonData } from "./formData";
 import TimeDistribution from "./distributions/TimeDistribution";
 import { Card, Grid, Typography } from "@mui/material";
-import AddButtonBase from "./toolbar/AddButtonBase";
 import { defaultWorkWeekTimePeriod } from "./simulationParameters/defaultValues";
-import TimePeriodGridItem from "./calendars/TimePeriodGridItem";
 import { MIN_LENGTH_REQUIRED_MSG } from "./validationMessages";
+import TimePeriodGridItemsWithAdd from "./calendars/TimePeriodGridItemsWithAdd";
 
 interface ArrivalTimeDistrProps {
     formState: UseFormReturn<JsonData, object>
@@ -27,7 +26,6 @@ const ArrivalTimeDistr = (props: ArrivalTimeDistrProps) => {
     }
 
     const onTimePeriodRemove = (index: number) => {
-        console.log("remove")
         if (arrivalCalendarFields.length === 1) {
             props.setErrorMessage(MIN_LENGTH_REQUIRED_MSG("arrival time period"))
             return
@@ -46,25 +44,13 @@ const ArrivalTimeDistr = (props: ArrivalTimeDistrProps) => {
                                 Arrival Time Calendar
                             </Typography>
                         </Grid>
-                        <Grid item container xs={12} spacing={2}>
-                            {arrivalCalendarFields.map((_item: any, index: number) => (
-                                <Grid item>
-                                    <TimePeriodGridItem
-                                        formState={props.formState}
-                                        objectFieldName={`arrival_time_calendar.${index}` as unknown as keyof JsonData}
-                                        isWithDeleteButton={true}
-                                        onDelete={onTimePeriodRemove}
-                                        timePeriodIndex={index}
-                                    />
-                                </Grid>
-                            ))}
-                        </Grid>
-                        <Grid item xs={12}>
-                            <AddButtonBase
-                                labelName="Add a time period"
-                                onClick={onTimePeriodAdd}
-                            />
-                        </Grid>
+                        <TimePeriodGridItemsWithAdd
+                            fields={arrivalCalendarFields}
+                            formState={props.formState}
+                            objectFieldNamePart={"arrival_time_calendar"}
+                            onTimePeriodRemove={onTimePeriodRemove}
+                            onTimePeriodAdd={onTimePeriodAdd}
+                        />
                         <Grid item xs={12}>
                             <Typography variant="h6" align="left">
                                 Arrival Time Distribution Function
