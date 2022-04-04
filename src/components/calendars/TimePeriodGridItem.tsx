@@ -16,7 +16,6 @@ interface TimePeriodGridItemProps<FieldValues> {
 
 const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldValues>) => {
     const { formState: { control: formControl, formState: { errors } }, objectFieldName, isWithDeleteButton, timePeriodIndex, onDelete } = props
-    const itemSize = isWithDeleteButton ? 2.5 : 3
     const currErrors = (errors as any)?.[objectFieldName]
 
     const onDeleteClicked = () => {
@@ -27,7 +26,7 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
 
     return (
         <Grid container spacing={2}>
-            <Grid item xs={itemSize}>
+            <Grid item xs={2.5}>
                 <Controller
                     name={`${objectFieldName}.from` as Path<FieldValues>}
                     control={formControl}
@@ -41,7 +40,7 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
                     )}
                 />
             </Grid>
-            <Grid item xs={itemSize}>
+            <Grid item xs={2.5}>
                 <Controller
                     name={`${objectFieldName}.to` as Path<FieldValues>}
                     control={formControl}
@@ -55,7 +54,7 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
                     )}
                 />
             </Grid>
-            <Grid item xs={itemSize}>
+            <Grid item xs={2.5}>
                 <TimePickerController
                     name={`${objectFieldName}.beginTime` as Path<FieldValues>}
                     formState={props.formState}
@@ -63,7 +62,7 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
                     fieldError={currErrors?.beginTime}
                 />
             </Grid>
-            <Grid item xs={itemSize}>
+            <Grid item xs={2.5}>
                 <TimePickerController
                     name={`${objectFieldName}.endTime` as Path<FieldValues>}
                     formState={props.formState}

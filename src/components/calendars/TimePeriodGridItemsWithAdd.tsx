@@ -18,14 +18,16 @@ const TimePeriodGridItemsWithAdd = <FieldValues,>(props: TimePeriodGridItemsWith
     return (
         <Grid item xs={12} container spacing={2}>
             {fields.map((item, index: number) => {
-                console.log(item.key)
+                // restrict from deleting only the last period item
+                const isWithoutDeleteButton = (fields.length === 1 && index === 0 )
+
                 return (
                     <Grid item xs={12}> 
                         <TimePeriodGridItem
                             key={item.key}
                             formState={props.formState}
                             objectFieldName={`${objectFieldNamePart}.${index}` as unknown as keyof FieldValues}
-                            isWithDeleteButton={true}
+                            isWithDeleteButton={!isWithoutDeleteButton}
                             timePeriodIndex={index}
                             onDelete={props.onTimePeriodRemove}
                         />
