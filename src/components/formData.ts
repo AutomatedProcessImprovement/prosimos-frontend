@@ -1,7 +1,7 @@
 export interface JsonData {
     resource_profiles: ResourcePool[]
     arrival_time_distribution: ProbabilityDistribution
-    arrival_time_calendar: TimePeriod
+    arrival_time_calendar: TimePeriod[]
     gateway_branching_probabilities: GatewayBranchingProbability[]
     task_resource_distribution: TaskResourceDistribution[]
     resource_calendars: ResourceCalendar[]

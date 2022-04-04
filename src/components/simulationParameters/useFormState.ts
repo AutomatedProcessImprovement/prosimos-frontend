@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { JsonData } from "../formData";
 import { AllModelTasks, Gateways } from "../modelData";
-import { defaultTemplateSchedule, defaultArrivalTimeDistribution, defaultArrivalCalendar, defaultResourceProfiles } from "./defaultValues";
+import { defaultTemplateSchedule, defaultArrivalTimeDistribution, defaultArrivalCalendarArr, defaultResourceProfiles } from "./defaultValues";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, SUMMATION_ONE_MSG } from "./../validationMessages";
@@ -39,12 +39,17 @@ const taskValidationSchema = yup.object().shape({
             .required()
             .min(2, "At least two required parameters should be provided")
     }),
-    arrival_time_calendar: yup.object().shape({
-        from: yup.string().required(REQUIRED_ERROR_MSG),
-        to: yup.string().required(REQUIRED_ERROR_MSG),
-        beginTime: yup.string().required(REQUIRED_ERROR_MSG),
-        endTime: yup.string().required(REQUIRED_ERROR_MSG),
-    }),
+    arrival_time_calendar: yup.array()
+        .of(
+            yup.object().shape({
+            from: yup.string().required(REQUIRED_ERROR_MSG),
+            to: yup.string().required(REQUIRED_ERROR_MSG),
+            beginTime: yup.string().required(REQUIRED_ERROR_MSG),
+            endTime: yup.string().required(REQUIRED_ERROR_MSG),
+        })
+        )
+        .required()
+        .min(1, MIN_LENGTH_REQUIRED_MSG("arrival calendar")),
     gateway_branching_probabilities: yup.array()
         .of(
             yup.object().shape({
@@ -153,7 +158,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
                 resource_calendars: [defaultResourceCalendars],
                 gateway_branching_probabilities: mappedGateways,
                 arrival_time_distribution: defaultArrivalTimeDistribution,
-                arrival_time_calendar: defaultArrivalCalendar,
+                arrival_time_calendar: defaultArrivalCalendarArr,
                 resource_profiles: defaultResourceProfiles(defaultResourceCalendars.id)
             }
             setData(updData)

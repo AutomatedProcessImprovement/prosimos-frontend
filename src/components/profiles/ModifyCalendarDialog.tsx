@@ -6,6 +6,7 @@ import TimePeriodGridItem from "../calendars/TimePeriodGridItem";
 import { JsonData, ResourceCalendar } from "../formData";
 import { UpdateResourceCalendarRequest } from "./ResourceProfilesTable";
 import AddButtonBase from "../toolbar/AddButtonBase";
+import { defaultWorkWeekTimePeriod } from "../simulationParameters/defaultValues";
 
 export interface ModalInfo {
     poolIndex: number
@@ -97,12 +98,7 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
     }
 
     const onTimePeriodAdd = () => {
-        append({
-            from: "MONDAY",
-            to: "THURSDAY",
-            beginTime: "09:00:00.000",
-            endTime: "17:00:00.000"
-        })
+        append(defaultWorkWeekTimePeriod)
     }
 
     return (

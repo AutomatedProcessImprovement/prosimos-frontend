@@ -3,13 +3,15 @@ import { ProbabilityDistribution, ProbabilityDistributionForResource, ResourceIn
 
 const DEFAULT_SCHEDULE_NAME = "default schedule"
 
+export const defaultWorkWeekTimePeriod = {
+    from: "MONDAY",
+    to: "FRIDAY",
+    beginTime: "09:00:00.000",
+    endTime: "17:00:00.000"
+}
+
 export const defaultTemplateSchedule = (withWeekends: boolean) => {
-    const tp = [{
-        from: "MONDAY",
-        to: "FRIDAY",
-        beginTime: "09:00:00.000",
-        endTime: "17:00:00.000"
-    }]
+    const tp = [defaultWorkWeekTimePeriod]
 
     if (withWeekends) {
         tp.push({
@@ -57,6 +59,8 @@ export const defaultArrivalCalendar = {
     beginTime: "",
     endTime: ""
 } as TimePeriod
+
+export const defaultArrivalCalendarArr = [defaultArrivalCalendar] as TimePeriod[]
 
 export const defaultResourceAllocationDist = {
     distribution_name: "norm",

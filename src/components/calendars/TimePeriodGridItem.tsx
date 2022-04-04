@@ -9,8 +9,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 interface TimePeriodGridItemProps<FieldValues> {
     formState: UseFormReturn<FieldValues, object>
     objectFieldName: keyof FieldValues
-    isWithDeleteButton: boolean
     timePeriodIndex?: number
+    isWithDeleteButton: boolean
     onDelete?: (index: number) => void
 }
 
@@ -65,7 +65,12 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
                     fieldError={currErrors?.endTime}
                 />
             </Grid>
-            {isWithDeleteButton && <Grid item xs={2}>
+            {isWithDeleteButton && <Grid item xs={2} style= {{
+                textAlign: 'center',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+            }}>
                 <IconButton
                     size="small"
                     onClick={() => (onDelete && timePeriodIndex) && onDelete(timePeriodIndex)}
