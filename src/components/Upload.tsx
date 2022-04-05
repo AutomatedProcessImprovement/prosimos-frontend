@@ -4,6 +4,7 @@ import FileUploader from './FileUploader';
 import { useNavigate } from 'react-router-dom';
 import paths from '../router/paths'
 import CustomizedSnackbar from './results/CustomizedSnackbar';
+import CustomDropzoneArea from './upload/CustomDropzoneArea';
 
 enum Source {
     empty,
@@ -18,10 +19,6 @@ const Upload = () => {
     const [errorMessage, setErrorMessage] = useState("");
 
     const navigate = useNavigate()
-
-    const onBpmnFileChange = (file: any) => {
-        setSelectedBpmnFile(file)
-    };
 
     const onJsonFileChange = (file: any) => {
         setSelectedJsonFile(file)
@@ -47,7 +44,7 @@ const Upload = () => {
         }
 
         return true
-    }
+    };
 
     const onContinueClick = () => {
         if (!isNeededFileProvided()){
@@ -68,7 +65,7 @@ const Upload = () => {
 
     const onSnackbarClose = () => {
         setErrorMessage("")
-    }
+    };
 
     return (
         <>
@@ -81,42 +78,60 @@ const Upload = () => {
                 <Grid item xs={9}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} md={6} >
-                            <Paper elevation={5} sx={{ p: 3, minHeight: '12vw' }}>
-                                <FileUploader
-                                    ext="bpmn"
-                                    onFileChange={onBpmnFileChange}
-                                    showHeader={true}
-                                />
+                            <Paper elevation={5} sx={{ p: 3, minHeight: '25vw' }}>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12}>
+                                        <Typography variant="h6" align="left">
+                                            Upload your .BPMN file
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <CustomDropzoneArea
+                                            acceptedFiles={[".bpmn"]}
+                                            setSelectedBpmnFile={setSelectedBpmnFile}
+                                            setErrorMessage={setErrorMessage}
+                                        />
+                                    </Grid>
+                                </Grid>
                             </Paper>
                         </Grid>
 
                         <Grid item xs={12} md={6}>
-                            <Paper elevation={5} sx={{ p: 3, minHeight: '12vw' }}>
-                                <RadioGroup
-                                    value={simParamsSource}
-                                    onChange={onSimParamsSourceChange}
-                                >
-                                    <Grid container>
-                                        <Grid item xs={12}>
-                                            <FormControlLabel value={Source.empty} control={<Radio />} label="Load simulation parameters from scratch" />
-                                        </Grid>
+                            <Paper elevation={5} sx={{ p: 3, minHeight: '25vw' }}>
+                                <Grid>
+                                    <Grid item xs={12}>
+                                        <Typography variant="h6" align="left">
+                                            Configure simulation parameters
+                                        </Typography>
                                     </Grid>
-                                    <Grid container>
-                                        <Grid item xs={12}>
-                                            <FormControlLabel value={Source.existing} control={<Radio />} label="Use existing simulation parameters" />
-                                            <FileUploader
-                                                ext="json"
-                                                onFileChange={onJsonFileChange}
-                                                showHeader={false}
-                                            />
-                                        </Grid>
+                                    <Grid item xs={12}>
+                                        <RadioGroup
+                                            value={simParamsSource}
+                                            onChange={onSimParamsSourceChange}
+                                        >
+                                            <Grid container>
+                                                <Grid item xs={12}>
+                                                    <FormControlLabel value={Source.empty} control={<Radio />} label="Load simulation parameters from scratch" />
+                                                </Grid>
+                                            </Grid>
+                                            <Grid container>
+                                                <Grid item xs={12}>
+                                                    <FormControlLabel value={Source.existing} control={<Radio />} label="Use existing simulation parameters" />
+                                                    <FileUploader
+                                                        ext="json"
+                                                        onFileChange={onJsonFileChange}
+                                                        showHeader={false}
+                                                    />
+                                                </Grid>
+                                            </Grid>
+                                            <Grid container>
+                                                <Grid item xs={12}>
+                                                    <FormControlLabel disabled value={Source.logs} control={<Radio />} label="Generate the simulation parameters based on logs" />
+                                                </Grid>
+                                            </Grid>
+                                        </RadioGroup>
                                     </Grid>
-                                    <Grid container>
-                                        <Grid item xs={12}>
-                                            <FormControlLabel disabled value={Source.logs} control={<Radio />} label="Generate the simulation parameters based on logs" />
-                                        </Grid>
-                                    </Grid>
-                                </RadioGroup>
+                                </Grid>
                             </Paper>
                         </Grid>
                     </Grid>

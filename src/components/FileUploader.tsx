@@ -14,8 +14,8 @@ const FileUploader = (props: FileUploaderProps) => {
 
     const onFileChange = (event: any) => {
         const selectedFile = event.target.files[0]
-        setSelectedFile(selectedFile);
-        setIsFilePicked(true);
+        setSelectedFile(selectedFile)
+        setIsFilePicked(true)
         props.onFileChange(selectedFile)
     };
     
