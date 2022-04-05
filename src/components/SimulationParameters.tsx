@@ -121,6 +121,10 @@ const SimulationParameters = () => {
                     }
                 })
             }))
+            .catch((error: any) => {
+                console.log(error.response)
+                setErrorMessage(error.response.data.displayMessage)
+            })
     };
 
     const onDownload = () => {
