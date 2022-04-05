@@ -41,15 +41,18 @@ const useBpmnFile = (bpmnFile: any) => {
 
                 const tasks = elementRegistry
                     .filter((e: { type: string; }) => e.type === 'bpmn:Task')
-                    .reduce((acc: {}, t: any) => (
-                        {
+                    .reduce((acc: {}, t: any) => {
+                        const taskDocs = t.businessObject?.documentation?.[0]?.text
+                        const resourceName = (taskDocs !== undefined) ? JSON.parse(taskDocs)?.resource : ""
+
+                        return {
                             ...acc,
                             [t.id]: { 
                                 name: t.businessObject.name,
-                                resource: JSON.parse(t.businessObject.documentation[0].text).resource
+                                resource: resourceName
                             } 
                         }
-                    ), {})
+                    }, {})
                 setTasksFromModel(tasks)
                 
                 const gateways = elementRegistry
