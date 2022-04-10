@@ -107,20 +107,22 @@ const SimulationParameters = () => {
 
     const onSubmit = (data: JsonData) => {
         const { num_processes, start_date } = getScenarioValues()
+        const formData = new FormData()
+        formData.append("xmlFile", bpmnFile)
+        formData.append("jsonFile", jsonFile)
+        formData.append("startDate", start_date)
+        formData.append("numProcesses", num_processes.toString())
+
         axios.post(
             '/api/prosimos',
-            {
-                "jsonData": data,
-                "numProcesses": num_processes,
-                "startDate": start_date,
-                "xmlData": xmlData
-            }).then(((res: any) => {
-                navigate(paths.SIMULATOR_RESULTS_PATH, {
-                    state: {
-                        output: res.data,
-                    }
-                })
-            }))
+            formData
+        ).then(((res: any) => {
+            navigate(paths.SIMULATOR_RESULTS_PATH, {
+                state: {
+                    output: res.data,
+                }
+            })
+        }))
             .catch((error: any) => {
                 console.log(error.response)
                 setErrorMessage(error.response.data.displayMessage)
