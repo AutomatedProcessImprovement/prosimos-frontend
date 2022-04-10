@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import paths from '../router/paths'
 import CustomizedSnackbar from './results/CustomizedSnackbar';
 import CustomDropzoneArea from './upload/CustomDropzoneArea';
+import axios from '../axios';
+import { LoadingButton } from '@mui/lab';
 
 enum Source {
     empty,
@@ -13,20 +15,35 @@ enum Source {
 } 
 
 const Upload = () => {
-    const [selectedBpmnFile, setSelectedBpmnFile] = useState<any>();
-    const [selectedJsonFile, setSelectedJsonFile] = useState<any>();
+    const [selectedBpmnFile, setSelectedBpmnFile] = useState<File>();
+    const [selectedParamFile, setSelectedParamFile] = useState<File>();
+    const [selectedLogsFile, setSelectedLogsFile] = useState<File>();
     const [simParamsSource, setSimParamsSource] = useState<Source>(Source.empty);
     const [errorMessage, setErrorMessage] = useState("");
+    const [loading, setLoading] = useState<boolean>(false);
 
     const navigate = useNavigate()
 
-    const onJsonFileChange = (file: any) => {
-        setSelectedJsonFile(file)
+    const onJsonFileChange = (file: File) => {
+        setSelectedParamFile(file)
         setSimParamsSource(Source.existing)
+        // clear an alternative option
+        if (selectedLogsFile !== undefined) {
+            setSelectedLogsFile(file)
+        }
+    };
+
+    const onLogFileChange = (file: File) => {
+        setSelectedLogsFile(file)
+        setSimParamsSource(Source.logs)
+        // clear an alternative option
+        if (selectedParamFile !== undefined) {
+            setSelectedParamFile(file)
+        }
     };
 
     const isNeededFileProvided = () => {
-        const isBpmnFileProvided = (selectedBpmnFile)
+        const isBpmnFileProvided = !!selectedBpmnFile
         let isJsonFileValidInput = false
         switch(simParamsSource) {
             case Source.empty:
@@ -34,8 +51,11 @@ const Upload = () => {
                 break;
             case Source.existing:
                 // if json file is provided, we treat it as valid
-                isJsonFileValidInput = selectedJsonFile
-                break;                
+                isJsonFileValidInput = !!selectedParamFile
+                break;
+            case Source.logs:
+                isJsonFileValidInput = !!selectedLogsFile
+                break;
         }
 
         if (!isBpmnFileProvided || !isJsonFileValidInput) {
@@ -47,16 +67,45 @@ const Upload = () => {
     };
 
     const onContinueClick = () => {
+        setLoading(true)
+
         if (!isNeededFileProvided()){
             return
         }
 
-        navigate(paths.SIMULATOR_PARAMS_PATH, {
-            state: {
-                bpmnFile: selectedBpmnFile,
-                jsonFile: selectedJsonFile
-            }
-        })
+        if (simParamsSource === Source.logs) {
+            // call API to get json params
+            const formData = new FormData()
+            formData.append("logsFile", selectedLogsFile as Blob)
+            formData.append("bpmnFile", selectedBpmnFile as Blob)
+
+            axios.post(
+                '/api/parameters',
+                formData)
+            .then(((res: any) => {
+                const jsonString = JSON.stringify(res.data)
+                var blob = new Blob([jsonString], { type: "application/json" })
+                const discoveredParamsFile = new File([blob], "name", { type: "application/json" })
+
+                navigate(paths.SIMULATOR_PARAMS_PATH, {
+                    state: {
+                        bpmnFile: selectedBpmnFile,
+                        jsonFile: discoveredParamsFile,
+                    }
+                })
+            }))
+            .catch((error: any) => {
+                console.log(error.response)
+                setErrorMessage(error.response.data.displayMessage)
+            })
+        } else {
+            navigate(paths.SIMULATOR_PARAMS_PATH, {
+                state: {
+                    bpmnFile: selectedBpmnFile,
+                    jsonFile: selectedParamFile,
+                }
+            })
+        }
     };
 
     const onSimParamsSourceChange = (event: React.ChangeEvent<HTMLInputElement>, value: string) => {
@@ -118,7 +167,8 @@ const Upload = () => {
                                                 <Grid item xs={12}>
                                                     <FormControlLabel value={Source.existing} control={<Radio />} label="Use existing simulation parameters" />
                                                     <FileUploader
-                                                        ext="json"
+                                                        startId="existing_params_file"
+                                                        ext=".json"
                                                         onFileChange={onJsonFileChange}
                                                         showHeader={false}
                                                     />
@@ -126,7 +176,13 @@ const Upload = () => {
                                             </Grid>
                                             <Grid container>
                                                 <Grid item xs={12}>
-                                                    <FormControlLabel disabled value={Source.logs} control={<Radio />} label="Generate the simulation parameters based on logs" />
+                                                    <FormControlLabel value={Source.logs} control={<Radio />} label="Generate the simulation parameters based on logs" />
+                                                    <FileUploader
+                                                        startId="logs_file"
+                                                        ext=".xes, .csv"
+                                                        onFileChange={onLogFileChange}
+                                                        showHeader={false}
+                                                    />
                                                 </Grid>
                                             </Grid>
                                         </RadioGroup>
@@ -137,11 +193,13 @@ const Upload = () => {
                     </Grid>
                 </Grid>
                 <Grid item xs={12}>
-                    <Button
+                    <LoadingButton
                         variant="contained"
-                        onClick={onContinueClick}>
+                        onClick={onContinueClick}
+                        loading={loading}
+                    >
                         Continue
-                    </Button>
+                    </LoadingButton>
                 </Grid>
             </Grid>
             <CustomizedSnackbar

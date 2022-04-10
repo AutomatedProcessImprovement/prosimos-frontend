@@ -29,8 +29,8 @@ const tabs_name = {
 }
 
 interface LocationState {
-    bpmnFile: any
-    jsonFile: any
+    bpmnFile: File
+    jsonFile: File
 }
 
 interface TabPanelProps {
@@ -82,7 +82,7 @@ const SimulationParameters = () => {
 
     const { formState, handleSubmit } = useFormState(tasksFromModel, gateways, jsonData)
     const { formState: { errors, isValid, isSubmitted, submitCount }, getValues } = formState
-
+    
     useEffect(() => {
         console.log(errors)
         if (isSubmitted && !isValid) {
@@ -108,25 +108,25 @@ const SimulationParameters = () => {
     const onSubmit = (data: JsonData) => {
         const { num_processes, start_date } = getScenarioValues()
         const formData = new FormData()
-        formData.append("xmlFile", bpmnFile)
-        formData.append("jsonFile", jsonFile)
+        formData.append("xmlFile", bpmnFile as Blob)
+        formData.append("jsonFile", jsonFile as Blob)
         formData.append("startDate", start_date)
         formData.append("numProcesses", num_processes.toString())
 
         axios.post(
             '/api/prosimos',
-            formData
-        ).then(((res: any) => {
+            formData)
+        .then(((res: any) => {
             navigate(paths.SIMULATOR_RESULTS_PATH, {
                 state: {
                     output: res.data,
                 }
             })
         }))
-            .catch((error: any) => {
-                console.log(error.response)
-                setErrorMessage(error.response.data.displayMessage)
-            })
+        .catch((error: any) => {
+            console.log(error.response)
+            setErrorMessage(error.response.data.displayMessage)
+        })
     };
 
     const onDownload = () => {

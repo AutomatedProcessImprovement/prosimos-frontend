@@ -3,7 +3,8 @@ import { Grid, Typography, Input, Button } from "@mui/material";
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 
 interface FileUploaderProps {
-    ext: string
+    startId: string
+    ext?: string
     onFileChange: (file: any) => void
     showHeader: boolean
 }
@@ -26,12 +27,12 @@ const FileUploader = (props: FileUploaderProps) => {
             </Typography>
         </Grid>}
         <Grid>
-            <label htmlFor={props.ext + "-file"}>
+            <label htmlFor={props.startId + "-file"}>
                 <Input
                     type="file"
-                    inputProps={{ accept: `.${props.ext}` }}
+                    inputProps={props.ext !== undefined ? { accept: props.ext } : {}}
                     style={{ display: 'none' }}
-                    id={props.ext + "-file"}
+                    id={props.startId + "-file"}
                     onChange={onFileChange}
                 />
                 <Button
