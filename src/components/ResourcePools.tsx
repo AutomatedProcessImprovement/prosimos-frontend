@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { v4 as uuid } from "uuid";
 import {
     Box, Collapse, Grid, IconButton, Paper,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Toolbar
+    Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TextField, Toolbar
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
@@ -114,6 +114,8 @@ function Row(props: RowProps) {
 
 const ResourcePools = (props: ResourcePoolsProps) => {
     const { setErrorMessage } = props
+    const [page, setPage] = useState<number>(0)
+    const [rowsPerPage, setRowsPerPage] = useState<number>(5)
     const { control: formControl, getValues } = props.formState
     const { fields, append, remove } = useFieldArray({
         keyName: 'key',
@@ -134,7 +136,7 @@ const ResourcePools = (props: ResourcePoolsProps) => {
             name: "",
             resource_list: []
         })
-    }
+    };
 
     const onResourcePoolDeletion = (index: number) => {
         if (fields.length === 1) {
@@ -143,7 +145,21 @@ const ResourcePools = (props: ResourcePoolsProps) => {
         }
 
         remove(index)
-    }
+    };
+
+    const handleChangePage = (event: unknown, newPage: number) => {
+        setPage(newPage)
+    };
+
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setRowsPerPage(parseInt(event.target.value, 10))
+        setPage(0)
+    };
+
+    const getPaginatedRows = () => {
+        const startIndex = page*rowsPerPage
+        return fields.slice(startIndex, startIndex+rowsPerPage)
+    };
 
     return (
         <Grid container spacing={2}>
@@ -165,18 +181,29 @@ const ResourcePools = (props: ResourcePoolsProps) => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {fields.map((profile, index) => (
-                            <Row key={profile.id}
-                                resourcePoolIndex={index}
+                        {getPaginatedRows().map((profile, index) => {
+                            const currentItemIndex = page * rowsPerPage + index
+
+                            return <Row key={profile.key}
+                                resourcePoolIndex={currentItemIndex}
                                 resourceTypeUid={profile.id}
                                 onResourcePoolDelete={onResourcePoolDeletion}
                                 formState={props.formState}
                                 calendars={calendars}
                                 setErrorMessage={setErrorMessage}
                             />
-                        ))}
+                        })}
                     </TableBody>
                 </Table>
+                <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={fields.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+            />
             </TableContainer>
         </Grid>
     )
