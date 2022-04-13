@@ -94,18 +94,18 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
 
     const onTimePeriodRemove = (index: number) => {
         remove(index)
-    }
+    };
 
     const onTimePeriodAdd = () => {
         append(defaultWorkWeekTimePeriod)
-    }
+    };
 
     return (
         <Dialog open={openModal} onClose={handleCloseModal}
             PaperProps={{
                 sx: {
-                    minHeight: "30vh",
-                    maxHeight: "40vh"
+                    minHeight: "60vh",
+                    minWidth: "70vh" 
                 }
             }}
         >
