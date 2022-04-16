@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { v4 as uuid } from "uuid";
 import {
     Box, Collapse, Grid, IconButton, Paper,
-    Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TextField, Toolbar
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Toolbar
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
@@ -12,7 +12,8 @@ import ResourceProfilesTable from "./profiles/ResourceProfilesTable";
 import AddButtonToolbar from "./toolbar/AddButtonToolbar";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
 import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG } from "./validationMessages";
-
+import { AutoSizer } from "react-virtualized";
+import { VariableSizeList } from "react-window";
 
 export interface ResourceInfo {
     id: string,
@@ -33,57 +34,81 @@ interface RowProps {
     formState: UseFormReturn<JsonData, object>
     calendars: CalendarMap
     setErrorMessage: (value: string) => void
+    style: any
+    handleExpansion: (i: number) => void
+    rowOpenState: boolean
 }
 
 function Row(props: RowProps) {
     const { resourcePoolIndex } = props
-
-    const { resourceTypeUid, onResourcePoolDelete, formState: { control: formControl, watch, formState: { errors } } } = props
-    const [openModule, setOpenModule] = useState(false);
+    const [resourceListCount, setResourceListCount] = useState(0)
+    const { resourceTypeUid, onResourcePoolDelete, formState: { control: formControl, getValues, formState: { errors } } } = props
 
     const { resource_profiles: resourceProfilesErrors } = errors as any
     const resourceListErrors = resourceProfilesErrors?.[resourcePoolIndex]
     const areAnyErrors = resourceListErrors?.name !== undefined || resourceListErrors?.resource_list !== undefined
     const errorMessage = resourceListErrors?.name?.message || resourceListErrors?.resource_list?.message
 
-    const resourceListValues = watch(`resource_profiles.${resourcePoolIndex}.resource_list`)
+    const getResourceCount = (resourceListValues?: ResourceInfo[]) => {
+        return resourceListValues
+        ? (resourceListValues)
+            .reduce(function (prev, curr) { return Number(prev) + Number(curr.amount) }, 0)
+        : 0
+    };
+
+    useEffect(() => {
+        const resourceListValues = getValues(`resource_profiles.${resourcePoolIndex}.resource_list`)
+        const count = getResourceCount(resourceListValues)
+        setResourceListCount(count)
+    }, [getValues, resourcePoolIndex]);
+
+    const onResourceListCountChange = () => {
+        const resourceListValues = getValues(`resource_profiles.${resourcePoolIndex}.resource_list`)
+        const count = getResourceCount(resourceListValues)
+        setResourceListCount(count)
+    };
+
+    const onOpenRow = () => {
+        props.handleExpansion(
+            props.resourcePoolIndex
+        )
+    };
 
     return (
         <React.Fragment>
-            <TableRow hover>
-                <TableCell style={{ width: "62px" }}>
+            <TableRow style={{ ...props.style }}>
+            <TableRow hover >
+                <TableCell style={{ width: "10%" }}>
                     <IconButton
                         size="small"
-                        onClick={() => setOpenModule(!openModule)}
+                        onClick={onOpenRow}
                     >
-                        {openModule ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                        {props.rowOpenState ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                     </IconButton>
                 </TableCell>
-                <TableCell>
+                <TableCell style={{ width: "70%" }}>
                     <Controller
                         name={`resource_profiles.${resourcePoolIndex}.name`}
                         control={formControl}
                         rules={{ required: REQUIRED_ERROR_MSG }}
-                        render={({ field }) => (
-                            <TextField
-                                {...field}
-                                style={{ width: "100%" }}
-                                error={areAnyErrors}
-                                helperText={errorMessage}
-                                variant="standard"
-                                placeholder="Pool Name"
-                            />
-                        )}
+                        render={({ field }) => {
+                            return (
+                                <TextField
+                                    {...field}
+                                    style={{ width: "100%" }}
+                                    error={areAnyErrors}
+                                    helperText={errorMessage}
+                                    variant="standard"
+                                    placeholder="Pool Name"
+                                />
+                            )
+                        }}
                     />
                 </TableCell>
-                <TableCell>
-                    {resourceListValues
-                        ? (resourceListValues as ResourceInfo[])
-                            .reduce(function (prev, curr) { return Number(prev) + Number(curr.amount) }, 0)
-                        : 0
-                    }
+                <TableCell style={{ width: "20%" }}>
+                    {resourceListCount}
                 </TableCell>
-                <TableCell style={{ width: "62px" }}>
+                <TableCell style={{ width: "10%" }}>
                     <IconButton
                         size="small"
                         onClick={() => onResourcePoolDelete(resourcePoolIndex)}
@@ -94,8 +119,8 @@ function Row(props: RowProps) {
             </TableRow>
             <TableRow>
                 <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-                    <Collapse in={openModule} timeout="auto" unmountOnExit>
-                        <Box margin={1}>
+                    <Collapse in={props.rowOpenState} timeout="auto" unmountOnExit>
+                        <Box margin={1} height={"45vh"}>
                             {resourceTypeUid && <ResourceProfilesTable
                                 resourcePoolIndex={resourcePoolIndex}
                                 poolUuid={resourceTypeUid}
@@ -103,10 +128,12 @@ function Row(props: RowProps) {
                                 errors={resourceListErrors?.resource_list}
                                 calendars={props.calendars}
                                 setErrorMessage={props.setErrorMessage}
+                                onResourceListCountChange={onResourceListCountChange}
                             />}
                         </Box>
                     </Collapse>
                 </TableCell>
+            </TableRow>
             </TableRow>
         </React.Fragment>
     );
@@ -114,8 +141,6 @@ function Row(props: RowProps) {
 
 const ResourcePools = (props: ResourcePoolsProps) => {
     const { setErrorMessage } = props
-    const [page, setPage] = useState<number>(0)
-    const [rowsPerPage, setRowsPerPage] = useState<number>(5)
     const { control: formControl, getValues } = props.formState
     const { fields, append, remove } = useFieldArray({
         keyName: 'key',
@@ -123,12 +148,22 @@ const ResourcePools = (props: ResourcePoolsProps) => {
         name: `resource_profiles`
     })
 
-    const calendars = getValues("resource_calendars")?.reduce((acc, currItem) => {
+    const initialRowSizes = new Array(fields.length).fill(true).reduce((acc, item, i) => {
+        acc[i] = 65;
+        return acc;
+    }, {})
+    const [rowSizes, setRowSizes] = useState<number[]>(initialRowSizes)
+    const initialRowState = Array(fields.length).fill(false)
+    const [rowOpenState, setRowOpenState] = useState<boolean[]>(initialRowState)
+
+    const ref = React.useRef<VariableSizeList>(null);
+
+    const calendars = React.useCallback(() => getValues("resource_calendars")?.reduce((acc, currItem) => {
         return {
             ...acc,
             [currItem.id]: currItem.name
         }
-    }, {} as CalendarMap)
+    }, {} as CalendarMap), [getValues])
 
     const onNewPoolCreation = () => {
         append({
@@ -147,18 +182,42 @@ const ResourcePools = (props: ResourcePoolsProps) => {
         remove(index)
     };
 
-    const handleChangePage = (event: unknown, newPage: number) => {
-        setPage(newPage)
+    const getItemSize = (index: number) => {
+        return rowSizes[index]
     };
 
-    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setRowsPerPage(parseInt(event.target.value, 10))
-        setPage(0)
+    const handleExpansion = (i: number) => {
+        if (ref.current) {
+            ref.current && ref.current!.resetAfterIndex(i, false);
+        }
+
+        setRowSizes({
+            ...rowSizes,
+            [i]: rowSizes[i] === 65 ? 7 * 65 : 65
+        })
+
+        setRowOpenState({
+            ...rowOpenState,
+            [i]: !rowOpenState[i]
+        })
     };
 
-    const getPaginatedRows = () => {
-        const startIndex = page*rowsPerPage
-        return fields.slice(startIndex, startIndex+rowsPerPage)
+    const renderRow = ({ style, index, data }: any) => {
+        const profile = fields[index]
+
+        return (
+            <Row key={profile.key}
+                style={{...style}}
+                resourcePoolIndex={index}
+                resourceTypeUid={profile.id}
+                onResourcePoolDelete={onResourcePoolDeletion}
+                formState={props.formState}
+                calendars={calendars()}
+                setErrorMessage={setErrorMessage}
+                handleExpansion={handleExpansion}
+                rowOpenState={rowOpenState[index]}
+            />
+        )
     };
 
     return (
@@ -170,8 +229,8 @@ const ResourcePools = (props: ResourcePoolsProps) => {
                 />
             </Toolbar>
 
-            <TableContainer component={Paper}>
-                <Table>
+            <TableContainer component={Paper} style={{ width: "100%", height: "60vh" }}>
+                <Table style={{ width: "100%", height: "100%" }}>
                     <TableHead>
                         <TableRow>
                             <TableCell></TableCell>
@@ -181,29 +240,24 @@ const ResourcePools = (props: ResourcePoolsProps) => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {getPaginatedRows().map((profile, index) => {
-                            const currentItemIndex = page * rowsPerPage + index
-
-                            return <Row key={profile.key}
-                                resourcePoolIndex={currentItemIndex}
-                                resourceTypeUid={profile.id}
-                                onResourcePoolDelete={onResourcePoolDeletion}
-                                formState={props.formState}
-                                calendars={calendars}
-                                setErrorMessage={setErrorMessage}
-                            />
-                        })}
+                    <AutoSizer>
+                        {({ height, width }) => (
+                            <VariableSizeList
+                                ref={ref}
+                                width={width}
+                                height={height}
+                                itemSize={getItemSize}
+                                itemCount={fields.length}
+                                itemData={fields}
+                                itemKey={(i: number) => fields[i].id}
+                                overscanCount={4}
+                            >
+                                {renderRow}
+                            </VariableSizeList>
+                        )}
+                    </AutoSizer>
                     </TableBody>
                 </Table>
-                <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={fields.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-            />
             </TableContainer>
         </Grid>
     )
