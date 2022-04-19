@@ -15,6 +15,8 @@ import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG } from "./validationMessage
 import { AutoSizer } from "react-virtualized";
 import { VariableSizeList } from "react-window";
 
+const ROW_HEIGHT = 80;
+
 export interface ResourceInfo {
     id: string,
     name: string,
@@ -74,10 +76,18 @@ function Row(props: RowProps) {
         )
     };
 
+    const getHeightForRow = () => {
+        if (!props.rowOpenState) {
+            return { height: "inherit" }
+        }
+    }
+
+    // const { ref: nameRef, ...inputProps } = register(`resource_profiles.${resourcePoolIndex}.name`);
+
     return (
         <React.Fragment>
-            <TableRow style={{ ...props.style }}>
-            <TableRow hover >
+            <TableRow style={{ ...props.style }} >
+            <TableRow hover style={getHeightForRow()}>
                 <TableCell style={{ width: "10%" }}>
                     <IconButton
                         size="small"
@@ -87,6 +97,15 @@ function Row(props: RowProps) {
                     </IconButton>
                 </TableCell>
                 <TableCell style={{ width: "70%" }}>
+                    {/* <TextField
+                        style={{ width: "100%" }}
+                        error={areAnyErrors}
+                        helperText={errorMessage}
+                        variant="standard"
+                        placeholder="Pool Name"
+                        inputRef={nameRef}
+                        {...inputProps}
+                    /> */}
                     <Controller
                         name={`resource_profiles.${resourcePoolIndex}.name`}
                         control={formControl}
@@ -141,15 +160,16 @@ function Row(props: RowProps) {
 
 const ResourcePools = (props: ResourcePoolsProps) => {
     const { setErrorMessage } = props
-    const { control: formControl, getValues } = props.formState
+    const { control: formControl, getValues, trigger } = props.formState
     const { fields, append, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: `resource_profiles`
     })
+    const [isRowAdding, setIsRowAdding] = useState(false)
 
     const initialRowSizes = new Array(fields.length).fill(true).reduce((acc, item, i) => {
-        acc[i] = 65;
+        acc[i] = ROW_HEIGHT;
         return acc;
     }, {})
     const [rowSizes, setRowSizes] = useState<number[]>(initialRowSizes)
@@ -165,12 +185,30 @@ const ResourcePools = (props: ResourcePoolsProps) => {
         }
     }, {} as CalendarMap), [getValues])
 
-    const onNewPoolCreation = () => {
+    useEffect(() => {
+        if (isRowAdding) {
+            if (ref?.current) {
+                ref.current?.scrollToItem(fields.length-2, "start")
+            }
+            setIsRowAdding(false)
+            // setFieldsLength(fields.length)
+        }
+      }, [fields, isRowAdding])
+
+    const onNewPoolCreation = async () => {
+        const arePrevResourcesValid = await trigger(`resource_profiles`)
+        if (!arePrevResourcesValid) {
+            setErrorMessage("Verify the correctness of all entered Resource Profiles")
+            return
+        }
+
         append({
             id: "sid-" + uuid(),
             name: "",
             resource_list: []
         })
+
+        setIsRowAdding(true)
     };
 
     const onResourcePoolDeletion = (index: number) => {
@@ -193,7 +231,7 @@ const ResourcePools = (props: ResourcePoolsProps) => {
 
         setRowSizes({
             ...rowSizes,
-            [i]: rowSizes[i] === 65 ? 7 * 65 : 65
+            [i]: rowSizes[i] === ROW_HEIGHT ? 5.5 * ROW_HEIGHT : ROW_HEIGHT
         })
 
         setRowOpenState({
@@ -249,7 +287,7 @@ const ResourcePools = (props: ResourcePoolsProps) => {
                                 itemSize={getItemSize}
                                 itemCount={fields.length}
                                 itemData={fields}
-                                itemKey={(i: number) => fields[i].id}
+                                itemKey={(i: number) => fields[i].key}
                                 overscanCount={4}
                             >
                                 {renderRow}
