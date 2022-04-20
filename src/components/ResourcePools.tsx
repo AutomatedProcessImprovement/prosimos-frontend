@@ -16,12 +16,24 @@ import { AutoSizer } from "react-virtualized";
 import { VariableSizeList } from "react-window";
 
 const ROW_HEIGHT = 80;
+const OPEN_ROW_HEIGHT = 5.5 * ROW_HEIGHT;
+
+const removeArrayElemByIndex = (index: number, arr: any []) => {
+    const copyArray = [...arr]
+    for (var i = 0; i < copyArray.length; i++) { 
+        if (i === index) { 
+            copyArray.splice(i, 1); 
+        }
+    }
+
+    return copyArray
+}
 
 export interface ResourceInfo {
     id: string,
     name: string,
-    cost_per_hour: string
-    amount: string
+    cost_per_hour: number
+    amount: number
 }
 
 interface ResourcePoolsProps {
@@ -41,10 +53,11 @@ interface RowProps {
     rowOpenState: boolean
 }
 
-function Row(props: RowProps) {
+// const Row = React.memo((props: RowProps) => {
+const Row = (props: RowProps) => {
     const { resourcePoolIndex } = props
     const [resourceListCount, setResourceListCount] = useState(0)
-    const { resourceTypeUid, onResourcePoolDelete, formState: { control: formControl, getValues, formState: { errors } } } = props
+    const { resourceTypeUid, onResourcePoolDelete, formState: { control: formControl, register, getValues, formState: { errors } } } = props
 
     const { resource_profiles: resourceProfilesErrors } = errors as any
     const resourceListErrors = resourceProfilesErrors?.[resourcePoolIndex]
@@ -82,7 +95,7 @@ function Row(props: RowProps) {
         }
     }
 
-    // const { ref: nameRef, ...inputProps } = register(`resource_profiles.${resourcePoolIndex}.name`);
+    const { ref: nameRef, ...inputProps } = register(`resource_profiles.${resourcePoolIndex}.name`);
 
     return (
         <React.Fragment>
@@ -97,7 +110,7 @@ function Row(props: RowProps) {
                     </IconButton>
                 </TableCell>
                 <TableCell style={{ width: "70%" }}>
-                    {/* <TextField
+                    <TextField
                         style={{ width: "100%" }}
                         error={areAnyErrors}
                         helperText={errorMessage}
@@ -105,8 +118,8 @@ function Row(props: RowProps) {
                         placeholder="Pool Name"
                         inputRef={nameRef}
                         {...inputProps}
-                    /> */}
-                    <Controller
+                    />
+                    {/* <Controller
                         name={`resource_profiles.${resourcePoolIndex}.name`}
                         control={formControl}
                         rules={{ required: REQUIRED_ERROR_MSG }}
@@ -122,7 +135,7 @@ function Row(props: RowProps) {
                                 />
                             )
                         }}
-                    />
+                    /> */}
                 </TableCell>
                 <TableCell style={{ width: "20%" }}>
                     {resourceListCount}
@@ -156,22 +169,19 @@ function Row(props: RowProps) {
             </TableRow>
         </React.Fragment>
     );
-}
+};
 
 const ResourcePools = (props: ResourcePoolsProps) => {
     const { setErrorMessage } = props
-    const { control: formControl, getValues, trigger } = props.formState
-    const { fields, append, remove } = useFieldArray({
+    const { control: formControl, getValues, trigger, setFocus } = props.formState
+    const { fields, append, prepend, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: `resource_profiles`
     })
     const [isRowAdding, setIsRowAdding] = useState(false)
 
-    const initialRowSizes = new Array(fields.length).fill(true).reduce((acc, item, i) => {
-        acc[i] = ROW_HEIGHT;
-        return acc;
-    }, {})
+    const initialRowSizes = new Array(fields.length).fill(ROW_HEIGHT)
     const [rowSizes, setRowSizes] = useState<number[]>(initialRowSizes)
     const initialRowState = Array(fields.length).fill(false)
     const [rowOpenState, setRowOpenState] = useState<boolean[]>(initialRowState)
@@ -187,12 +197,10 @@ const ResourcePools = (props: ResourcePoolsProps) => {
 
     useEffect(() => {
         if (isRowAdding) {
-            if (ref?.current) {
-                ref.current?.scrollToItem(fields.length-2, "start")
-            }
+            setFocus(`resource_profiles.1.name`)
             setIsRowAdding(false)
-            // setFieldsLength(fields.length)
         }
+
       }, [fields, isRowAdding])
 
     const onNewPoolCreation = async () => {
@@ -202,13 +210,27 @@ const ResourcePools = (props: ResourcePoolsProps) => {
             return
         }
 
-        append({
+        prepend( {
             id: "sid-" + uuid(),
-            name: "",
+            name: `Resource Group ${fields.length}`,
             resource_list: []
         })
 
         setIsRowAdding(true)
+
+        const openRow = false
+        setRowOpenState([
+            openRow,
+            ...rowOpenState,
+        ])
+        setRowSizes([
+            (openRow ? OPEN_ROW_HEIGHT : ROW_HEIGHT),
+            ...rowSizes,
+        ])
+
+        if (ref.current) {
+            ref.current && ref.current!.resetAfterIndex(0);
+        }
     };
 
     const onResourcePoolDeletion = (index: number) => {
@@ -218,6 +240,13 @@ const ResourcePools = (props: ResourcePoolsProps) => {
         }
 
         remove(index)
+
+        setRowSizes(removeArrayElemByIndex(index, rowSizes))
+        setRowOpenState(removeArrayElemByIndex(index, rowOpenState))
+
+        if (ref.current) {
+            ref.current && ref.current!.resetAfterIndex(0);
+        }
     };
 
     const getItemSize = (index: number) => {
@@ -229,15 +258,17 @@ const ResourcePools = (props: ResourcePoolsProps) => {
             ref.current && ref.current!.resetAfterIndex(i, false);
         }
 
-        setRowSizes({
-            ...rowSizes,
-            [i]: rowSizes[i] === ROW_HEIGHT ? 5.5 * ROW_HEIGHT : ROW_HEIGHT
-        })
+        setRowSizes([
+            ...rowSizes.slice(0, i),
+            rowSizes[i] === ROW_HEIGHT ? OPEN_ROW_HEIGHT : ROW_HEIGHT,
+            ...rowSizes.slice(i+1)
+        ])
 
-        setRowOpenState({
-            ...rowOpenState,
-            [i]: !rowOpenState[i]
-        })
+        setRowOpenState([
+            ...rowOpenState.slice(0, i),
+            !rowOpenState[i],
+            ...rowOpenState.slice(i+1),
+        ])
     };
 
     const renderRow = ({ style, index, data }: any) => {
@@ -271,10 +302,10 @@ const ResourcePools = (props: ResourcePoolsProps) => {
                 <Table style={{ width: "100%", height: "100%" }}>
                     <TableHead>
                         <TableRow>
-                            <TableCell></TableCell>
-                            <TableCell>Resource Profile</TableCell>
-                            <TableCell>Amount</TableCell>
-                            <TableCell>Actions</TableCell>
+                            <TableCell style={{ width: "10%" }}></TableCell>
+                            <TableCell style={{ width: "70%" }}>Resource Profile</TableCell>
+                            <TableCell style={{ width: "20%" }}>Amount</TableCell>
+                            <TableCell style={{ width: "10%" }}>Actions</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
