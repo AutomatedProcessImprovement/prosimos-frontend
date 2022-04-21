@@ -53,11 +53,10 @@ interface RowProps {
     rowOpenState: boolean
 }
 
-// const Row = React.memo((props: RowProps) => {
 const Row = (props: RowProps) => {
     const { resourcePoolIndex } = props
     const [resourceListCount, setResourceListCount] = useState(0)
-    const { resourceTypeUid, onResourcePoolDelete, formState: { control: formControl, register, getValues, formState: { errors } } } = props
+    const { resourceTypeUid, onResourcePoolDelete, formState: { control: formControl, getValues, formState: { errors } } } = props
 
     const { resource_profiles: resourceProfilesErrors } = errors as any
     const resourceListErrors = resourceProfilesErrors?.[resourcePoolIndex]
@@ -95,8 +94,6 @@ const Row = (props: RowProps) => {
         }
     }
 
-    const { ref: nameRef, ...inputProps } = register(`resource_profiles.${resourcePoolIndex}.name`);
-
     return (
         <React.Fragment>
             <TableRow style={{ ...props.style }} >
@@ -110,23 +107,15 @@ const Row = (props: RowProps) => {
                     </IconButton>
                 </TableCell>
                 <TableCell style={{ width: "70%" }}>
-                    <TextField
-                        style={{ width: "100%" }}
-                        error={areAnyErrors}
-                        helperText={errorMessage}
-                        variant="standard"
-                        placeholder="Pool Name"
-                        inputRef={nameRef}
-                        {...inputProps}
-                    />
-                    {/* <Controller
+                    <Controller
                         name={`resource_profiles.${resourcePoolIndex}.name`}
                         control={formControl}
                         rules={{ required: REQUIRED_ERROR_MSG }}
-                        render={({ field }) => {
+                        render={({ field: { ref, ...others } }) => {
                             return (
                                 <TextField
-                                    {...field}
+                                    inputRef={ref}
+                                    {...others}
                                     style={{ width: "100%" }}
                                     error={areAnyErrors}
                                     helperText={errorMessage}
@@ -135,7 +124,7 @@ const Row = (props: RowProps) => {
                                 />
                             )
                         }}
-                    /> */}
+                    />
                 </TableCell>
                 <TableCell style={{ width: "20%" }}>
                     {resourceListCount}
@@ -174,7 +163,7 @@ const Row = (props: RowProps) => {
 const ResourcePools = (props: ResourcePoolsProps) => {
     const { setErrorMessage } = props
     const { control: formControl, getValues, trigger, setFocus } = props.formState
-    const { fields, append, prepend, remove } = useFieldArray({
+    const { fields, prepend, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: `resource_profiles`
