@@ -4,6 +4,7 @@ import { UseFormReturn } from "react-hook-form";
 import AddButtonBase from "../toolbar/AddButtonBase";
 import TimePeriodGridItem from "./TimePeriodGridItem";
 import { List , AutoSizer } from 'react-virtualized';
+import { useEffect, useState, useRef } from "react";
 
 interface TimePeriodGridItemsWithAddProps<FieldValues> {
     fields: FieldArrayWithId<FieldValues, FieldArrayPath<FieldValues>, "key">[]
@@ -15,6 +16,22 @@ interface TimePeriodGridItemsWithAddProps<FieldValues> {
 
 const TimePeriodGridItemsWithAdd = <FieldValues,>(props: TimePeriodGridItemsWithAddProps<FieldValues>) => {
     const { fields, objectFieldNamePart } = props
+    const [isRowAdded, setIsRowAdded] = useState(false)
+    const listRef = useRef<List>(null)
+
+    const onTimePeriodAdd = () => {
+        setIsRowAdded(true)
+        props.onTimePeriodAdd()
+    };
+
+    useEffect(() => {
+        if (isRowAdded) {
+            if (listRef.current) {
+                listRef.current.scrollToRow(fields.length)
+            }
+            setIsRowAdded(false)
+        }
+    }, [fields, isRowAdded]);
 
     const renderRow = ({ index, key, style }: any) => {
         const isWithoutDeleteButton = (fields.length === 1 && index === 0 )
@@ -40,6 +57,7 @@ const TimePeriodGridItemsWithAdd = <FieldValues,>(props: TimePeriodGridItemsWith
                 <AutoSizer>
                     {({ width, height }) => {
                         return <List
+                            ref={listRef}
                             width={width}
                             height={height}
                             rowHeight={50}
@@ -53,7 +71,7 @@ const TimePeriodGridItemsWithAdd = <FieldValues,>(props: TimePeriodGridItemsWith
             <Grid item xs={12}>
                 <AddButtonBase
                     labelName="Add a time period"
-                    onClick={props.onTimePeriodAdd}
+                    onClick={onTimePeriodAdd}
                 />
             </Grid>
         </Grid>
