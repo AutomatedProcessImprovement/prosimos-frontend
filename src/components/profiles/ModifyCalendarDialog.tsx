@@ -27,6 +27,7 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
         formState: { getValues },
         detailModal: { poolIndex, resourceIndex, calendarId }
     } = props
+    const [initialCalendarIndex, setInitialCalendarIndex] = useState<number>()
     const [currCalendarIndex, setCurrCalendarIndex] = useState<number>()
     const [isNameDialogOpen, setIsNameDialogOpen] = useState<boolean>(false)
     const allCalendars = getValues("resource_calendars")
@@ -34,6 +35,7 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
     useEffect(() => {
         const currCalendarIndex = allCalendars.findIndex((item) => item.id === calendarId)
         setCurrCalendarIndex(currCalendarIndex)
+        setInitialCalendarIndex(currCalendarIndex)
     }, [calendarId, allCalendars])
 
     const currCalendar = (currCalendarIndex !== undefined) ? allCalendars[currCalendarIndex] : {} 
@@ -75,11 +77,20 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
         }
     }
 
+    const onModalClose = () => {
+        // reset calendar to the default values
+        if (initialCalendarIndex !== currCalendarIndex || isDirty) {
+            setCurrCalendarIndex(initialCalendarIndex)
+        }
+
+        handleCloseModal()
+    }
+
     const onNameDialogClose = () => {
         setIsNameDialogOpen(false)
     }
 
-    const onModalFinalSave = (name: string) => {
+    const onNameDialogSave = (name: string) => {
         handleSaveModal({
             isNew: isDirty,
             calendar: {
@@ -141,14 +152,13 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
                 </Grid>
             </DialogContent>
             <DialogActions>
-                <Button onClick={handleCloseModal}>Cancel</Button>
+                <Button onClick={onModalClose}>Cancel</Button>
                 <Button onClick={onModalSave}>Save</Button>
             </DialogActions>
-            {isNameDialogOpen &&
-            <CalendarNameDialog
+            {isNameDialogOpen && <CalendarNameDialog
                 modalOpen={isNameDialogOpen}
                 handleClose={onNameDialogClose}
-                handleSubmit={onModalFinalSave}
+                handleSubmit={onNameDialogSave}
             />}
         </Dialog>
     )
