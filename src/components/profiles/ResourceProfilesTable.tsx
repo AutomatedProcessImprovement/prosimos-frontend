@@ -1,13 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { v4 as uuid } from "uuid";
-import { Table, TableHead, TableRow, TableCell, TableBody, TextField, IconButton, Link, Toolbar, Typography } from "@mui/material";
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Table, TableHead, TableRow, TableCell, TableBody, TextField, Toolbar } from "@mui/material";
+
 import AddButtonToolbar from "../toolbar/AddButtonToolbar";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
 import { CalendarMap, JsonData, ResourceCalendar } from "../formData";
 import ModifyCalendarDialog, { ModalInfo } from "./ModifyCalendarDialog";
 import { AutoSizer } from "react-virtualized";
 import { FixedSizeList } from "react-window";
+import ActionsColumn from "./ActionsColumn";
+
+const colWidth = ["55%", "15%", "15%", "15%"]
 
 export interface UpdateResourceCalendarRequest {
     isNew: boolean
@@ -28,12 +31,14 @@ interface ResourceProfilesTableProps {
 const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
     const [openModal, setOpenModal] = useState<boolean>(false)
     const [detailModal, setDetailModal] = useState<ModalInfo>()
+    const [isRowAdding, setIsRowAdding] = useState<boolean>(false)
+    
     const { 
-        formState: { control: formControl, trigger, setValue }, 
+        formState: { control: formControl, trigger, setValue, getValues, setFocus },
         resourcePoolIndex, calendars, errors, setErrorMessage
     } = props
 
-    const { fields, append, remove } = useFieldArray({
+    const { fields, prepend, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: `resource_profiles.${resourcePoolIndex}.resource_list`
@@ -45,7 +50,15 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
         name: "resource_calendars"
     });
 
+    useEffect(() => {
+        if (isRowAdding) {
+            setFocus(`resource_profiles.${resourcePoolIndex}.resource_list.1.name`)
+            setIsRowAdding(false)
+        }
+    }, [fields, isRowAdding])
+
     const onResourceProfileDelete = (index: number) => {
+        // TODO: after deleting, the table is scrolled to the first row (this behavior is not desired)
         if (fields.length === 1) {
             setErrorMessage("At least one resource should be provided")
             return
@@ -68,20 +81,21 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
     };
 
     const onResourceAdd = async () => {
-        const lastItemIndex = fields.length - 1
-        const arePrevResourcesValid = await trigger(`resource_profiles.${resourcePoolIndex}.resource_list.${lastItemIndex}`) // ?? true
+        if ((errors?.length > 0 && errors?.type !== "min") || (errors?.length > 1 && errors?.type === "min")) {
+            setErrorMessage("Verify the correctness of all entered Resource Profiles")
+            return
+        }
 
-        if (!arePrevResourcesValid) return
-
-        append({
+        prepend({
             id: getIdForNewResource(props.poolUuid, fields.slice(-1)),
             name: "",
-            cost_per_hour: "",
-            amount: "",
+            cost_per_hour: 0,
+            amount: 0,
             calendar: Object.keys(calendars)[0]
         })
 
-        // re-validate fields in the parent component only if we already have error about array length
+        setIsRowAdding(true)
+
         if (errors?.type === "min")
             trigger('resource_profiles')
     };
@@ -91,22 +105,24 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
     };
 
     const handleSaveModal = (r: UpdateResourceCalendarRequest) => {
-        const calendar = {
-            ...r.calendar,
-            id: "sid-" + uuid()
-        }
+        let calendarId = ""
+
         if (r.isNew) {
+            const calendar = {
+                ...r.calendar,
+                id: "sid-" + uuid()
+            }
             appendCalendar(calendar)
-            setValue(
-                `resource_profiles.${resourcePoolIndex}.resource_list.${r.resourceListIndex}.calendar`, 
-                calendar.id,
-                { shouldDirty: true })
+            calendarId = calendar.id
         } else {
-            setValue(
-                `resource_profiles.${resourcePoolIndex}.resource_list.${r.resourceListIndex}.calendar`,
-                r.calendar.id,
-                { shouldDirty: true })
+            calendarId = r.calendar.id 
         }
+
+        setValue(
+            `resource_profiles.${resourcePoolIndex}.resource_list.${r.resourceListIndex}.calendar`,
+            calendarId,
+            { shouldDirty: true }
+        )
     };
 
     const renderRow = ({ style, index, data }: any) => {
@@ -117,8 +133,22 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
         const costPerHourError = isError && errors?.[index].cost_per_hour
         const amountError = isError && errors?.[index].amount
 
-        return <TableRow key={childrenRow.id} hover style={style}>
-            <TableCell width="40%">
+        const onViewCalendarClick = () => {
+            setDetailModal({
+                poolIndex: resourcePoolIndex,
+                resourceIndex: index,
+                calendarId: getValues(`resource_profiles.${resourcePoolIndex}.resource_list.${index}.calendar`)
+            })
+            setOpenModal(true)
+        }
+
+        return <TableRow key={childrenRow.id} hover style={{ ...style }}>
+            <TableCell width={colWidth[0]} style = {{ 
+                width: colWidth[0],
+                height: "inherit",
+                paddingTop: "0px",
+                paddingBottom: "0px" }}
+            >
                 <Controller
                     name={`resource_profiles.${resourcePoolIndex}.resource_list.${index}.name`}
                     control={formControl}
@@ -134,7 +164,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                     )}
                 />
             </TableCell>
-            <TableCell width="15%">
+            <TableCell width={colWidth[1]}>
                 <Controller
                     name={`resource_profiles.${resourcePoolIndex}.resource_list.${index}.cost_per_hour`}
                     control={formControl}
@@ -154,7 +184,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                     )}
                 />
             </TableCell>
-            <TableCell width="15%">
+            <TableCell width={colWidth[2]}>
                 <Controller
                     name={`resource_profiles.${resourcePoolIndex}.resource_list.${index}.amount`}
                     control={formControl}
@@ -178,36 +208,11 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                     )}
                 />
             </TableCell>
-            <TableCell width="20%">
-                <Controller
-                    name={`resource_profiles.${resourcePoolIndex}.resource_list.${index}.calendar`}
-                    control={formControl}
-                    render={({ field: { value: calendarId} }) => (
-                        <Link
-                            component="button"
-                            type="button"
-                            variant="body2"
-                            onClick={(e) => {
-                                setDetailModal({
-                                    poolIndex: resourcePoolIndex,
-                                    resourceIndex: index,
-                                    calendarId: calendarId
-                                })
-                                setOpenModal(true)
-                            }}
-                        >
-                            <Typography>review</Typography>
-                        </Link>
-                    )}
+            <TableCell width={colWidth[3]}>
+                <ActionsColumn
+                    onViewCalendarClick={onViewCalendarClick}
+                    onDeleteClick={() => onResourceProfileDelete(index)}
                 />
-            </TableCell>
-            <TableCell width="10%">
-                <IconButton
-                    size="small"
-                    onClick={() => onResourceProfileDelete(index)}
-                >
-                    <DeleteIcon />
-                </IconButton>
             </TableCell>
         </TableRow>
     }
@@ -223,11 +228,10 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
             <Table size="small" style={{ width: "90%", height: "35vh", margin: "auto" }}>
                 <TableHead>
                     <TableRow>
-                        <TableCell width="40%">Name</TableCell>
-                        <TableCell width="15%">Cost per hour</TableCell>
-                        <TableCell width="15%">Amount</TableCell>
-                        <TableCell width="20%">Calendar</TableCell>
-                        <TableCell width="10%">Actions</TableCell>
+                        <TableCell width={colWidth[0]}>Name</TableCell>
+                        <TableCell width={colWidth[1]}>Cost per hour</TableCell>
+                        <TableCell width={colWidth[2]}>Amount</TableCell>
+                        <TableCell width={colWidth[3]}>Actions</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -236,7 +240,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                             <FixedSizeList
                                 width={width}
                                 height={height}
-                                itemSize={65}
+                                itemSize={80}
                                 itemCount={fields.length}
                                 itemData={fields}
                                 itemKey={(i: number) => fields[i].key}

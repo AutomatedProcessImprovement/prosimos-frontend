@@ -37,8 +37,8 @@ export const defaultResourceProfiles = (calendarUuid: string) => {
         resource_list: [{
             id: resourceProfileId + "_1",
             name: "Default resource profile 1",
-            cost_per_hour: "0",
-            amount: "1",
+            cost_per_hour: 0,
+            amount: 1,
             calendar: calendarUuid,
             assignedTasks: []
         } as ResourceInfo] as ResourceInfo[]

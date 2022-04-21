@@ -26,8 +26,8 @@ export interface ResourcePool {
 export interface ResourceInfo {
     id: string,
     name: string,
-    cost_per_hour: string
-    amount: string
+    cost_per_hour: number
+    amount: number
     calendar: string
     assignedTasks: string []
 }

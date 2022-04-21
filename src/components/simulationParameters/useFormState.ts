@@ -18,7 +18,7 @@ const taskValidationSchema = yup.object().shape({
                         yup.object().shape({
                             id: yup.string(),
                             name: yup.string().required(REQUIRED_ERROR_MSG),
-                            cost_per_hour: yup.string().required(REQUIRED_ERROR_MSG),
+                            cost_per_hour: yup.number().required(REQUIRED_ERROR_MSG),
                             amount: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG),
                             calendar: yup.string().required(REQUIRED_ERROR_MSG),
                             assignedTasks: yup.array()
@@ -87,7 +87,7 @@ const taskValidationSchema = yup.object().shape({
                                         value: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG)
                                     })
                                 )
-                                .min(2, "At least two required parameters should be provided")
+                                // .min(2, "At least two required parameters should be provided")
                         })
                     )
                     .min(1, MIN_LENGTH_REQUIRED_MSG("allocated resource"))

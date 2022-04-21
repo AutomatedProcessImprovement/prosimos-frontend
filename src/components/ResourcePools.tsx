@@ -18,6 +18,8 @@ import { VariableSizeList } from "react-window";
 const ROW_HEIGHT = 80;
 const OPEN_ROW_HEIGHT = 5.5 * ROW_HEIGHT;
 
+const colWidth = [ "10%", "70%", "20%", "10%"]
+
 const removeArrayElemByIndex = (index: number, arr: any []) => {
     const copyArray = [...arr]
     for (var i = 0; i < copyArray.length; i++) { 
@@ -98,7 +100,7 @@ const Row = (props: RowProps) => {
         <React.Fragment>
             <TableRow style={{ ...props.style }} >
             <TableRow hover style={getHeightForRow()}>
-                <TableCell style={{ width: "10%" }}>
+                <TableCell style={{ width: colWidth[0] }}>
                     <IconButton
                         size="small"
                         onClick={onOpenRow}
@@ -106,7 +108,7 @@ const Row = (props: RowProps) => {
                         {props.rowOpenState ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                     </IconButton>
                 </TableCell>
-                <TableCell style={{ width: "70%" }}>
+                <TableCell style={{ width: colWidth[1] }}>
                     <Controller
                         name={`resource_profiles.${resourcePoolIndex}.name`}
                         control={formControl}
@@ -126,10 +128,10 @@ const Row = (props: RowProps) => {
                         }}
                     />
                 </TableCell>
-                <TableCell style={{ width: "20%" }}>
+                <TableCell style={{ width: colWidth[2] }}>
                     {resourceListCount}
                 </TableCell>
-                <TableCell style={{ width: "10%" }}>
+                <TableCell style={{ width: colWidth[3] }}>
                     <IconButton
                         size="small"
                         onClick={() => onResourcePoolDelete(resourcePoolIndex)}
@@ -291,10 +293,10 @@ const ResourcePools = (props: ResourcePoolsProps) => {
                 <Table style={{ width: "100%", height: "100%" }}>
                     <TableHead>
                         <TableRow>
-                            <TableCell style={{ width: "10%" }}></TableCell>
-                            <TableCell style={{ width: "70%" }}>Resource Profile</TableCell>
-                            <TableCell style={{ width: "20%" }}>Amount</TableCell>
-                            <TableCell style={{ width: "10%" }}>Actions</TableCell>
+                            <TableCell style={{ width: colWidth[0] }}></TableCell>
+                            <TableCell style={{ width: colWidth[1] }}>Resource Profile</TableCell>
+                            <TableCell style={{ width: colWidth[2] }}>Amount</TableCell>
+                            <TableCell style={{ width: colWidth[3] }}>Actions</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
