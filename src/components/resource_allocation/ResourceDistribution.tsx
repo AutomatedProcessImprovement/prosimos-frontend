@@ -12,6 +12,7 @@ interface ResourceDistributionProps {
     resourceIndex: number
     allowedResources: { [key: string]: { name: string } }
     setErrorMessage: (value: string) => void
+    onResourceAllocationDelete: (index: number) => void
 }
 
 const ResourceDistribution = (props: ResourceDistributionProps) => {
@@ -22,6 +23,10 @@ const ResourceDistribution = (props: ResourceDistributionProps) => {
     const distrErrors = {
         distribution_name: currentErrors?.distribution_name,
         distribution_params: currentErrors?.distribution_params
+    }
+
+    const onDelete = () => {
+        props.onResourceAllocationDelete(resourceIndex)
     }
 
     return (
@@ -37,7 +42,7 @@ const ResourceDistribution = (props: ResourceDistributionProps) => {
                     />
                 </Grid>
                 <Grid item xs={1}>
-                    <IconButton component="span" onClick={() => { console.log("hello") }}>
+                    <IconButton component="span" onClick={onDelete}>
                         <DeleteIcon />
                     </IconButton>
                 </Grid>

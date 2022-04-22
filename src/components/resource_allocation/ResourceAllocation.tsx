@@ -35,7 +35,7 @@ const Row = (props: RowProps) => {
 
     const rowErrors = errors?.task_resource_distribution?.[allocationIndex]?.resources as any
 
-    const { fields, append } = useFieldArray({
+    const { fields, append, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: `${TASK_RESOURCE_DISTR}.${allocationIndex}.resources`
@@ -56,14 +56,28 @@ const Row = (props: RowProps) => {
             return
         }
 
-        const arePrevResourcesValid = await trigger(`task_resource_distribution.${allocationIndex}.resources`)
-        if (!arePrevResourcesValid) {
+        await trigger(`task_resource_distribution.${allocationIndex}.resources`)
+        const rowResourcesErrors = errors?.task_resource_distribution?.[allocationIndex]?.resources
+
+        if (rowResourcesErrors !== undefined && rowResourcesErrors.length > 0) {
             setErrorMessage("Verify the correctness of all entered Resource Allocations")
             return
         }
         
         append(defaultResourceAllocationDist)
         setIsRowAdded(true)
+        if ((rowResourcesErrors as any)?.type === "min") {
+            await trigger(`task_resource_distribution.${allocationIndex}.resources`)
+        }
+    }
+
+    const onResourceAllocationDelete = (index: number) => {
+        if (fields.length === 1) {
+            setErrorMessage("At least one resource allocation for the task should be provided")
+            return
+        }
+        
+        remove(index)
     }
 
     const renderRow = ({ index, key, style }: any) => {
@@ -78,6 +92,7 @@ const Row = (props: RowProps) => {
                     resourceIndex={index}
                     allowedResources={allowedResources}
                     setErrorMessage={setErrorMessage}
+                    onResourceAllocationDelete={onResourceAllocationDelete}
                 />
             </Grid>
         )
