@@ -1,14 +1,15 @@
 import { Box, Collapse, Grid, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { JsonData, ResourceMap, ResourcePool } from "../formData";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import ResourceDistribution from "./ResourceDistribution";
 import { AllModelTasks } from "../modelData";
-import AddButtonBase from "../toolbar/AddButtonBase";
 import { defaultResourceAllocationDist } from "../simulationParameters/defaultValues";
 import { FormHelperText } from '@mui/material';
+import { AutoSizer, List } from "react-virtualized";
+import AddButtonToolbar from "../toolbar/AddButtonToolbar"
 
 const TASK_RESOURCE_DISTR = "task_resource_distribution"
 interface ResourceAllocationProps {
@@ -29,6 +30,8 @@ const Row = (props: RowProps) => {
     const { allocationIndex, taskName, allowedResources, setErrorMessage } = props
     const { formState: { control: formControl, trigger, formState: { errors }} } = props
     const [openModule, setOpenModule] = useState(false)
+    const [isRowAdded, setIsRowAdded] = useState(false)
+    const listRef = useRef<List>(null)
 
     const rowErrors = errors?.task_resource_distribution?.[allocationIndex]?.resources as any
 
@@ -38,15 +41,55 @@ const Row = (props: RowProps) => {
         name: `${TASK_RESOURCE_DISTR}.${allocationIndex}.resources`
     })
 
-    const onResourceAllocationAdd = () => {
+    useEffect(() => {
+        if (isRowAdded) {
+            if (listRef.current) {
+                listRef.current.scrollToRow(fields.length)
+            }
+            setIsRowAdded(false)
+        }
+    }, [fields, isRowAdded]);
+
+    const onResourceAllocationAdd = async () => {
         if (!allowedResources || Object.keys(allowedResources).length === 0) {
             setErrorMessage("Provide resource profiles before proceeding")
             return
         }
+
+        const arePrevResourcesValid = await trigger(`task_resource_distribution.${allocationIndex}.resources`)
+        if (!arePrevResourcesValid) {
+            setErrorMessage("Verify the correctness of all entered Resource Allocations")
+            return
+        }
         
         append(defaultResourceAllocationDist)
-        trigger(`${TASK_RESOURCE_DISTR}.${allocationIndex}.resources`)
+        setIsRowAdded(true)
     }
+
+    const renderRow = ({ index, key, style }: any) => {
+        const resourceDistr = fields[index]
+
+        return (
+            <Grid item xs={12} key={`resource_distr_${allocationIndex}_${index}`} style={{ ...style, padding: "10px"}}>
+                <ResourceDistribution
+                    formState={props.formState}
+                    resourceDistr={resourceDistr}
+                    allocationIndex={allocationIndex}
+                    resourceIndex={index}
+                    allowedResources={allowedResources}
+                    setErrorMessage={setErrorMessage}
+                />
+            </Grid>
+        )
+    };
+
+    const getHeightForCollapseRow = useMemo(() => {
+        if (fields.length <= 1) {
+            return { minHeight: "30vh" }
+        } else {
+            return { minHeight: "40vh" }
+        }
+    }, [fields])
 
     return (
         <React.Fragment>
@@ -75,27 +118,26 @@ const Row = (props: RowProps) => {
                     <Collapse in={openModule} timeout="auto" unmountOnExit>
                         <Box margin={1}>
                             <Grid container spacing={2}>
-                                {fields.map((resourceDistr, index) => (
-                                    <Grid item xs={12} key={`resource_distr_${allocationIndex}_${index}`}>
-                                        <ResourceDistribution
-                                            formState={props.formState}
-                                            resourceDistr={resourceDistr}
-                                            allocationIndex={allocationIndex}
-                                            resourceIndex={index}
-                                            allowedResources={allowedResources}
-                                            setErrorMessage={setErrorMessage}
-                                        />
-                                    </Grid>
-                                ))}
-                                <Grid item xs={12}>
-                                    <Paper elevation={5} sx={{ p: 2 }}>
-                                        <Grid>
-                                            <AddButtonBase
-                                                labelName="Add a new resource allocation"
-                                                onClick={onResourceAllocationAdd}
+                                <Grid item xs={12} style={getHeightForCollapseRow}>
+                                    <AutoSizer>
+                                        {({ width, height }) => {
+                                            return <List
+                                                ref={listRef}
+                                                width={width}
+                                                height={height}
+                                                rowHeight={220}
+                                                rowRenderer={renderRow}
+                                                rowCount={fields.length}
+                                                overscanRowCount={2}
                                             />
-                                        </Grid>
-                                    </Paper>
+                                        }}
+                                    </AutoSizer>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <AddButtonToolbar
+                                        labelName="Add a new resource allocation"
+                                        onClick={onResourceAllocationAdd}
+                                    />
                                 </Grid>
                             </Grid>
                         </Box>
