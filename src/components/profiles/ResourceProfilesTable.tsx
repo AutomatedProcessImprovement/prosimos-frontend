@@ -90,7 +90,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
             id: getIdForNewResource(props.poolUuid, fields.slice(-1)),
             name: "",
             cost_per_hour: 0,
-            amount: 0,
+            amount: 1,
             calendar: Object.keys(calendars)[0]
         })
 

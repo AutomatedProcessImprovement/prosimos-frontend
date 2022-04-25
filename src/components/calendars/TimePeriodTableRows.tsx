@@ -1,16 +1,17 @@
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form"
-import { TableRow, TableCell, IconButton, Checkbox, TextField } from "@mui/material"
-import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
+import { TableRow, TableCell, Checkbox, TextField } from "@mui/material"
 import WeekdaySelect from "./WeekdaySelect"
 import TimePickerController from "./TimePickerController"
 import { JsonData } from "../formData"
-
+import { colWidth } from "../ResourceCalendars"
+import TimePeriodActionsColumn from "./TimePeriodActionsColumn"
 interface TimePeriodTableRowsProps {
     formState: UseFormReturn<JsonData, object>
     index: number,
     isItemSelected: boolean
     handleClick: (name: string) => void
+    style: any
+    updateRowSizes: (index: number, timePeriodsCount: number) => void
 }
 
 const defaultTimePeriod = {
@@ -34,13 +35,15 @@ const TimePeriodTableRows = (props: TimePeriodTableRowsProps) => {
 
     const onTimePeriodAdd = () => {
         append(defaultTimePeriod)
+        props.updateRowSizes(index, timePeriodsFields.length + 1)
     }
 
-    const onTimePeriodDelete = (index: number) => {
-        remove(index)
+    const onTimePeriodDelete = (index: number, tpIndex: number) => {
+        remove(tpIndex)
+        props.updateRowSizes(index, timePeriodsFields.length - 1)
     }
 
-    return <>
+    return <TableRow style={props.style}>
         {timePeriodsFields.map((timePeriod, tpIndex) => {
             const isOnlyOneRow = timePeriodsFields.length === 1
             const isLastRow = (timePeriodsFields.length-1) === tpIndex
@@ -55,21 +58,22 @@ const TimePeriodTableRows = (props: TimePeriodTableRowsProps) => {
                 tabIndex={-1}
                 selected={isItemSelected}
             >
-                <TableCell padding="checkbox">
+                <TableCell width={colWidth[0]} padding="checkbox">
                     {isFirstRow && <Checkbox
                         color="primary"
                         checked={props.isItemSelected}
                         onChange={() => handleClick(currCalendar.id)}
                     />}
                 </TableCell>
-                <TableCell width="20%">
+                <TableCell width={colWidth[1]}>
                     {isFirstRow &&
                         <Controller
                             name={`resource_calendars.${index}.name`}
                             control={formControl}
-                            render={({ field }) => (
+                            render={({ field: { ref, ...others } }) => (
                                 <TextField
-                                    {...field}
+                                    {...others}
+                                    inputRef={ref}
                                     error={calErrors?.name !== undefined}
                                     helperText={calErrors?.name?.message || ""}
                                     variant="standard"
@@ -79,7 +83,7 @@ const TimePeriodTableRows = (props: TimePeriodTableRowsProps) => {
                         />
                     }
                 </TableCell>
-                <TableCell width="19%">
+                <TableCell width={colWidth[2]}>
                     <Controller
                         name={`resource_calendars.${index}.time_periods.${tpIndex}.from`}
                         control={formControl}
@@ -91,7 +95,7 @@ const TimePeriodTableRows = (props: TimePeriodTableRowsProps) => {
                         )}
                     />
                 </TableCell>
-                <TableCell width="19%">
+                <TableCell width={colWidth[3]}>
                     <Controller
                         name={`resource_calendars.${index}.time_periods.${tpIndex}.to`}
                         control={formControl}
@@ -103,41 +107,33 @@ const TimePeriodTableRows = (props: TimePeriodTableRowsProps) => {
                         )}
                     />
                 </TableCell>
-                <TableCell width="19%">
+                <TableCell width={colWidth[4]}>
                     <TimePickerController
                         name={`resource_calendars.${index}.time_periods.${tpIndex}.beginTime` as unknown as keyof JsonData}
                         formState={props.formState}
                         fieldError={currErrors?.beginTime}
                     />
                 </TableCell>
-                <TableCell width="19%">
+                <TableCell width={colWidth[5]}>
                     <TimePickerController
                         name={`resource_calendars.${index}.time_periods.${tpIndex}.endTime` as unknown as keyof JsonData}
                         formState={props.formState}
                         fieldError={currErrors?.endTime}
                     />
                 </TableCell>
-                <TableCell width="4%">
-                    {!isOnlyOneRow && <IconButton
-                        size="small"
-                        onClick={() => onTimePeriodDelete(tpIndex)}
-                    >
-                        <DeleteIcon />
-                    </IconButton>
-                    }
-                </TableCell>
-                <TableCell width="4%">
-                    {isLastRow && <IconButton
-                        size="small"
-                        onClick={onTimePeriodAdd}
-                    >
-                        <AddIcon />
-                    </IconButton>
-                    }
+                <TableCell width={colWidth[6]}>
+                    <TimePeriodActionsColumn
+                        isOnlyOneRow={isOnlyOneRow}
+                        isLastRow={isLastRow}
+                        index={index}
+                        tpIndex={tpIndex}
+                        onTimePeriodDelete={onTimePeriodDelete}
+                        onTimePeriodAdd={onTimePeriodAdd}
+                    />
                 </TableCell>
             </TableRow>
         })}
-    </>
+    </TableRow>
 }
 
 export default TimePeriodTableRows;

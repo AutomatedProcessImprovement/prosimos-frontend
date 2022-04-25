@@ -116,8 +116,8 @@ const Row = (props: RowProps) => {
                         render={({ field: { ref, ...others } }) => {
                             return (
                                 <TextField
-                                    inputRef={ref}
                                     {...others}
+                                    inputRef={ref}
                                     style={{ width: "100%" }}
                                     error={areAnyErrors}
                                     helperText={errorMessage}
