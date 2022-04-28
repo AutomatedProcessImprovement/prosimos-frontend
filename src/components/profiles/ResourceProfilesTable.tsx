@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { v4 as uuid } from "uuid";
 import { Table, TableHead, TableRow, TableCell, TableBody, TextField, Toolbar } from "@mui/material";
 
 import AddButtonToolbar from "../toolbar/AddButtonToolbar";
-import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
+import { Controller, useFieldArray, UseFormReturn, useWatch } from "react-hook-form";
 import { CalendarMap, JsonData, ResourceCalendar } from "../formData";
 import ModifyCalendarDialog, { ModalInfo } from "./ModifyCalendarDialog";
 import { AutoSizer } from "react-virtualized";
 import { FixedSizeList } from "react-window";
 import ActionsColumn from "./ActionsColumn";
+import ResourceProfilesTableRow, { ResourceProfilesTableRowProps } from "./ResourceProfilesTableRow";
 
 const colWidth = ["55%", "15%", "15%", "15%"]
 
@@ -25,19 +26,19 @@ interface ResourceProfilesTableProps {
     errors: any
     calendars: CalendarMap
     setErrorMessage: (value: string) => void
-    onResourceListCountChange: () => void
+    onResourceListCountChange: (count: number) => void
 }
 
 const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
     const [openModal, setOpenModal] = useState<boolean>(false)
     const [detailModal, setDetailModal] = useState<ModalInfo>()
     const [isRowAdding, setIsRowAdding] = useState<boolean>(false)
-    
-    const { 
+
+    const {
         formState: { control: formControl, trigger, setValue, getValues, setFocus },
         resourcePoolIndex, calendars, errors, setErrorMessage
     } = props
-
+    
     const { fields, prepend, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
@@ -64,8 +65,9 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
             return
         }
 
+        const removedAmount = -fields[index].amount
         remove(index)
-        props.onResourceListCountChange()
+        props.onResourceListCountChange(removedAmount)
     };
 
     const getIdForNewResource = (poolUuid: string, lastElem: any) => {
@@ -115,7 +117,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
             appendCalendar(calendar)
             calendarId = calendar.id
         } else {
-            calendarId = r.calendar.id 
+            calendarId = r.calendar.id
         }
 
         setValue(
@@ -125,96 +127,13 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
         )
     };
 
-    const renderRow = ({ style, index, data }: any) => {
-        const childrenRow = fields[index]
-
-        const isError = errors?.[index]
-        const nameError = isError && errors?.[index].name
-        const costPerHourError = isError && errors?.[index].cost_per_hour
-        const amountError = isError && errors?.[index].amount
-
-        const onViewCalendarClick = () => {
-            setDetailModal({
-                poolIndex: resourcePoolIndex,
-                resourceIndex: index,
-                calendarId: getValues(`resource_profiles.${resourcePoolIndex}.resource_list.${index}.calendar`)
-            })
-            setOpenModal(true)
-        }
-
-        return <TableRow key={childrenRow.id} hover style={{ ...style }}>
-            <TableCell width={colWidth[0]} style = {{ 
-                width: colWidth[0],
-                height: "inherit",
-                paddingTop: "0px",
-                paddingBottom: "0px" }}
-            >
-                <Controller
-                    name={`resource_profiles.${resourcePoolIndex}.resource_list.${index}.name`}
-                    control={formControl}
-                    render={({ field }) => (
-                        <TextField
-                            {...field}
-                            style={{ width: "100%" }}
-                            error={nameError !== undefined}
-                            helperText={nameError?.message || ""}
-                            variant="standard"
-                            placeholder="Resource Name"
-                        />
-                    )}
-                />
-            </TableCell>
-            <TableCell width={colWidth[1]}>
-                <Controller
-                    name={`resource_profiles.${resourcePoolIndex}.resource_list.${index}.cost_per_hour`}
-                    control={formControl}
-                    render={({ field }) => (
-                        <TextField
-                            {...field}
-                            type="number"
-                            error={costPerHourError !== undefined}
-                            helperText={costPerHourError?.message || ""}
-                            variant="standard"
-                            inputProps={{
-                                min: 0
-                            }}
-                            style={{ width: "100%" }}
-                            placeholder="Cost"
-                        />
-                    )}
-                />
-            </TableCell>
-            <TableCell width={colWidth[2]}>
-                <Controller
-                    name={`resource_profiles.${resourcePoolIndex}.resource_list.${index}.amount`}
-                    control={formControl}
-                    render={({ field: { onChange, ...others }}) => (
-                        <TextField
-                            {...others}
-                            onChange={(e) => {
-                                onChange(e)
-                                props.onResourceListCountChange()
-                            }}
-                            type="number"
-                            error={amountError !== undefined}
-                            helperText={amountError?.message || ""}
-                            variant="standard"
-                            inputProps={{
-                                min: 0
-                            }}
-                            style={{ width: "100%" }}
-                            placeholder="Amount"
-                        />
-                    )}
-                />
-            </TableCell>
-            <TableCell width={colWidth[3]}>
-                <ActionsColumn
-                    onViewCalendarClick={onViewCalendarClick}
-                    onDeleteClick={() => onResourceProfileDelete(index)}
-                />
-            </TableCell>
-        </TableRow>
+    const onViewCalendarClick = (resourcePoolIndex: number, index: number) => {
+        setDetailModal({
+            poolIndex: resourcePoolIndex,
+            resourceIndex: index,
+            calendarId: getValues(`resource_profiles.${resourcePoolIndex}.resource_list.${index}.calendar`)
+        })
+        setOpenModal(true)
     }
 
     return (
@@ -246,7 +165,18 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                                 itemKey={(i: number) => fields[i].key}
                                 overscanCount={2}
                             >
-                                {renderRow}
+                                {({ style, index, data }: any) => (
+                                    <ResourceProfilesTableRow
+                                        index={index}
+                                        resourcePoolIndex={resourcePoolIndex}
+                                        style={style}
+                                        formState={props.formState}
+                                        errors={errors}
+                                        onResourceListCountChange={props.onResourceListCountChange}
+                                        onResourceProfileDelete={onResourceProfileDelete}
+                                        onViewCalendarClick={onViewCalendarClick}
+                                    />
+                                )}
                             </FixedSizeList>
                         )}
                     </AutoSizer>

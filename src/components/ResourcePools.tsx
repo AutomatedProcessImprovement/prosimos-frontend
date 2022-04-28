@@ -78,10 +78,9 @@ const Row = (props: RowProps) => {
         setResourceListCount(count)
     }, [getValues, resourcePoolIndex]);
 
-    const onResourceListCountChange = () => {
-        const resourceListValues = getValues(`resource_profiles.${resourcePoolIndex}.resource_list`)
-        const count = getResourceCount(resourceListValues)
-        setResourceListCount(count)
+    const onResourceListCountChange = (changedCount: number) => {
+        const newCount = resourceListCount + changedCount
+        setResourceListCount(newCount)
     };
 
     const onOpenRow = () => {
@@ -145,6 +144,7 @@ const Row = (props: RowProps) => {
                     <Collapse in={props.rowOpenState} timeout="auto" unmountOnExit>
                         <Box margin={1} height={"45vh"}>
                             {resourceTypeUid && <ResourceProfilesTable
+                                key={`resource_profile_table_${resourcePoolIndex}`}
                                 resourcePoolIndex={resourcePoolIndex}
                                 poolUuid={resourceTypeUid}
                                 formState={props.formState}
