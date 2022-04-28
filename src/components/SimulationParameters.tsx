@@ -11,7 +11,7 @@ import ResourceCalendars from './ResourceCalendars';
 import ArrivalTimeDistr from './ArrivalTimeDistr';
 import ResourceAllocation from './resource_allocation/ResourceAllocation';
 import BPMNModelViewer from './model/BPMNModelViewer';
-import ScenarioSpecification from './scenario_specification.tsx/ScenarioSpecification';
+import ScenarioSpecification from './scenarioSpecification/ScenarioSpecification';
 import paths from '../router/paths';
 import useBpmnFile from './simulationParameters/useBpmnFile';
 import useJsonFile from './simulationParameters/useJsonFile';

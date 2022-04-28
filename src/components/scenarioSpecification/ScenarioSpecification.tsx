@@ -29,7 +29,8 @@ const ScenarioSpecification = (props: ScenarioSpecificationProps) => {
                                 onChange(Number(e.target.value))
                             }}
                             inputProps={{
-                                step: "0.1"
+                                step: "1",
+                                min: "1"
                             }}
                             error={errors?.num_processes !== undefined}
                             helperText={errors?.num_processes?.message || ""}
