@@ -56,7 +56,13 @@ function TabPanel(props: TabPanelProps) {
             )}
         </div>
     );
-}
+};
+
+const fromContentToBlob = (values: any) => {
+    const content = JSON.stringify(values)
+    const blob = new Blob([content], { type: "text/plain" })
+    return blob
+};
 
 const SimulationParameters = () => {
     const navigate = useNavigate()
@@ -106,10 +112,12 @@ const SimulationParameters = () => {
     }, [fileDownloadUrl]);
 
     const onSubmit = (data: JsonData) => {
+        const newJsonFile = fromContentToBlob(getValues())
+        
         const { num_processes, start_date } = getScenarioValues()
         const formData = new FormData()
         formData.append("xmlFile", bpmnFile as Blob)
-        formData.append("jsonFile", jsonFile as Blob)
+        formData.append("jsonFile", newJsonFile as Blob)
         formData.append("startDate", start_date)
         formData.append("numProcesses", num_processes.toString())
 
@@ -130,8 +138,7 @@ const SimulationParameters = () => {
     };
 
     const onDownload = () => {
-        const content = JSON.stringify(getValues())
-        const blob = new Blob([content], { type: "text/plain" })
+        const blob = fromContentToBlob(getValues())
         const fileDownloadUrl = URL.createObjectURL(blob);
         setFileDownloadUrl(fileDownloadUrl)
     };

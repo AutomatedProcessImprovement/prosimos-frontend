@@ -7,6 +7,7 @@ import paths from "./paths";
 const AppRouter = () => {
     return (
         <Routes>
+            <Route path={"/"} element={<Upload/>} />
             <Route path={paths.SIMULATOR_UPLOAD_PATH} element={<Upload/>} />
             <Route path={paths.SIMULATOR_PARAMS_PATH} element={<SimulationParameters/>} />
             <Route path={paths.SIMULATOR_RESULTS_PATH} element={<SimulationResults/>}/>
