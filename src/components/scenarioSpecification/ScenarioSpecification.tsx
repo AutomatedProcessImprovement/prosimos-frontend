@@ -30,7 +30,8 @@ const ScenarioSpecification = (props: ScenarioSpecificationProps) => {
                             }}
                             inputProps={{
                                 step: "1",
-                                min: "1"
+                                min: "1",
+                                pattern: '[0-9]'
                             }}
                             error={errors?.num_processes !== undefined}
                             helperText={errors?.num_processes?.message || ""}

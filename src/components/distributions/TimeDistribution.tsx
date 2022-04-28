@@ -73,7 +73,7 @@ const TimeDistribution = (props: TimeDistributionProps) => {
                     }
 
                     return (
-                        <Grid item xs={2} key={`arrival_distr_params_${paramIndex}`}>
+                        <Grid item xs={3} key={`arrival_distr_params_${paramIndex}`}>
                             <Controller
                                 name={`${objectNamePath}.distribution_params.${paramIndex}.value` as unknown as keyof JsonData}
                                 control={formControl}
@@ -89,7 +89,8 @@ const TimeDistribution = (props: TimeDistributionProps) => {
                                             onChange(Number(e.target.value))
                                         }}
                                         inputProps={{
-                                            step: "0.1"
+                                            step: "any",
+                                            min: "0.0"
                                         }}
                                         error={errors?.value !== undefined}
                                         helperText={errors?.value?.message || ""}
