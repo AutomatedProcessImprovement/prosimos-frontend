@@ -46,8 +46,10 @@ export const defaultResourceProfiles = (calendarUuid: string) => {
 }
 
 export const defaultArrivalTimeDistribution = {
-    distribution_name: "",
+    distribution_name: "norm",
     distribution_params: [
+        { value: 0 },
+        { value: 0 },
         { value: 0 },
         { value: 0 }
     ]
@@ -63,10 +65,6 @@ export const defaultArrivalCalendar = {
 export const defaultArrivalCalendarArr = [defaultArrivalCalendar] as TimePeriod[]
 
 export const defaultResourceAllocationDist = {
-    distribution_name: "norm",
-    distribution_params: [
-        { value: 0 },
-        { value: 0 }
-    ],
+    ...defaultArrivalTimeDistribution,
     resource_id: ""
 } as ProbabilityDistributionForResource

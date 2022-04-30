@@ -5,13 +5,18 @@ import { REQUIRED_ERROR_MSG } from "../validationMessages";
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove';
 import GridItemWithCenteredIcon from "./GridItemWithCenteredIcon";
+import DistrFuncSelect from "./DistrFuncSelect";
+import { DISTR_FUNC } from "./DistrFuncSelect"
 
-type AllowedName = "arrival_time_distribution.distribution_params" 
+type AllowedObjectName = "arrival_time_distribution" 
+    | `task_resource_distribution.${number}.resources.${number}`
+
+type AllowedDistrParamsName = "arrival_time_distribution.distribution_params" 
     | `task_resource_distribution.${number}.resources.${number}.distribution_params`
 
 interface TimeDistributionProps {
     formState: UseFormReturn<JsonData, object>
-    objectNamePath: string
+    objectNamePath: AllowedObjectName
     errors?: {
         distribution_name?: FieldError
         distribution_params?: { value?: FieldError }[]
@@ -19,13 +24,24 @@ interface TimeDistributionProps {
     setErrorMessage: (value: string) => void
 }
 
+const distrFuncWithNumOfParams: { [key in DISTR_FUNC]: any [] } = {
+    [DISTR_FUNC.fix]: [0,0,1],
+    [DISTR_FUNC.norm]: new Array(2+2).fill(0),
+    [DISTR_FUNC.expon]: new Array(2+2).fill(0),
+    [DISTR_FUNC.exponnorm]: new Array(2+2).fill(0),
+    [DISTR_FUNC.uniform]: new Array(2+2).fill(0),
+    [DISTR_FUNC.gamma]: new Array(3+2).fill(0),
+    [DISTR_FUNC.triang]: new Array(3+2).fill(0),
+    [DISTR_FUNC.lognorm]: new Array(3+2).fill(0)
+}
+
 const TimeDistribution = (props: TimeDistributionProps) => {
-    const { control: formControl } = props.formState
+    const { control: formControl, setValue } = props.formState
     const { objectNamePath, errors: distrErrors } = props
-    const { fields, append, remove } = useFieldArray({
+    const { fields, append, remove, replace } = useFieldArray({
         keyName: 'key',
         control: formControl,
-        name: `${objectNamePath}.distribution_params` as AllowedName
+        name: `${objectNamePath}.distribution_params` as AllowedDistrParamsName
     })
     
     const onDistrFuncParamAdd = () => append({ value: 0 })
@@ -39,7 +55,15 @@ const TimeDistribution = (props: TimeDistributionProps) => {
 
         const lastIndex = fieldsLength - 1
         remove(lastIndex)
-    }
+    };
+
+    const updateParamsNum = (newDistrFunc: DISTR_FUNC) => {
+        const newDefaultParams = distrFuncWithNumOfParams[newDistrFunc]
+        replace(newDefaultParams)
+        newDefaultParams.forEach((item, index) => {
+            setValue(`${objectNamePath}.distribution_params.${index}.value`, item)
+        })
+    };
 
     return (
         <Grid container spacing={2}>
@@ -50,14 +74,11 @@ const TimeDistribution = (props: TimeDistributionProps) => {
                         control={formControl}
                         rules={{ required: REQUIRED_ERROR_MSG }}
                         render={({ field }) => (
-                            <TextField
-                                {...field}
-                                sx={{ width: "100%" }}
-                                error={distrErrors?.distribution_name !== undefined}
-                                helperText={distrErrors?.distribution_name?.message}
-                                variant="standard"
-                                placeholder="norm"
-                                label="Distribution function"
+                            <DistrFuncSelect
+                                field={field}
+                                fieldError={distrErrors?.distribution_name}
+                                label="Distribution Function"
+                                updateParamsNum={updateParamsNum}
                             />
                         )}
                     />
@@ -67,21 +88,25 @@ const TimeDistribution = (props: TimeDistributionProps) => {
                 {fields.map((item, paramIndex) => {
                     const errors = distrErrors?.distribution_params?.[paramIndex]
                     let labelName = ""
+                    const length = fields.length
                     switch (paramIndex) {
-                        case 0: labelName = "Mean"; break
-                        case 1: labelName = "Std deviation"; break
+                        // give the name starting from the last element in the array
+                        case (length - 1): labelName = "Max"; break
+                        case (length - 2): labelName = "Min"; break
+                        case (length - 3): labelName = "Scale"; break
+                        case (length - 4): labelName = "Loc"; break
                     }
 
                     return (
-                        <Grid item xs={3} key={`arrival_distr_params_${paramIndex}`}>
+                        <Grid item xs={3} key={`${objectNamePath}_distribution_params_${paramIndex}`}>
                             <Controller
                                 name={`${objectNamePath}.distribution_params.${paramIndex}.value` as unknown as keyof JsonData}
                                 control={formControl}
                                 rules={{ required: REQUIRED_ERROR_MSG }}
                                 render={({ 
                                     field: { onChange, value }
-                                 }) => ( 
-                                    <TextField
+                                 }) => {
+                                    return <TextField
                                         type="number"
                                         value={value}
                                         label={labelName || `Param ${paramIndex+1}`}
@@ -89,14 +114,13 @@ const TimeDistribution = (props: TimeDistributionProps) => {
                                             onChange(Number(e.target.value))
                                         }}
                                         inputProps={{
-                                            step: "any",
-                                            min: "0.0"
+                                            step: "any"
                                         }}
                                         error={errors?.value !== undefined}
                                         helperText={errors?.value?.message || ""}
                                         variant="standard"
                                     />
-                                )}
+                                }}
                             />
                         </Grid>
                     )

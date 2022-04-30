@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, FormControlLabel, Grid, Paper, Radio, RadioGroup, Typography } from "@mui/material";
+import { FormControlLabel, Grid, Paper, Radio, RadioGroup, Typography } from "@mui/material";
 import FileUploader from './FileUploader';
 import { useNavigate } from 'react-router-dom';
 import paths from '../router/paths'
