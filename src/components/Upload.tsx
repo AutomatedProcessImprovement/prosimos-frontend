@@ -95,8 +95,10 @@ const Upload = () => {
                 })
             }))
             .catch((error: any) => {
+                setLoading(false)
                 console.log(error.response)
-                setErrorMessage(error.response.data.displayMessage)
+                console.log(error?.response?.data?.displayMessage)
+                setErrorMessage(error.response.data.displayMessage || "Something went wrong")
             })
         } else {
             navigate(paths.SIMULATOR_PARAMS_PATH, {
