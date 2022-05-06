@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { v4 as uuid } from "uuid";
-import { Table, TableHead, TableRow, TableCell, TableBody, TextField, Toolbar } from "@mui/material";
+import { Table, TableHead, TableRow, TableCell, TableBody, Toolbar } from "@mui/material";
 
 import AddButtonToolbar from "../toolbar/AddButtonToolbar";
-import { Controller, useFieldArray, UseFormReturn, useWatch } from "react-hook-form";
+import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { CalendarMap, JsonData, ResourceCalendar } from "../formData";
 import ModifyCalendarDialog, { ModalInfo } from "./ModifyCalendarDialog";
 import { AutoSizer } from "react-virtualized";
 import { FixedSizeList } from "react-window";
-import ActionsColumn from "./ActionsColumn";
-import ResourceProfilesTableRow, { ResourceProfilesTableRowProps } from "./ResourceProfilesTableRow";
+import ResourceProfilesTableRow from "./ResourceProfilesTableRow";
 
-const colWidth = ["55%", "15%", "15%", "15%"]
+export const colWidth = ["55%", "15%", "15%", "15%"]
 
 export interface UpdateResourceCalendarRequest {
     isNew: boolean

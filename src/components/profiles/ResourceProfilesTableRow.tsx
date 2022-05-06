@@ -1,8 +1,8 @@
 import { TableRow, TableCell, TextField } from "@mui/material";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { JsonData } from "../formData";
-import { colWidth } from "../ResourceCalendars";
 import ActionsColumn from "./ActionsColumn";
+import { colWidth } from "./ResourceProfilesTable";
 
 export interface ResourceProfilesTableRowProps {
     index: number
@@ -33,8 +33,7 @@ const ResourceProfilesTableRow = (props: ResourceProfilesTableRowProps) => {
     const amountError = isError && errors?.[index].amount
 
     return <TableRow key={`table_row_${resourcePoolIndex}_${index}`} hover style={{ ...style }}>
-        <TableCell width={colWidth[0]} style = {{ 
-            width: colWidth[0],
+        <TableCell width={colWidth[0]} style = {{
             height: "inherit",
             paddingTop: "0px",
             paddingBottom: "0px" }}
