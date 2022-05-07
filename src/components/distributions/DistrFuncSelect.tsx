@@ -2,7 +2,7 @@ import React from "react";
 import { MenuItem, TextField } from "@mui/material";
 import { ControllerRenderProps, FieldError } from "react-hook-form";
 
-interface WeekdaySelectProps<FieldValues>{
+interface DistrFuncSelectProps<FieldValues>{
     field: ControllerRenderProps<FieldValues, any>,
     label?: string
     fieldError?: FieldError
@@ -21,8 +21,8 @@ export enum DISTR_FUNC {
 } 
 
 
-const WeekdaySelect = <FieldValues,>(props: WeekdaySelectProps<FieldValues>) => {
-    const { onChange, ...otherProps} = props.field
+const DistrFuncSelect = <FieldValues,>(props: DistrFuncSelectProps<FieldValues>) => {
+    const { onChange, value, ...otherProps} = props.field
     const onDistrFuncChange = (e?: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement> ) => {
         const selectedValue = e?.target.value
         props.updateParamsNum(selectedValue as DISTR_FUNC)
@@ -33,6 +33,7 @@ const WeekdaySelect = <FieldValues,>(props: WeekdaySelectProps<FieldValues>) => 
         <TextField 
             sx={{ width: "100%" }}
             {...otherProps}
+            value={value || DISTR_FUNC.norm.toString()}
             onChange={e => onDistrFuncChange(e)}
             error={props.fieldError !== undefined}
             helperText={props.fieldError?.message}
@@ -40,11 +41,11 @@ const WeekdaySelect = <FieldValues,>(props: WeekdaySelectProps<FieldValues>) => 
             variant="standard"
             select
         >
-            {Object.values(DISTR_FUNC).map((item) => (
-                <MenuItem value={item}>{item}</MenuItem>
+            {Object.values(DISTR_FUNC).map((item, index) => (
+                <MenuItem key={`menu_item_${index}`} value={item}>{item}</MenuItem>
             ))}
         </TextField>
     )
 }
 
-export default WeekdaySelect;
+export default DistrFuncSelect;
