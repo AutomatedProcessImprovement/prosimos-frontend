@@ -12,12 +12,12 @@ enum Source {
     empty,
     existing,
     logs
-} 
+}
 
 const Upload = () => {
-    const [selectedBpmnFile, setSelectedBpmnFile] = useState<File>();
-    const [selectedParamFile, setSelectedParamFile] = useState<File>();
-    const [selectedLogsFile, setSelectedLogsFile] = useState<File>();
+    const [selectedBpmnFile, setSelectedBpmnFile] = useState<File | null>(null);
+    const [selectedParamFile, setSelectedParamFile] = useState<File | null>(null);
+    const [selectedLogsFile, setSelectedLogsFile] = useState<File | null>(null);
     const [simParamsSource, setSimParamsSource] = useState<Source>(Source.empty);
     const [errorMessage, setErrorMessage] = useState("");
     const [loading, setLoading] = useState<boolean>(false);
@@ -27,30 +27,39 @@ const Upload = () => {
     const onJsonFileChange = (file: File) => {
         setSelectedParamFile(file)
         setSimParamsSource(Source.existing)
+
         // clear an alternative option
         if (selectedLogsFile !== undefined) {
-            setSelectedLogsFile(file)
+            setSelectedLogsFile(null)
         }
     };
 
     const onLogFileChange = (file: File) => {
         setSelectedLogsFile(file)
         setSimParamsSource(Source.logs)
+
         // clear an alternative option
         if (selectedParamFile !== undefined) {
-            setSelectedParamFile(file)
+            setSelectedParamFile(null)
         }
     };
 
+    const updateErrorMessage = (text: string) => {
+        setLoading(false)
+        setErrorMessage(text)
+    };
+
+    // validate that selected option and appropriate file selection matches
+    // or that empty option selected (the one that doesn't require file)
     const isNeededFileProvided = () => {
         const isBpmnFileProvided = !!selectedBpmnFile
         let isJsonFileValidInput = false
+
         switch(simParamsSource) {
             case Source.empty:
                 isJsonFileValidInput = true
                 break;
             case Source.existing:
-                // if json file is provided, we treat it as valid
                 isJsonFileValidInput = !!selectedParamFile
                 break;
             case Source.logs:
@@ -59,7 +68,7 @@ const Upload = () => {
         }
 
         if (!isBpmnFileProvided || !isJsonFileValidInput) {
-            setErrorMessage("Please provide the correct selection for the files")
+            updateErrorMessage("Please provide the correct selection for the files")
             return false
         }
 
@@ -95,10 +104,7 @@ const Upload = () => {
                 })
             }))
             .catch((error: any) => {
-                setLoading(false)
-                console.log(error.response)
-                console.log(error?.response?.data?.displayMessage)
-                setErrorMessage(error.response.data.displayMessage || "Something went wrong")
+                updateErrorMessage(error.response.data.displayMessage || "Something went wrong")
             })
         } else {
             navigate(paths.SIMULATOR_PARAMS_PATH, {
@@ -111,29 +117,42 @@ const Upload = () => {
     };
 
     const onSimParamsSourceChange = (event: React.ChangeEvent<HTMLInputElement>, value: string) => {
-        setSimParamsSource(parseInt(value))
+        const newSourceId = parseInt(value)
+        setSimParamsSource(newSourceId)
+
+        // on option change, remove the previously selected files
+        if (Source[newSourceId] === Source[Source.empty]) {
+            setSelectedLogsFile(null)
+            setSelectedParamFile(null)
+        } else if (Source[newSourceId] === Source[Source.logs]) {
+            setSelectedParamFile(null)
+        } else {
+            setSelectedLogsFile(null)
+        }
     };
 
     const onSnackbarClose = () => {
-        setErrorMessage("")
+        updateErrorMessage("")
     };
 
     return (
         <>
-            <Grid container alignItems="center" justifyContent="center" spacing={3} className="UploadContainer">
-                <Grid item xs={12}>
-                    <Typography variant="h6">
-                        Prosimos
-                    </Typography>
+            <Grid container alignItems="center" justifyContent="center" spacing={4} style={{ paddingTop: '10px' }} className="uploadContainer">
+                <Grid item xs={9}>
+                    <Grid item>
+                        <Typography variant="subtitle1">
+                            To run a simulation, upload a process model and a simulation scenario.
+                        </Typography>
+                    </Grid>
                 </Grid>
                 <Grid item xs={9}>
                     <Grid container spacing={2}>
-                        <Grid item xs={12} md={6} >
-                            <Paper elevation={5} sx={{ p: 3, minHeight: '25vw' }}>
+                        <Grid item xs={12} md={6}>
+                            <Paper elevation={5} sx={{ p: 3, minHeight: '30vw' }}>
                                 <Grid container spacing={2}>
                                     <Grid item xs={12}>
                                         <Typography variant="h6" align="left">
-                                            Upload your .BPMN file
+                                            Process Model
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={12}>
@@ -147,12 +166,12 @@ const Upload = () => {
                             </Paper>
                         </Grid>
 
-                        <Grid item xs={12} md={6}>
-                            <Paper elevation={5} sx={{ p: 3, minHeight: '25vw' }}>
+                        <Grid item xs={12} md={6} className="simulationScenarioContainer">
+                            <Paper elevation={5} sx={{ p: 3, minHeight: '30vw' }}>
                                 <Grid>
                                     <Grid item xs={12}>
                                         <Typography variant="h6" align="left">
-                                            Configure simulation parameters
+                                            Simulation Scenario
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={12}>
@@ -162,29 +181,29 @@ const Upload = () => {
                                         >
                                             <Grid container>
                                                 <Grid item xs={12}>
-                                                    <FormControlLabel value={Source.empty} control={<Radio />} label="Load simulation parameters from scratch" />
+                                                    <FormControlLabel value={Source.empty} control={<Radio />} label="Create a simulation scenario manually" />
                                                 </Grid>
                                             </Grid>
                                             <Grid container>
                                                 <Grid item xs={12}>
-                                                    <FormControlLabel value={Source.existing} control={<Radio />} label="Use existing simulation parameters" />
-                                                    <FileUploader
-                                                        startId="existing_params_file"
-                                                        ext=".json"
-                                                        onFileChange={onJsonFileChange}
-                                                        showHeader={false}
-                                                    />
+                                                    <FormControlLabel value={Source.existing} control={<Radio />} label="Upload a simulation scenario" />
+                                                        <FileUploader
+                                                            file={selectedParamFile}
+                                                            startId="existing_params_file"
+                                                            ext=".json"
+                                                            onFileChange={onJsonFileChange}
+                                                        />
                                                 </Grid>
                                             </Grid>
                                             <Grid container>
                                                 <Grid item xs={12}>
-                                                    <FormControlLabel value={Source.logs} control={<Radio />} label="Generate the simulation parameters based on logs" />
-                                                    <FileUploader
-                                                        startId="logs_file"
-                                                        ext=".xes, .csv"
-                                                        onFileChange={onLogFileChange}
-                                                        showHeader={false}
-                                                    />
+                                                    <FormControlLabel value={Source.logs} control={<Radio />} label="Discover a simulation scenario from the log" />
+                                                        <FileUploader
+                                                            file={selectedLogsFile}
+                                                            startId="logs_file"
+                                                            ext=".xes, .csv"
+                                                            onFileChange={onLogFileChange}
+                                                        />
                                                 </Grid>
                                             </Grid>
                                         </RadioGroup>

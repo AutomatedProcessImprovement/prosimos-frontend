@@ -33,6 +33,10 @@
   }
 }
 
-.UploadContainer {
+.uploadContainer {
   text-align: center;
+}
+
+.simulationScenarioContainer {
+  text-align: left;
 }
