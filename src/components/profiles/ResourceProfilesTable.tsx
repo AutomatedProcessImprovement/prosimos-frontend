@@ -81,7 +81,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
         return poolUuid + "_" + nextResourceNum
     };
 
-    const onResourceAdd = async () => {
+    const onProfileAdd = async () => {
         if ((errors?.length > 0 && errors?.type !== "min") || (errors?.length > 1 && errors?.type === "min")) {
             setErrorMessage("Verify the correctness of all entered Resource Profiles")
             return
@@ -139,14 +139,14 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
         <React.Fragment>
             <Toolbar sx={{ justifyContent: "flex-end", marginLeft: "auto" }}>
                 <AddButtonToolbar
-                    labelName="Add new resource"
-                    onClick={onResourceAdd}
+                    labelName="Add new profile"
+                    onClick={onProfileAdd}
                 />
             </Toolbar>
             <Table size="small" style={{ width: "90%", height: "35vh", margin: "auto" }}>
                 <TableHead>
                     <TableRow>
-                        <TableCell width={colWidth[0]}>Name</TableCell>
+                        <TableCell width={colWidth[0]}>Resource Profile</TableCell>
                         <TableCell width={colWidth[1]}>Cost per hour</TableCell>
                         <TableCell width={colWidth[2]}>Amount</TableCell>
                         <TableCell width={colWidth[3]}>Actions</TableCell>

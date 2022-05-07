@@ -22,9 +22,8 @@ const tabs_name = {
     RESOURCE_CALENDARS: "Resource Calendars",
     RESOURCES: "Resources",
     RESOURCE_ALLOCATION: "Resource Allocation",
-    // ARRIVAL_TIME_PARAMS: "Arrival Time Parameters",
     BRANCHING_PROB: "Branching Probabilities",
-    MODEL_VIEWER: "Model Viewer"
+    PROCESS_MODEL: "Process Model"
 }
 
 interface LocationState {

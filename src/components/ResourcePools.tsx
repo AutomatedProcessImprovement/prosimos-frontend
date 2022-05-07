@@ -121,7 +121,7 @@ const Row = (props: RowProps) => {
                                     error={areAnyErrors}
                                     helperText={errorMessage}
                                     variant="standard"
-                                    placeholder="Pool Name"
+                                    placeholder="Resource pool name"
                                 />
                             )
                         }}
@@ -203,7 +203,7 @@ const ResourcePools = (props: ResourcePoolsProps) => {
 
         prepend( {
             id: "sid-" + uuid(),
-            name: `Resource Group ${fields.length}`,
+            name: "",
             resource_list: []
         })
 
@@ -294,7 +294,7 @@ const ResourcePools = (props: ResourcePoolsProps) => {
                     <TableHead>
                         <TableRow>
                             <TableCell style={{ width: colWidth[0] }}></TableCell>
-                            <TableCell style={{ width: colWidth[1] }}>Resource Profile</TableCell>
+                            <TableCell style={{ width: colWidth[1] }}>Resource Pool</TableCell>
                             <TableCell style={{ width: colWidth[2] }}>Amount</TableCell>
                             <TableCell style={{ width: colWidth[3] }}>Actions</TableCell>
                         </TableRow>
