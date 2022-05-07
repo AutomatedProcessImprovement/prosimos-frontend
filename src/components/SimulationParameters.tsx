@@ -1,21 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import moment from 'moment';
-import axios from './../axios';
 import { Button, ButtonGroup, Grid, Step, StepButton, Stepper } from '@mui/material';
-import { JsonData, ScenarioProperties } from './formData';
+import { ScenarioProperties } from './formData';
 import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
 import ResourcePools from './ResourcePools';
 import ResourceCalendars from './ResourceCalendars';
 import ResourceAllocation from './resource_allocation/ResourceAllocation';
 import BPMNModelViewer from './model/BPMNModelViewer';
 import CaseCreation from './caseCreation/CaseCreation';
-import paths from '../router/paths';
 import useBpmnFile from './simulationParameters/useBpmnFile';
 import useJsonFile from './simulationParameters/useJsonFile';
 import useFormState from './simulationParameters/useFormState';
 import CustomizedSnackbar from './results/CustomizedSnackbar';
+import SubmitStep from './SubmitStep';
 
 const tabs_name = {
     CASE_CREATION: "Case Creation",
@@ -23,7 +22,8 @@ const tabs_name = {
     RESOURCES: "Resources",
     RESOURCE_ALLOCATION: "Resource Allocation",
     BRANCHING_PROB: "Branching Probabilities",
-    PROCESS_MODEL: "Process Model"
+    PROCESS_MODEL: "Process Model",
+    SUBMIT: "Submit"
 }
 
 interface LocationState {
@@ -38,8 +38,6 @@ const fromContentToBlob = (values: any) => {
 };
 
 const SimulationParameters = () => {
-    const navigate = useNavigate()
-
     const scenarioState = useForm<ScenarioProperties>({
         mode: "onBlur",
         defaultValues: {
@@ -47,7 +45,6 @@ const SimulationParameters = () => {
             start_date: moment().format("YYYY-MM-DDTHH:mm:ss.sssZ")
         }
     })
-    const { getValues: getScenarioValues } = scenarioState
 
     const [activeStep, setActiveStep] = useState(0)
     const [fileDownloadUrl, setFileDownloadUrl] = useState("")
@@ -59,7 +56,7 @@ const SimulationParameters = () => {
     const { xmlData, tasksFromModel, gateways } = useBpmnFile(bpmnFile)
     const { jsonData } = useJsonFile(jsonFile)
 
-    const { formState, handleSubmit } = useFormState(tasksFromModel, gateways, jsonData)
+    const { formState } = useFormState(tasksFromModel, gateways, jsonData)
     const { formState: { errors, isValid, isSubmitted, submitCount }, getValues } = formState
     
     useEffect(() => {
@@ -82,32 +79,6 @@ const SimulationParameters = () => {
             URL.revokeObjectURL(fileDownloadUrl);
         }
     }, [fileDownloadUrl]);
-
-    const onSubmit = (data: JsonData) => {
-        const newJsonFile = fromContentToBlob(getValues())
-        
-        const { num_processes, start_date } = getScenarioValues()
-        const formData = new FormData()
-        formData.append("xmlFile", bpmnFile as Blob)
-        formData.append("jsonFile", newJsonFile as Blob)
-        formData.append("startDate", start_date)
-        formData.append("numProcesses", num_processes.toString())
-
-        axios.post(
-            '/api/prosimos',
-            formData)
-        .then(((res: any) => {
-            navigate(paths.SIMULATOR_RESULTS_PATH, {
-                state: {
-                    output: res.data,
-                }
-            })
-        }))
-        .catch((error: any) => {
-            console.log(error.response)
-            setErrorMessage(error.response.data.displayMessage)
-        })
-    };
 
     const onDownload = () => {
         const blob = fromContentToBlob(getValues())
@@ -152,11 +123,18 @@ const SimulationParameters = () => {
                 return <BPMNModelViewer
                     xmlData={xmlData}
                 />
+            case 6:
+                return <SubmitStep
+                    formState={formState}
+                    scenarioState={scenarioState}
+                    setErrorMessage={setErrorMessage}
+                    bpmnFile={bpmnFile}
+                />
         }
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form>
             <Grid container alignItems="center" justifyContent="center">
                 <Grid item xs={9}>
                     <Grid item xs={12}>
@@ -172,10 +150,6 @@ const SimulationParameters = () => {
                                     href={fileDownloadUrl}
                                     ref={linkDownloadRef}
                                 >Download json</a>
-                                <Button
-                                    type="submit"
-                                    onClick={handleSubmit(onSubmit)}
-                                >Submit</Button>
                             </ButtonGroup>
                         </Grid>
                     </Grid>
