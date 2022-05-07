@@ -135,25 +135,26 @@ const SimulationParameters = () => {
 
     return (
         <form>
-            <Grid container alignItems="center" justifyContent="center">
+            <Grid container alignItems="center" justifyContent="center" mt={2}>
                 <Grid item xs={9}>
-                    <Grid item xs={12}>
-                        <Grid container alignItems="center" justifyContent="center">
-                            <ButtonGroup variant="outlined">
-                                <Button
-                                    type="button"
-                                    onClick={(_e) => onDownload()}
-                                >Download as a .json</Button>
-                                <a
-                                    style={{ display: "none" }}
-                                    download={"json-file-name.json"}
-                                    href={fileDownloadUrl}
-                                    ref={linkDownloadRef}
-                                >Download json</a>
-                            </ButtonGroup>
+                    <Grid container item xs={12}>
+                        <Grid item xs={6} justifyContent="flex-start">
+                        </Grid>
+                        <Grid item container xs={6} justifyContent="flex-end">
+                            <Button
+                                type="button"
+                                variant="outlined"
+                                onClick={(_e) => onDownload()}
+                            >Download as a .json</Button>
+                            <a
+                                style={{ display: "none" }}
+                                download={"json-file-name.json"}
+                                href={fileDownloadUrl}
+                                ref={linkDownloadRef}
+                            >Download json</a>
                         </Grid>
                     </Grid>
-                    <Grid item xs={12} mt={2}>
+                    <Grid item container xs={12} mt={3}>
                         <Stepper nonLinear activeStep={activeStep}>
                             {Object.values(tabs_name).map((label, index) => (
                                 <Step key={label}>
