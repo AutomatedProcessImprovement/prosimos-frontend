@@ -1,62 +1,35 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import moment from 'moment';
-import axios from './../axios';
-import { Box, Button, ButtonGroup, Grid, Tab, Tabs } from '@mui/material';
-import { JsonData, ScenarioProperties } from './formData';
+import { Button, ButtonGroup, Grid, Step, StepButton, Stepper } from '@mui/material';
+import { ScenarioProperties } from './formData';
 import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
 import ResourcePools from './ResourcePools';
 import ResourceCalendars from './ResourceCalendars';
-import ArrivalTimeDistr from './ArrivalTimeDistr';
 import ResourceAllocation from './resource_allocation/ResourceAllocation';
 import BPMNModelViewer from './model/BPMNModelViewer';
-import ScenarioSpecification from './scenarioSpecification/ScenarioSpecification';
-import paths from '../router/paths';
+import CaseCreation from './caseCreation/CaseCreation';
 import useBpmnFile from './simulationParameters/useBpmnFile';
 import useJsonFile from './simulationParameters/useJsonFile';
 import useFormState from './simulationParameters/useFormState';
 import CustomizedSnackbar from './results/CustomizedSnackbar';
+import SubmitStep from './SubmitStep';
 
 const tabs_name = {
-    SCENARIO_SPECIFICATION: "Scenario Specification",
-    RESOURCE_PROFILES: "Resource Profiles",
+    CASE_CREATION: "Case Creation",
     RESOURCE_CALENDARS: "Resource Calendars",
+    RESOURCES: "Resources",
     RESOURCE_ALLOCATION: "Resource Allocation",
-    ARRIVAL_TIME_PARAMS: "Arrival Time Parameters",
     BRANCHING_PROB: "Branching Probabilities",
-    MODEL_VIEWER: "Model Viewer"
+    PROCESS_MODEL: "Process Model",
+    SUBMIT: "Submit"
 }
 
 interface LocationState {
     bpmnFile: File
     jsonFile: File
 }
-
-interface TabPanelProps {
-    children?: React.ReactNode;
-    index: number;
-    value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-    const { children, value, index, ...other } = props;
-
-    return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            style={{ width: "100%" }}
-            {...other}
-        >
-            {value === index && (
-                <Box sx={{ p: 3 }}>
-                    {children}
-                </Box>
-            )}
-        </div>
-    );
-};
 
 const fromContentToBlob = (values: any) => {
     const content = JSON.stringify(values)
@@ -65,8 +38,6 @@ const fromContentToBlob = (values: any) => {
 };
 
 const SimulationParameters = () => {
-    const navigate = useNavigate()
-
     const scenarioState = useForm<ScenarioProperties>({
         mode: "onBlur",
         defaultValues: {
@@ -74,9 +45,8 @@ const SimulationParameters = () => {
             start_date: moment().format("YYYY-MM-DDTHH:mm:ss.sssZ")
         }
     })
-    const { getValues: getScenarioValues } = scenarioState
 
-    const [tabValue, setTabValue] = useState(0)
+    const [activeStep, setActiveStep] = useState(0)
     const [fileDownloadUrl, setFileDownloadUrl] = useState("")
     const [errorSnack, setErrorSnack] = useState("")
     const linkDownloadRef = useRef<HTMLAnchorElement>(null)
@@ -86,18 +56,17 @@ const SimulationParameters = () => {
     const { xmlData, tasksFromModel, gateways } = useBpmnFile(bpmnFile)
     const { jsonData } = useJsonFile(jsonFile)
 
-    const { formState, handleSubmit } = useFormState(tasksFromModel, gateways, jsonData)
+    const { formState } = useFormState(tasksFromModel, gateways, jsonData)
     const { formState: { errors, isValid, isSubmitted, submitCount }, getValues } = formState
     
     useEffect(() => {
-        console.log(errors)
         if (isSubmitted && !isValid) {
             setErrorMessage("There are validation errors")
         }
     }, [isValid, isSubmitted, submitCount, errors])
 
-    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-        setTabValue(newValue)
+    const handleStep = (index: number) => () => {
+        setActiveStep(index)
     };
 
     const setErrorMessage = (value: string) => {
@@ -111,32 +80,6 @@ const SimulationParameters = () => {
         }
     }, [fileDownloadUrl]);
 
-    const onSubmit = (data: JsonData) => {
-        const newJsonFile = fromContentToBlob(getValues())
-        
-        const { num_processes, start_date } = getScenarioValues()
-        const formData = new FormData()
-        formData.append("xmlFile", bpmnFile as Blob)
-        formData.append("jsonFile", newJsonFile as Blob)
-        formData.append("startDate", start_date)
-        formData.append("numProcesses", num_processes.toString())
-
-        axios.post(
-            '/api/prosimos',
-            formData)
-        .then(((res: any) => {
-            navigate(paths.SIMULATOR_RESULTS_PATH, {
-                state: {
-                    output: res.data,
-                }
-            })
-        }))
-        .catch((error: any) => {
-            console.log(error.response)
-            setErrorMessage(error.response.data.displayMessage)
-        })
-    };
-
     const onDownload = () => {
         const blob = fromContentToBlob(getValues())
         const fileDownloadUrl = URL.createObjectURL(blob);
@@ -147,84 +90,83 @@ const SimulationParameters = () => {
         setErrorMessage("")
     };
 
+    const getStepContent = (index: number) => {
+        switch (index) {
+            case 0:
+                return <CaseCreation
+                    scenarioFormState={scenarioState}
+                    jsonFormState={formState}
+                    setErrorMessage={setErrorMessage}
+                />
+            case 1:
+                return <ResourceCalendars
+                    formState={formState}
+                    setErrorMessage={setErrorMessage}
+                />
+            case 2:
+                return <ResourcePools
+                    formState={formState}
+                    setErrorMessage={setErrorMessage}
+                />
+            case 3:
+                return <ResourceAllocation
+                    tasksFromModel={tasksFromModel}
+                    formState={formState}
+                    setErrorMessage={setErrorMessage}
+                />
+            case 4:
+                return <AllGatewaysProbabilities
+                    formState={formState}
+                    gateways={gateways}
+                />
+            case 5:
+                return <BPMNModelViewer
+                    xmlData={xmlData}
+                />
+            case 6:
+                return <SubmitStep
+                    formState={formState}
+                    scenarioState={scenarioState}
+                    setErrorMessage={setErrorMessage}
+                    bpmnFile={bpmnFile}
+                />
+        }
+    };
+
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
-            <Grid container alignItems="center" justifyContent="center">
+        <form>
+            <Grid container alignItems="center" justifyContent="center" mt={2}>
                 <Grid item xs={9}>
-                    <Grid item xs={12}>
-                        <Grid container alignItems="center" justifyContent="center">
-                            <ButtonGroup variant="outlined">
-                                <Button
-                                    type="button"
-                                    onClick={(_e) => onDownload()}
-                                >Download as a .json</Button>
-                                <a
-                                    style={{ display: "none" }}
-                                    download={"json-file-name.json"}
-                                    href={fileDownloadUrl}
-                                    ref={linkDownloadRef}
-                                >Download json</a>
-                                <Button
-                                    type="submit"
-                                    onClick={handleSubmit(onSubmit)}
-                                >Submit</Button>
-                            </ButtonGroup>
+                    <Grid container item xs={12}>
+                        <Grid item xs={6} justifyContent="flex-start">
+                        </Grid>
+                        <Grid item container xs={6} justifyContent="flex-end">
+                            <Button
+                                type="button"
+                                variant="outlined"
+                                onClick={(_e) => onDownload()}
+                            >Download as a .json</Button>
+                            <a
+                                style={{ display: "none" }}
+                                download={"json-file-name.json"}
+                                href={fileDownloadUrl}
+                                ref={linkDownloadRef}
+                            >Download json</a>
                         </Grid>
                     </Grid>
-                    <Grid item xs={12}>
-                        <Box
-                            sx={{ flexGrow: 1, display: 'flex' }}
-                        >
-                            <Tabs value={tabValue}
-                                onChange={handleTabChange}
-                                variant="scrollable"
-                                orientation="vertical">
-                                {Object.values(tabs_name).map((item) => (
-                                    <Tab key={item} label={item} wrapped />
-                                ))}
-                            </Tabs>
-                            <TabPanel value={tabValue} index={0}>
-                                <ScenarioSpecification
-                                    formState={scenarioState}
-                                />
-                            </TabPanel>
-                            <TabPanel value={tabValue} index={1}>
-                                <ResourcePools
-                                    formState={formState}
-                                    setErrorMessage={setErrorMessage}
-                                />
-                            </TabPanel>
-                            <TabPanel value={tabValue} index={2}>
-                                <ResourceCalendars
-                                    formState={formState}
-                                    setErrorMessage={setErrorMessage}
-                                />
-                            </TabPanel>
-                            <TabPanel value={tabValue} index={3}>
-                                <ResourceAllocation
-                                    tasksFromModel={tasksFromModel}
-                                    formState={formState}
-                                    setErrorMessage={setErrorMessage}
-                                />
-                            </TabPanel>
-                            <TabPanel value={tabValue} index={4}>
-                                <ArrivalTimeDistr
-                                    formState={formState}
-                                    setErrorMessage={setErrorMessage}
-                                />
-                            </TabPanel>
-                            <TabPanel value={tabValue} index={5}>
-                                <AllGatewaysProbabilities
-                                    formState={formState}
-                                    gateways={gateways}
-                                />
-                            </TabPanel>
-                            <TabPanel value={tabValue} index={6}>
-                                <BPMNModelViewer
-                                    xmlData={xmlData}
-                                />
-                            </TabPanel>
-                        </Box>
+                    <Grid item container xs={12} mt={3} alignItems="center" justifyContent="center" >
+                        <Stepper nonLinear alternativeLabel activeStep={activeStep}>
+                            {Object.values(tabs_name).map((label, index) => (
+                                <Step key={label}>
+                                    <StepButton color="inherit" onClick={handleStep(index)}>
+                                        {label}
+                                    </StepButton>
+                                </Step>
+                            ))}
+                        </Stepper>
+                        <Grid container mt={3}>
+                            {getStepContent(activeStep)}
+                        </Grid>
                     </Grid>
                 </Grid>
             </Grid>

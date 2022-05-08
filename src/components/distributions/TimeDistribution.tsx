@@ -22,6 +22,7 @@ interface TimeDistributionProps {
         distribution_params?: { value?: FieldError }[]
     }
     setErrorMessage: (value: string) => void
+    funcLabel?: string
 }
 
 const distrFuncWithNumOfParams: { [key in DISTR_FUNC]: any [] } = {
@@ -77,7 +78,7 @@ const TimeDistribution = (props: TimeDistributionProps) => {
                             <DistrFuncSelect
                                 field={field}
                                 fieldError={distrErrors?.distribution_name}
-                                label="Distribution Function"
+                                label={ props.funcLabel || "Distribution Function" }
                                 updateParamsNum={updateParamsNum}
                             />
                         )}
@@ -125,14 +126,15 @@ const TimeDistribution = (props: TimeDistributionProps) => {
                         </Grid>
                     )
                 })}
-                <GridItemWithCenteredIcon
+                {/* TODO: will be back once we allow all possible functions from the scipy stats library*/}
+                {/* <GridItemWithCenteredIcon
                     onClick={onDistrFuncParamRemove}
                     icon={<RemoveIcon/>}
                 />
                 <GridItemWithCenteredIcon
                     onClick={onDistrFuncParamAdd}
                     icon={<AddIcon/>}
-                />
+                /> */}
             </Grid>
         </Grid>
     )

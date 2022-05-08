@@ -137,7 +137,7 @@ const Upload = () => {
 
     return (
         <>
-            <Grid container alignItems="center" justifyContent="center" spacing={4} style={{ paddingTop: '10px' }} className="uploadContainer">
+            <Grid container alignItems="center" justifyContent="center" spacing={4} style={{ paddingTop: '10px' }} className="centeredContent">
                 <Grid item xs={9}>
                     <Grid item>
                         <Typography variant="subtitle1">

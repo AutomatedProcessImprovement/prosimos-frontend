@@ -121,7 +121,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
         resolver: yupResolver(taskValidationSchema),
         mode: "onBlur" // validate on blur
     })
-    const { handleSubmit, reset } = formState
+    const { reset } = formState
 
     useEffect(() => {
         if (jsonData === undefined) {
@@ -175,7 +175,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
         }
     }, [jsonData, reset]);
 
-    return { formState, handleSubmit }
+    return { formState }
 }
 
 export default useFormState;

@@ -29,7 +29,7 @@ const FileUploader = (props: FileUploaderProps) => {
     };
     
     return (<Grid container alignItems="center" justifyContent="center">
-        <Grid item xs={12} className="uploadContainer">
+        <Grid item xs={12} className="centeredContent">
             <label htmlFor={props.startId}>
                 <Input
                     inputRef={inputRef}
@@ -49,7 +49,7 @@ const FileUploader = (props: FileUploaderProps) => {
         </Grid>
         {
             (selectedFile !== null && selectedFile !== undefined) && (
-                <Grid xs={12} className="uploadContainer">
+                <Grid xs={12} className="centeredContent">
                     <p>Uploaded file: {selectedFile && selectedFile.name}</p>
                 </Grid>
             )

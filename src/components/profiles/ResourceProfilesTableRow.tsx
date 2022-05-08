@@ -48,7 +48,7 @@ const ResourceProfilesTableRow = (props: ResourceProfilesTableRowProps) => {
                         error={nameError !== undefined}
                         helperText={nameError?.message || ""}
                         variant="standard"
-                        placeholder="Resource Name"
+                        placeholder="Resource profile name"
                     />
                 )}
             />

@@ -20,8 +20,8 @@ const BPMNModelViewer = (props: ModelViewerProps) => {
     }, [modelViewerRef, xmlData])
 
     return (
-        <Paper elevation={5} sx={{ p:2 }}>
-            <div id="canvas" ref={modelViewerRef} style={{ width: "100%", height: "80vh" }}></div>
+        <Paper elevation={5} sx={{ p:2 }} style={{ width: "100%" }}>
+            <div id="canvas" ref={modelViewerRef} style={{ width: "100%", height: "70vh" }}></div>
         </Paper>
     )
 }
