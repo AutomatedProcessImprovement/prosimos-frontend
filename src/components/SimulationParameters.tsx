@@ -154,8 +154,8 @@ const SimulationParameters = () => {
                             >Download json</a>
                         </Grid>
                     </Grid>
-                    <Grid item container xs={12} mt={3}>
-                        <Stepper nonLinear activeStep={activeStep}>
+                    <Grid item container xs={12} mt={3} alignItems="center" justifyContent="center" >
+                        <Stepper nonLinear alternativeLabel activeStep={activeStep}>
                             {Object.values(tabs_name).map((label, index) => (
                                 <Step key={label}>
                                     <StepButton color="inherit" onClick={handleStep(index)}>

@@ -1,6 +1,6 @@
 import { Grid, IconButton, Tooltip } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import Schedule from '@mui/icons-material/Schedule';
 
 interface ActionsColumnProps {
     onViewCalendarClick: () => void
@@ -12,12 +12,12 @@ const ActionsColumn = (props: ActionsColumnProps) => {
     return (
         <Grid container spacing={1} alignItems="center" justifyContent="center">
             <Grid item xs={6} >
-                <Tooltip title="View calendar group">
+                <Tooltip title="View profile's calendar">
                     <IconButton
                         size="small"
                         onClick={onViewCalendarClick}
                     >
-                        <VisibilityIcon />
+                        <Schedule />
                     </IconButton>
                 </Tooltip>
             </Grid>
