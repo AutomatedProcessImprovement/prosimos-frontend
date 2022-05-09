@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import moment from 'moment';
-import { Button, ButtonGroup, Grid, Step, StepButton, Stepper } from '@mui/material';
+import { Button, createStyles, Grid, Step, StepButton, Stepper, Theme } from '@mui/material';
+import { WithStyles, withStyles } from '@material-ui/core/styles';
 import { ScenarioProperties } from './formData';
 import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
 import ResourcePools from './ResourcePools';
@@ -15,6 +16,15 @@ import useJsonFile from './simulationParameters/useJsonFile';
 import useFormState from './simulationParameters/useFormState';
 import CustomizedSnackbar from './results/CustomizedSnackbar';
 import SubmitStep from './SubmitStep';
+
+const styles = (theme: Theme) => createStyles({
+    simParamsGrid: {
+        marginTop: "2vh!important"
+    },
+    stepper: {
+        marginTop: "3vh!important"
+    }
+})
 
 const tabs_name = {
     CASE_CREATION: "Case Creation",
@@ -37,7 +47,10 @@ const fromContentToBlob = (values: any) => {
     return blob
 };
 
-const SimulationParameters = () => {
+type SimulationParametersProps = WithStyles<typeof styles>
+
+const SimulationParameters = (props: SimulationParametersProps) => {
+    const { classes } = props
     const scenarioState = useForm<ScenarioProperties>({
         mode: "onBlur",
         defaultValues: {
@@ -58,7 +71,7 @@ const SimulationParameters = () => {
 
     const { formState } = useFormState(tasksFromModel, gateways, jsonData)
     const { formState: { errors, isValid, isSubmitted, submitCount }, getValues } = formState
-    
+
     useEffect(() => {
         if (isSubmitted && !isValid) {
             setErrorMessage("There are validation errors")
@@ -135,7 +148,7 @@ const SimulationParameters = () => {
 
     return (
         <form>
-            <Grid container alignItems="center" justifyContent="center" mt={2}>
+            <Grid container alignItems="center" justifyContent="center" className={classes.simParamsGrid}>
                 <Grid item xs={9}>
                     <Grid container item xs={12}>
                         <Grid item xs={6} justifyContent="flex-start">
@@ -154,7 +167,7 @@ const SimulationParameters = () => {
                             >Download json</a>
                         </Grid>
                     </Grid>
-                    <Grid item container xs={12} mt={3} alignItems="center" justifyContent="center" >
+                    <Grid item container xs={12} className={classes.stepper} alignItems="center" justifyContent="center" >
                         <Stepper nonLinear alternativeLabel activeStep={activeStep}>
                             {Object.values(tabs_name).map((label, index) => (
                                 <Step key={label}>
@@ -178,4 +191,4 @@ const SimulationParameters = () => {
     );
 }
 
-export default SimulationParameters;
+export default withStyles(styles)(SimulationParameters);
