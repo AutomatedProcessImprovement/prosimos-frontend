@@ -42,6 +42,8 @@ const SubmitStep = (props: SubmitStepProps) => {
             navigate(paths.SIMULATOR_RESULTS_PATH, {
                 state: {
                     output: res.data,
+                    modelFile: bpmnFile,
+                    scenarioProperties: newJsonFile
                 }
             })
         }))

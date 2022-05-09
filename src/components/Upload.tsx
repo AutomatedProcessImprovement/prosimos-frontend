@@ -55,7 +55,7 @@ const Upload = () => {
         const isBpmnFileProvided = !!selectedBpmnFile
         let isJsonFileValidInput = false
 
-        switch(simParamsSource) {
+        switch (simParamsSource) {
             case Source.empty:
                 isJsonFileValidInput = true
                 break;
@@ -78,7 +78,7 @@ const Upload = () => {
     const onContinueClick = () => {
         setLoading(true)
 
-        if (!isNeededFileProvided()){
+        if (!isNeededFileProvided()) {
             return
         }
 
@@ -91,21 +91,21 @@ const Upload = () => {
             axios.post(
                 '/api/parameters',
                 formData)
-            .then(((res: any) => {
-                const jsonString = JSON.stringify(res.data)
-                var blob = new Blob([jsonString], { type: "application/json" })
-                const discoveredParamsFile = new File([blob], "name", { type: "application/json" })
+                .then(((res: any) => {
+                    const jsonString = JSON.stringify(res.data)
+                    var blob = new Blob([jsonString], { type: "application/json" })
+                    const discoveredParamsFile = new File([blob], "name", { type: "application/json" })
 
-                navigate(paths.SIMULATOR_PARAMS_PATH, {
-                    state: {
-                        bpmnFile: selectedBpmnFile,
-                        jsonFile: discoveredParamsFile,
-                    }
+                    navigate(paths.SIMULATOR_PARAMS_PATH, {
+                        state: {
+                            bpmnFile: selectedBpmnFile,
+                            jsonFile: discoveredParamsFile,
+                        }
+                    })
+                }))
+                .catch((error: any) => {
+                    updateErrorMessage(error.response.data.displayMessage || "Something went wrong")
                 })
-            }))
-            .catch((error: any) => {
-                updateErrorMessage(error.response.data.displayMessage || "Something went wrong")
-            })
         } else {
             navigate(paths.SIMULATOR_PARAMS_PATH, {
                 state: {
@@ -187,23 +187,23 @@ const Upload = () => {
                                             <Grid container>
                                                 <Grid item xs={12}>
                                                     <FormControlLabel value={Source.existing} control={<Radio />} label="Upload a simulation scenario" />
-                                                        <FileUploader
-                                                            file={selectedParamFile}
-                                                            startId="existing_params_file"
-                                                            ext=".json"
-                                                            onFileChange={onJsonFileChange}
-                                                        />
+                                                    <FileUploader
+                                                        file={selectedParamFile}
+                                                        startId="existing_params_file"
+                                                        ext=".json"
+                                                        onFileChange={onJsonFileChange}
+                                                    />
                                                 </Grid>
                                             </Grid>
                                             <Grid container>
                                                 <Grid item xs={12}>
                                                     <FormControlLabel value={Source.logs} control={<Radio />} label="Discover a simulation scenario from the log" />
-                                                        <FileUploader
-                                                            file={selectedLogsFile}
-                                                            startId="logs_file"
-                                                            ext=".xes, .csv"
-                                                            onFileChange={onLogFileChange}
-                                                        />
+                                                    <FileUploader
+                                                        file={selectedLogsFile}
+                                                        startId="logs_file"
+                                                        ext=".xes, .csv"
+                                                        onFileChange={onLogFileChange}
+                                                    />
                                                 </Grid>
                                             </Grid>
                                         </RadioGroup>
