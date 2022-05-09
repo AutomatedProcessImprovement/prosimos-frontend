@@ -87,7 +87,6 @@ const SimulationResults = (props: SimulationResultsProps) => {
             container
             alignItems="center"
             justifyContent="center"
-            spacing={2}
             className={classes.resultsGrid}
         >
             <Grid container item xs={10}>

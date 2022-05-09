@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import moment from 'moment';
-import { Button, createStyles, Grid, Step, StepButton, Stepper, Theme } from '@mui/material';
+import { Button, ButtonGroup, createStyles, Grid, Step, StepButton, Stepper, Theme } from '@mui/material';
 import { WithStyles, withStyles } from '@material-ui/core/styles';
 import { ScenarioProperties } from './formData';
 import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
@@ -16,6 +16,7 @@ import useJsonFile from './simulationParameters/useJsonFile';
 import useFormState from './simulationParameters/useFormState';
 import CustomizedSnackbar from './results/CustomizedSnackbar';
 import SubmitStep from './SubmitStep';
+import useNewModel from './simulationParameters/useNewModel';
 
 const styles = (theme: Theme) => createStyles({
     simParamsGrid: {
@@ -71,6 +72,8 @@ const SimulationParameters = (props: SimulationParametersProps) => {
 
     const { formState } = useFormState(tasksFromModel, gateways, jsonData)
     const { formState: { errors, isValid, isSubmitted, submitCount }, getValues } = formState
+
+    const { onUploadNewModel } = useNewModel()
 
     useEffect(() => {
         if (isSubmitted && !isValid) {
@@ -149,9 +152,14 @@ const SimulationParameters = (props: SimulationParametersProps) => {
     return (
         <form>
             <Grid container alignItems="center" justifyContent="center" className={classes.simParamsGrid}>
-                <Grid item xs={9}>
+                <Grid item xs={10}>
                     <Grid container item xs={12}>
                         <Grid item xs={6} justifyContent="flex-start">
+                            <ButtonGroup>
+                                <Button
+                                    onClick={onUploadNewModel}
+                                >Upload new model</Button>
+                            </ButtonGroup>
                         </Grid>
                         <Grid item container xs={6} justifyContent="flex-end">
                             <Button
