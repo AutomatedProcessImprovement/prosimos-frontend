@@ -1,4 +1,5 @@
-import { Button, ButtonGroup, Grid } from "@mui/material";
+import { Button, ButtonGroup, createStyles, Grid, Theme } from "@mui/material";
+import { WithStyles, withStyles } from '@material-ui/core/styles';
 import { useLocation, useNavigate } from "react-router-dom";
 import ResourceUtilization from "./ResourceUtilization";
 import ScenarioStatistics from "./ScenarioStatistics";
@@ -9,9 +10,11 @@ import axios from './../../axios';
 import CustomizedSnackbar from "./CustomizedSnackbar";
 import paths from "../../router/paths";
 
-interface SimulationResultsProps {
-
-}
+const styles = (theme: Theme) => createStyles({
+    resultsGrid: {
+        marginTop: "2vh!important"
+    }
+})
 
 interface SimulationResult {
     "Resource Utilization": any,
@@ -26,7 +29,10 @@ interface ResultLocationState {
     scenarioProperties: Blob
 }
 
+type SimulationResultsProps = WithStyles<typeof styles>
+
 const SimulationResults = (props: SimulationResultsProps) => {
+    const { classes } = props
     const navigate = useNavigate()
     const { state } = useLocation()
     const { output, modelFile, scenarioProperties } = state as ResultLocationState
@@ -82,7 +88,7 @@ const SimulationResults = (props: SimulationResultsProps) => {
             alignItems="center"
             justifyContent="center"
             spacing={2}
-            mt={2}
+            className={classes.resultsGrid}
         >
             <Grid container item xs={10}>
                 <Grid item xs={6} justifyContent="flex-start">
@@ -129,4 +135,4 @@ const SimulationResults = (props: SimulationResultsProps) => {
     </>)
 }
 
-export default SimulationResults;
+export default withStyles(styles)(SimulationResults);
