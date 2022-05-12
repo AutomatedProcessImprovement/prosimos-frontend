@@ -37,23 +37,34 @@ const SimulationResults = (props: SimulationResultsProps) => {
     const navigate = useNavigate()
     const { state } = useLocation()
     const { output, modelFile, scenarioProperties } = state as ResultLocationState
-    const [logFileName, setLogFileName] = useState("")
+    const [logsFilename, setLogsFilename] = useState("")
+    const [statsFilename, setStatsFilename] = useState("")
     const [errorMessage, setErrorMessage] = useState("")
 
     useEffect(() => {
-        setLogFileName(output["LogsFilename"])
+        setLogsFilename(output["LogsFilename"])
+        setStatsFilename(output["StatsFilename"])
     }, [output]);
 
     const onLogFileDownload = () => {
+        downloadSimulationFile(logsFilename)
+    };
+
+    const onStatsDownload = () => {
+        downloadSimulationFile(statsFilename)
+    };
+
+    const downloadSimulationFile = (filename: string) => {
         axios
-            .get(`/api/simulationFile?filePath=${logFileName}`)
+            .get(`/api/simulationFile?fileName=${filename}`)
             .then((data: any) => {
                 const mimeType = "text/csv"
                 const blob = new Blob([data.data], { type: mimeType })
                 const url = URL.createObjectURL(blob)
 
                 const link = document.createElement('a')
-                link.download = "logs"
+                const category = filename.split("_")[0]
+                link.download = category
                 link.href = url
 
                 document.body.appendChild(link)
@@ -102,27 +113,37 @@ const SimulationResults = (props: SimulationResultsProps) => {
                     </ButtonGroup>
                 </Grid>
                 <Grid item container xs={6} justifyContent="flex-end">
-                    <Button
-                        variant="outlined"
-                        startIcon={<FileDownloadIcon />}
-                        onClick={onLogFileDownload}
-                        size="small"
-                    >
-                        Download logs
-                    </Button>
+                    <ButtonGroup>
+                        <Button
+                            variant="outlined"
+                            startIcon={<FileDownloadIcon />}
+                            onClick={onStatsDownload}
+                            size="small"
+                        >
+                            Download stats
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            startIcon={<FileDownloadIcon />}
+                            onClick={onLogFileDownload}
+                            size="small"
+                        >
+                            Download logs
+                        </Button>
+                    </ButtonGroup>
                 </Grid>
             </Grid>
-            <Grid item xs={10}>
+            <Grid item xs={10} className={classes.resultsGrid}>
                 <TaskStatistics
                     data={output["IndividualTaskStatistics"]}
                 />
             </Grid>
-            <Grid item xs={10}>
+            <Grid item xs={10} className={classes.resultsGrid}>
                 <ResourceUtilization
                     data={output["ResourceUtilization"]}
                 />
             </Grid>
-            <Grid item xs={10}>
+            <Grid item xs={10} className={classes.resultsGrid}>
                 <ScenarioStatistics
                     data={output["OverallScenarioStatistics"]}
                 />
