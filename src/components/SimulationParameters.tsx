@@ -40,6 +40,8 @@ const tabs_name = {
 interface LocationState {
     bpmnFile: File
     jsonFile: File
+    numProcesses?: number
+    start_date?: string
 }
 
 const fromContentToBlob = (values: any) => {
@@ -52,11 +54,14 @@ type SimulationParametersProps = WithStyles<typeof styles>
 
 const SimulationParameters = (props: SimulationParametersProps) => {
     const { classes } = props
+    const { state } = useLocation()
+    const { bpmnFile, jsonFile, numProcesses, start_date } = state as LocationState
+
     const scenarioState = useForm<ScenarioProperties>({
         mode: "onBlur",
         defaultValues: {
-            num_processes: 10,
-            start_date: moment().format("YYYY-MM-DDTHH:mm:ss.sssZ")
+            num_processes: numProcesses || 10,
+            start_date: start_date || moment().format("YYYY-MM-DDTHH:mm:ss.sssZ")
         }
     })
 
@@ -65,8 +70,6 @@ const SimulationParameters = (props: SimulationParametersProps) => {
     const [errorSnack, setErrorSnack] = useState("")
     const linkDownloadRef = useRef<HTMLAnchorElement>(null)
 
-    const { state } = useLocation()
-    const { bpmnFile, jsonFile } = state as LocationState
     const { xmlData, tasksFromModel, gateways } = useBpmnFile(bpmnFile)
     const { jsonData } = useJsonFile(jsonFile)
 

@@ -26,8 +26,10 @@ interface SimulationResult {
 
 interface ResultLocationState {
     output: SimulationResult
-    modelFile: Blob,
+    modelFile: Blob
     scenarioProperties: Blob
+    numProcesses?: number
+    startDate?: string
 }
 
 type SimulationResultsProps = WithStyles<typeof styles>
@@ -36,7 +38,7 @@ const SimulationResults = (props: SimulationResultsProps) => {
     const { classes } = props
     const navigate = useNavigate()
     const { state } = useLocation()
-    const { output, modelFile, scenarioProperties } = state as ResultLocationState
+    const { output, modelFile, scenarioProperties, numProcesses, startDate } = state as ResultLocationState
     const [logsFilename, setLogsFilename] = useState("")
     const [statsFilename, setStatsFilename] = useState("")
     const [errorMessage, setErrorMessage] = useState("")
@@ -85,7 +87,9 @@ const SimulationResults = (props: SimulationResultsProps) => {
         navigate(paths.SIMULATOR_PARAMS_PATH, {
             state: {
                 bpmnFile: modelFile,
-                jsonFile: scenarioProperties
+                jsonFile: scenarioProperties,
+                numProcesses: numProcesses,
+                startDate: startDate
             }
         })
     };

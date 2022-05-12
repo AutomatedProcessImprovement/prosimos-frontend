@@ -7,8 +7,8 @@ import { JsonData, ScenarioProperties } from "./formData";
 
 interface SubmitStepProps {
     formState: UseFormReturn<JsonData, object>
-    scenarioState: UseFormReturn<ScenarioProperties, object>
     setErrorMessage: (value: string) => void
+    scenarioState: UseFormReturn<ScenarioProperties, object>
     bpmnFile: File
 }
 
@@ -28,10 +28,10 @@ const SubmitStep = (props: SubmitStepProps) => {
     const onSubmit = (data: JsonData) => {
         const newJsonFile = fromContentToBlob(getValues())
         
-        const { num_processes, start_date } = getScenarioValues()
+        const { num_processes: numProcesses, start_date: startDate } = getScenarioValues()
         const formData = new FormData()
-        formData.append("startDate", start_date)
-        formData.append("numProcesses", num_processes.toString())
+        formData.append("startDate", startDate)
+        formData.append("numProcesses", numProcesses.toString())
         formData.append("simScenarioFile", newJsonFile as Blob)
         formData.append("modelFile", bpmnFile as Blob)
 
@@ -43,7 +43,9 @@ const SubmitStep = (props: SubmitStepProps) => {
                 state: {
                     output: res.data,
                     modelFile: bpmnFile,
-                    scenarioProperties: newJsonFile
+                    scenarioProperties: newJsonFile,
+                    numProcesses: numProcesses,
+                    startDate: startDate
                 }
             })
         }))
