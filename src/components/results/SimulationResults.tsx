@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import axios from './../../axios';
 import CustomizedSnackbar from "./CustomizedSnackbar";
 import paths from "../../router/paths";
+import { simulate } from "../../api/api";
 
 const styles = (theme: Theme) => createStyles({
     resultsGrid: {
@@ -28,8 +29,8 @@ interface ResultLocationState {
     output: SimulationResult
     modelFile: Blob
     scenarioProperties: Blob
-    numProcesses?: number
-    startDate?: string
+    numProcesses: number
+    startDate: string
 }
 
 type SimulationResultsProps = WithStyles<typeof styles>
@@ -38,15 +39,16 @@ const SimulationResults = (props: SimulationResultsProps) => {
     const { classes } = props
     const navigate = useNavigate()
     const { state } = useLocation()
-    const { output, modelFile, scenarioProperties, numProcesses, startDate } = state as ResultLocationState
+    const { output: outputFromPrevPage, modelFile, scenarioProperties, numProcesses, startDate } = state as ResultLocationState
+    const [currOutput, setCurrOutput] = useState(outputFromPrevPage)
     const [logsFilename, setLogsFilename] = useState("")
     const [statsFilename, setStatsFilename] = useState("")
     const [errorMessage, setErrorMessage] = useState("")
 
     useEffect(() => {
-        setLogsFilename(output["LogsFilename"])
-        setStatsFilename(output["StatsFilename"])
-    }, [output]);
+        setLogsFilename(currOutput["LogsFilename"])
+        setStatsFilename(currOutput["StatsFilename"])
+    }, [currOutput]);
 
     const onLogFileDownload = () => {
         downloadSimulationFile(logsFilename)
@@ -98,6 +100,17 @@ const SimulationResults = (props: SimulationResultsProps) => {
         navigate(paths.SIMULATOR_UPLOAD_PATH)
     };
 
+    const onReRun = () => {
+        simulate(startDate, numProcesses, scenarioProperties, modelFile)
+            .then((res) => {
+                setCurrOutput(res.data)
+            })
+            .catch((error) => {
+                console.log(error.response)
+                setErrorMessage(error.response.data.displayMessage)
+            })
+    };
+
     return (<>
         <Grid
             container
@@ -111,6 +124,9 @@ const SimulationResults = (props: SimulationResultsProps) => {
                         <Button
                             onClick={onEditScenario}
                         >Edit scenario</Button>
+                        <Button
+                            onClick={onReRun}
+                        >Re-Run</Button>
                         <Button
                             onClick={onUploadNewModel}
                         >Upload new model</Button>
@@ -139,17 +155,17 @@ const SimulationResults = (props: SimulationResultsProps) => {
             </Grid>
             <Grid item xs={10} className={classes.resultsGrid}>
                 <TaskStatistics
-                    data={output["IndividualTaskStatistics"]}
+                    data={currOutput["IndividualTaskStatistics"]}
                 />
             </Grid>
             <Grid item xs={10} className={classes.resultsGrid}>
                 <ResourceUtilization
-                    data={output["ResourceUtilization"]}
+                    data={currOutput["ResourceUtilization"]}
                 />
             </Grid>
             <Grid item xs={10} className={classes.resultsGrid}>
                 <ScenarioStatistics
-                    data={output["OverallScenarioStatistics"]}
+                    data={currOutput["OverallScenarioStatistics"]}
                 />
             </Grid>
         </Grid>

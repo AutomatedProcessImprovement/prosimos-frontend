@@ -1,7 +1,7 @@
 import { Button, Grid } from "@mui/material";
 import { UseFormReturn } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import axios from "../axios";
+import { simulate } from "../api/api";
 import paths from "../router/paths";
 import { JsonData, ScenarioProperties } from "./formData";
 
@@ -24,35 +24,27 @@ const SubmitStep = (props: SubmitStepProps) => {
         const blob = new Blob([content], { type: "text/plain" })
         return blob
     };
-    
+
     const onSubmit = (data: JsonData) => {
         const newJsonFile = fromContentToBlob(getValues())
-        
-        const { num_processes: numProcesses, start_date: startDate } = getScenarioValues()
-        const formData = new FormData()
-        formData.append("startDate", startDate)
-        formData.append("numProcesses", numProcesses.toString())
-        formData.append("simScenarioFile", newJsonFile as Blob)
-        formData.append("modelFile", bpmnFile as Blob)
 
-        axios.post(
-            '/api/simulate',
-            formData)
-        .then(((res: any) => {
-            navigate(paths.SIMULATOR_RESULTS_PATH, {
-                state: {
-                    output: res.data,
-                    modelFile: bpmnFile,
-                    scenarioProperties: newJsonFile,
-                    numProcesses: numProcesses,
-                    startDate: startDate
-                }
+        const { num_processes: numProcesses, start_date: startDate } = getScenarioValues()
+        simulate(startDate, numProcesses, newJsonFile, bpmnFile)
+            .then(((res: any) => {
+                navigate(paths.SIMULATOR_RESULTS_PATH, {
+                    state: {
+                        output: res.data,
+                        modelFile: bpmnFile,
+                        scenarioProperties: newJsonFile,
+                        numProcesses: numProcesses,
+                        startDate: startDate
+                    }
+                })
+            }))
+            .catch((error: any) => {
+                console.log(error.response)
+                setErrorMessage(error.response.data.displayMessage)
             })
-        }))
-        .catch((error: any) => {
-            console.log(error.response)
-            setErrorMessage(error.response.data.displayMessage)
-        })
     };
 
     return (
