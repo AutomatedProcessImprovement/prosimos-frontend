@@ -17,10 +17,11 @@ const styles = (theme: Theme) => createStyles({
 })
 
 interface SimulationResult {
-    "Resource Utilization": any,
-    "Individual Task Statistics": any,
-    "Overall Scenario Statistics": any,
-    "LogFileName": string
+    "ResourceUtilization": any,
+    "IndividualTaskStatistics": any,
+    "OverallScenarioStatistics": any,
+    "LogsFilename": string
+    "StatsFilename": string
 }
 
 interface ResultLocationState {
@@ -40,12 +41,12 @@ const SimulationResults = (props: SimulationResultsProps) => {
     const [errorMessage, setErrorMessage] = useState("")
 
     useEffect(() => {
-        setLogFileName(output["LogFileName"])
+        setLogFileName(output["LogsFilename"])
     }, [output]);
 
     const onLogFileDownload = () => {
         axios
-            .get(`/api/file?filePath=${logFileName}`)
+            .get(`/api/simulationFile?filePath=${logFileName}`)
             .then((data: any) => {
                 const mimeType = "text/csv"
                 const blob = new Blob([data.data], { type: mimeType })
@@ -113,17 +114,17 @@ const SimulationResults = (props: SimulationResultsProps) => {
             </Grid>
             <Grid item xs={10}>
                 <TaskStatistics
-                    data={output["Individual Task Statistics"]}
+                    data={output["IndividualTaskStatistics"]}
                 />
             </Grid>
             <Grid item xs={10}>
                 <ResourceUtilization
-                    data={output["Resource Utilization"]}
+                    data={output["ResourceUtilization"]}
                 />
             </Grid>
             <Grid item xs={10}>
                 <ScenarioStatistics
-                    data={output["Overall Scenario Statistics"]}
+                    data={output["OverallScenarioStatistics"]}
                 />
             </Grid>
         </Grid>

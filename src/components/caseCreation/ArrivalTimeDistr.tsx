@@ -36,7 +36,6 @@ const ArrivalTimeDistr = (props: ArrivalTimeDistrProps) => {
 
     return (<>
         <Grid item xs={12}>
-
             <TimeDistribution
                 formState={props.formState}
                 objectNamePath="arrival_time_distribution"

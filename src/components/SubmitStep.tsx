@@ -30,13 +30,13 @@ const SubmitStep = (props: SubmitStepProps) => {
         
         const { num_processes, start_date } = getScenarioValues()
         const formData = new FormData()
-        formData.append("xmlFile", bpmnFile as Blob)
-        formData.append("jsonFile", newJsonFile as Blob)
         formData.append("startDate", start_date)
         formData.append("numProcesses", num_processes.toString())
+        formData.append("simScenarioFile", newJsonFile as Blob)
+        formData.append("modelFile", bpmnFile as Blob)
 
         axios.post(
-            '/api/prosimos',
+            '/api/simulate',
             formData)
         .then(((res: any) => {
             navigate(paths.SIMULATOR_RESULTS_PATH, {
