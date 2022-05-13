@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import moment from 'moment';
-import { Button, createStyles, Grid, Step, StepButton, Stepper, Theme } from '@mui/material';
+import { Button, ButtonGroup, createStyles, Grid, Step, StepButton, Stepper, Theme } from '@mui/material';
 import { WithStyles, withStyles } from '@material-ui/core/styles';
 import { ScenarioProperties } from './formData';
 import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
@@ -16,6 +16,7 @@ import useJsonFile from './simulationParameters/useJsonFile';
 import useFormState from './simulationParameters/useFormState';
 import CustomizedSnackbar from './results/CustomizedSnackbar';
 import SubmitStep from './SubmitStep';
+import useNewModel from './simulationParameters/useNewModel';
 
 const styles = (theme: Theme) => createStyles({
     simParamsGrid: {
@@ -39,6 +40,8 @@ const tabs_name = {
 interface LocationState {
     bpmnFile: File
     jsonFile: File
+    numProcesses?: number
+    start_date?: string
 }
 
 const fromContentToBlob = (values: any) => {
@@ -51,11 +54,14 @@ type SimulationParametersProps = WithStyles<typeof styles>
 
 const SimulationParameters = (props: SimulationParametersProps) => {
     const { classes } = props
+    const { state } = useLocation()
+    const { bpmnFile, jsonFile, numProcesses, start_date } = state as LocationState
+
     const scenarioState = useForm<ScenarioProperties>({
         mode: "onBlur",
         defaultValues: {
-            num_processes: 10,
-            start_date: moment().format("YYYY-MM-DDTHH:mm:ss.sssZ")
+            num_processes: numProcesses || 10,
+            start_date: start_date || moment().format("YYYY-MM-DDTHH:mm:ss.sssZ")
         }
     })
 
@@ -64,13 +70,13 @@ const SimulationParameters = (props: SimulationParametersProps) => {
     const [errorSnack, setErrorSnack] = useState("")
     const linkDownloadRef = useRef<HTMLAnchorElement>(null)
 
-    const { state } = useLocation()
-    const { bpmnFile, jsonFile } = state as LocationState
     const { xmlData, tasksFromModel, gateways } = useBpmnFile(bpmnFile)
     const { jsonData } = useJsonFile(jsonFile)
 
     const { formState } = useFormState(tasksFromModel, gateways, jsonData)
     const { formState: { errors, isValid, isSubmitted, submitCount }, getValues } = formState
+
+    const { onUploadNewModel } = useNewModel()
 
     useEffect(() => {
         if (isSubmitted && !isValid) {
@@ -149,9 +155,14 @@ const SimulationParameters = (props: SimulationParametersProps) => {
     return (
         <form>
             <Grid container alignItems="center" justifyContent="center" className={classes.simParamsGrid}>
-                <Grid item xs={9}>
+                <Grid item xs={10}>
                     <Grid container item xs={12}>
                         <Grid item xs={6} justifyContent="flex-start">
+                            <ButtonGroup>
+                                <Button
+                                    onClick={onUploadNewModel}
+                                >Upload new model</Button>
+                            </ButtonGroup>
                         </Grid>
                         <Grid item container xs={6} justifyContent="flex-end">
                             <Button

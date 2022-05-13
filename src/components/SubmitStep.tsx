@@ -1,14 +1,14 @@
 import { Button, Grid } from "@mui/material";
 import { UseFormReturn } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import axios from "../axios";
+import { simulate } from "../api/api";
 import paths from "../router/paths";
 import { JsonData, ScenarioProperties } from "./formData";
 
 interface SubmitStepProps {
     formState: UseFormReturn<JsonData, object>
-    scenarioState: UseFormReturn<ScenarioProperties, object>
     setErrorMessage: (value: string) => void
+    scenarioState: UseFormReturn<ScenarioProperties, object>
     bpmnFile: File
 }
 
@@ -24,33 +24,27 @@ const SubmitStep = (props: SubmitStepProps) => {
         const blob = new Blob([content], { type: "text/plain" })
         return blob
     };
-    
+
     const onSubmit = (data: JsonData) => {
         const newJsonFile = fromContentToBlob(getValues())
-        
-        const { num_processes, start_date } = getScenarioValues()
-        const formData = new FormData()
-        formData.append("xmlFile", bpmnFile as Blob)
-        formData.append("jsonFile", newJsonFile as Blob)
-        formData.append("startDate", start_date)
-        formData.append("numProcesses", num_processes.toString())
 
-        axios.post(
-            '/api/prosimos',
-            formData)
-        .then(((res: any) => {
-            navigate(paths.SIMULATOR_RESULTS_PATH, {
-                state: {
-                    output: res.data,
-                    modelFile: bpmnFile,
-                    scenarioProperties: newJsonFile
-                }
+        const { num_processes: numProcesses, start_date: startDate } = getScenarioValues()
+        simulate(startDate, numProcesses, newJsonFile, bpmnFile)
+            .then(((res: any) => {
+                navigate(paths.SIMULATOR_RESULTS_PATH, {
+                    state: {
+                        output: res.data,
+                        modelFile: bpmnFile,
+                        scenarioProperties: newJsonFile,
+                        numProcesses: numProcesses,
+                        startDate: startDate
+                    }
+                })
+            }))
+            .catch((error: any) => {
+                console.log(error.response)
+                setErrorMessage(error.response.data.displayMessage)
             })
-        }))
-        .catch((error: any) => {
-            console.log(error.response)
-            setErrorMessage(error.response.data.displayMessage)
-        })
     };
 
     return (

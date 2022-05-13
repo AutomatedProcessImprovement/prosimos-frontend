@@ -89,7 +89,7 @@ const Upload = () => {
             formData.append("bpmnFile", selectedBpmnFile as Blob)
 
             axios.post(
-                '/api/parameters',
+                '/api/discovery',
                 formData)
                 .then(((res: any) => {
                     const jsonString = JSON.stringify(res.data)

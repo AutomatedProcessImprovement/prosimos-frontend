@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import axios from './../../axios';
 import CustomizedSnackbar from "./CustomizedSnackbar";
 import paths from "../../router/paths";
+import { simulate } from "../../api/api";
 
 const styles = (theme: Theme) => createStyles({
     resultsGrid: {
@@ -17,16 +18,19 @@ const styles = (theme: Theme) => createStyles({
 })
 
 interface SimulationResult {
-    "Resource Utilization": any,
-    "Individual Task Statistics": any,
-    "Overall Scenario Statistics": any,
-    "LogFileName": string
+    "ResourceUtilization": any,
+    "IndividualTaskStatistics": any,
+    "OverallScenarioStatistics": any,
+    "LogsFilename": string
+    "StatsFilename": string
 }
 
 interface ResultLocationState {
     output: SimulationResult
-    modelFile: Blob,
+    modelFile: Blob
     scenarioProperties: Blob
+    numProcesses: number
+    startDate: string
 }
 
 type SimulationResultsProps = WithStyles<typeof styles>
@@ -35,24 +39,36 @@ const SimulationResults = (props: SimulationResultsProps) => {
     const { classes } = props
     const navigate = useNavigate()
     const { state } = useLocation()
-    const { output, modelFile, scenarioProperties } = state as ResultLocationState
-    const [logFileName, setLogFileName] = useState("")
+    const { output: outputFromPrevPage, modelFile, scenarioProperties, numProcesses, startDate } = state as ResultLocationState
+    const [currOutput, setCurrOutput] = useState(outputFromPrevPage)
+    const [logsFilename, setLogsFilename] = useState("")
+    const [statsFilename, setStatsFilename] = useState("")
     const [errorMessage, setErrorMessage] = useState("")
 
     useEffect(() => {
-        setLogFileName(output["LogFileName"])
-    }, [output]);
+        setLogsFilename(currOutput["LogsFilename"])
+        setStatsFilename(currOutput["StatsFilename"])
+    }, [currOutput]);
 
     const onLogFileDownload = () => {
+        downloadSimulationFile(logsFilename)
+    };
+
+    const onStatsDownload = () => {
+        downloadSimulationFile(statsFilename)
+    };
+
+    const downloadSimulationFile = (filename: string) => {
         axios
-            .get(`/api/file?filePath=${logFileName}`)
+            .get(`/api/simulationFile?fileName=${filename}`)
             .then((data: any) => {
                 const mimeType = "text/csv"
                 const blob = new Blob([data.data], { type: mimeType })
                 const url = URL.createObjectURL(blob)
 
                 const link = document.createElement('a')
-                link.download = "logs"
+                const category = filename.split("_")[0]
+                link.download = category
                 link.href = url
 
                 document.body.appendChild(link)
@@ -73,7 +89,9 @@ const SimulationResults = (props: SimulationResultsProps) => {
         navigate(paths.SIMULATOR_PARAMS_PATH, {
             state: {
                 bpmnFile: modelFile,
-                jsonFile: scenarioProperties
+                jsonFile: scenarioProperties,
+                numProcesses: numProcesses,
+                startDate: startDate
             }
         })
     };
@@ -82,12 +100,22 @@ const SimulationResults = (props: SimulationResultsProps) => {
         navigate(paths.SIMULATOR_UPLOAD_PATH)
     };
 
+    const onReRun = () => {
+        simulate(startDate, numProcesses, scenarioProperties, modelFile)
+            .then((res) => {
+                setCurrOutput(res.data)
+            })
+            .catch((error) => {
+                console.log(error.response)
+                setErrorMessage(error.response.data.displayMessage)
+            })
+    };
+
     return (<>
         <Grid
             container
             alignItems="center"
             justifyContent="center"
-            spacing={2}
             className={classes.resultsGrid}
         >
             <Grid container item xs={10}>
@@ -97,34 +125,47 @@ const SimulationResults = (props: SimulationResultsProps) => {
                             onClick={onEditScenario}
                         >Edit scenario</Button>
                         <Button
+                            onClick={onReRun}
+                        >Re-Run</Button>
+                        <Button
                             onClick={onUploadNewModel}
                         >Upload new model</Button>
                     </ButtonGroup>
                 </Grid>
                 <Grid item container xs={6} justifyContent="flex-end">
-                    <Button
-                        variant="outlined"
-                        startIcon={<FileDownloadIcon />}
-                        onClick={onLogFileDownload}
-                        size="small"
-                    >
-                        Download logs
-                    </Button>
+                    <ButtonGroup>
+                        <Button
+                            variant="outlined"
+                            startIcon={<FileDownloadIcon />}
+                            onClick={onStatsDownload}
+                            size="small"
+                        >
+                            Download stats
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            startIcon={<FileDownloadIcon />}
+                            onClick={onLogFileDownload}
+                            size="small"
+                        >
+                            Download logs
+                        </Button>
+                    </ButtonGroup>
                 </Grid>
             </Grid>
-            <Grid item xs={10}>
+            <Grid item xs={10} className={classes.resultsGrid}>
                 <TaskStatistics
-                    data={output["Individual Task Statistics"]}
+                    data={currOutput["IndividualTaskStatistics"]}
                 />
             </Grid>
-            <Grid item xs={10}>
+            <Grid item xs={10} className={classes.resultsGrid}>
                 <ResourceUtilization
-                    data={output["Resource Utilization"]}
+                    data={currOutput["ResourceUtilization"]}
                 />
             </Grid>
-            <Grid item xs={10}>
+            <Grid item xs={10} className={classes.resultsGrid}>
                 <ScenarioStatistics
-                    data={output["Overall Scenario Statistics"]}
+                    data={currOutput["OverallScenarioStatistics"]}
                 />
             </Grid>
         </Grid>
