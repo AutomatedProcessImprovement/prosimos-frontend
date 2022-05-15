@@ -96,7 +96,7 @@ const Upload = () => {
                     var blob = new Blob([jsonString], { type: "application/json" })
                     const discoveredParamsFile = new File([blob], "name", { type: "application/json" })
 
-                    navigate(paths.SIMULATOR_PARAMS_PATH, {
+                    navigate(paths.SIMULATOR_SCENARIO_PATH, {
                         state: {
                             bpmnFile: selectedBpmnFile,
                             jsonFile: discoveredParamsFile,
@@ -107,7 +107,7 @@ const Upload = () => {
                     updateErrorMessage(error.response.data.displayMessage || "Something went wrong")
                 })
         } else {
-            navigate(paths.SIMULATOR_PARAMS_PATH, {
+            navigate(paths.SIMULATOR_SCENARIO_PATH, {
                 state: {
                     bpmnFile: selectedBpmnFile,
                     jsonFile: selectedParamFile,

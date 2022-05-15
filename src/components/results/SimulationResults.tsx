@@ -1,6 +1,4 @@
-import { Button, ButtonGroup, createStyles, Grid, Theme } from "@mui/material";
-import { WithStyles, withStyles } from '@material-ui/core/styles';
-import { useLocation, useNavigate } from "react-router-dom";
+import { Button, ButtonGroup, Grid } from "@mui/material";
 import ResourceUtilization from "./ResourceUtilization";
 import ScenarioStatistics from "./ScenarioStatistics";
 import TaskStatistics from "./TaskStatistics";
@@ -8,16 +6,15 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { useEffect, useState } from "react";
 import axios from './../../axios';
 import CustomizedSnackbar from "./CustomizedSnackbar";
-import paths from "../../router/paths";
-import { simulate } from "../../api/api";
+import { makeStyles } from "@mui/styles";
 
-const styles = (theme: Theme) => createStyles({
+const useStyles = makeStyles({
     resultsGrid: {
         marginTop: "2vh!important"
     }
 })
 
-interface SimulationResult {
+export interface SimulationResult {
     "ResourceUtilization": any,
     "IndividualTaskStatistics": any,
     "OverallScenarioStatistics": any,
@@ -25,29 +22,27 @@ interface SimulationResult {
     "StatsFilename": string
 }
 
-interface ResultLocationState {
-    output: SimulationResult
-    modelFile: Blob
-    scenarioProperties: Blob
-    numProcesses: number
-    startDate: string
+interface SimulationResultsProps {
+    readonly output: SimulationResult
 }
 
-type SimulationResultsProps = WithStyles<typeof styles>
-
 const SimulationResults = (props: SimulationResultsProps) => {
-    const { classes } = props
-    const navigate = useNavigate()
-    const { state } = useLocation()
-    const { output: outputFromPrevPage, modelFile, scenarioProperties, numProcesses, startDate } = state as ResultLocationState
+    const classes = useStyles();
+    const { output: outputFromPrevPage, } = props
     const [currOutput, setCurrOutput] = useState(outputFromPrevPage)
     const [logsFilename, setLogsFilename] = useState("")
     const [statsFilename, setStatsFilename] = useState("")
     const [errorMessage, setErrorMessage] = useState("")
 
     useEffect(() => {
-        setLogsFilename(currOutput["LogsFilename"])
-        setStatsFilename(currOutput["StatsFilename"])
+        setCurrOutput(outputFromPrevPage)
+    }, [outputFromPrevPage]);
+
+    useEffect(() => {
+        if (currOutput !== null) {
+            setLogsFilename(currOutput["LogsFilename"])
+            setStatsFilename(currOutput["StatsFilename"])
+        }
     }, [currOutput]);
 
     const onLogFileDownload = () => {
@@ -85,32 +80,6 @@ const SimulationResults = (props: SimulationResultsProps) => {
         setErrorMessage("")
     };
 
-    const onEditScenario = () => {
-        navigate(paths.SIMULATOR_PARAMS_PATH, {
-            state: {
-                bpmnFile: modelFile,
-                jsonFile: scenarioProperties,
-                numProcesses: numProcesses,
-                startDate: startDate
-            }
-        })
-    };
-
-    const onUploadNewModel = () => {
-        navigate(paths.SIMULATOR_UPLOAD_PATH)
-    };
-
-    const onReRun = () => {
-        simulate(startDate, numProcesses, scenarioProperties, modelFile)
-            .then((res) => {
-                setCurrOutput(res.data)
-            })
-            .catch((error) => {
-                console.log(error.response)
-                setErrorMessage(error.response.data.displayMessage)
-            })
-    };
-
     return (<>
         <Grid
             container
@@ -120,17 +89,6 @@ const SimulationResults = (props: SimulationResultsProps) => {
         >
             <Grid container item xs={10}>
                 <Grid item xs={6} justifyContent="flex-start">
-                    <ButtonGroup>
-                        <Button
-                            onClick={onEditScenario}
-                        >Edit scenario</Button>
-                        <Button
-                            onClick={onReRun}
-                        >Re-Run</Button>
-                        <Button
-                            onClick={onUploadNewModel}
-                        >Upload new model</Button>
-                    </ButtonGroup>
                 </Grid>
                 <Grid item container xs={6} justifyContent="flex-end">
                     <ButtonGroup>
@@ -176,4 +134,4 @@ const SimulationResults = (props: SimulationResultsProps) => {
     </>)
 }
 
-export default withStyles(styles)(SimulationResults);
+export default SimulationResults;

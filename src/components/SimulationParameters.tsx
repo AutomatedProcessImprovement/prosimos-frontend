@@ -15,7 +15,6 @@ import useBpmnFile from './simulationParameters/useBpmnFile';
 import useJsonFile from './simulationParameters/useJsonFile';
 import useFormState from './simulationParameters/useFormState';
 import CustomizedSnackbar from './results/CustomizedSnackbar';
-import SubmitStep from './SubmitStep';
 import useNewModel from './simulationParameters/useNewModel';
 import CallSplitIcon from '@mui/icons-material/CallSplit';
 import GroupsIcon from '@mui/icons-material/Groups';
@@ -23,6 +22,8 @@ import DateRangeIcon from '@mui/icons-material/DateRange';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import SettingsIcon from '@mui/icons-material/Settings';
+import { simulate } from '../api/api';
+import SimulationResults, { SimulationResult } from './results/SimulationResults';
 
 const styles = (theme: Theme) => createStyles({
     simParamsGrid: {
@@ -40,14 +41,12 @@ const tabs_name = {
     RESOURCE_ALLOCATION: "Resource Allocation",
     BRANCHING_PROB: "Branching Probabilities",
     PROCESS_MODEL: "Process Model",
-    SUBMIT: "Submit"
+    SIMULATION_RESULTS: "Simulation Results"
 }
 
 interface LocationState {
     bpmnFile: File
     jsonFile: File
-    numProcesses?: number
-    start_date?: string
 }
 
 const fromContentToBlob = (values: any) => {
@@ -61,19 +60,22 @@ type SimulationParametersProps = WithStyles<typeof styles>
 const SimulationParameters = (props: SimulationParametersProps) => {
     const { classes } = props
     const { state } = useLocation()
-    const { bpmnFile, jsonFile, numProcesses, start_date } = state as LocationState
-
-    const scenarioState = useForm<ScenarioProperties>({
-        mode: "onBlur",
-        defaultValues: {
-            num_processes: numProcesses || 10,
-            start_date: start_date || moment().format("YYYY-MM-DDTHH:mm:ss.sssZ")
-        }
-    })
+    const { bpmnFile, jsonFile } = state as LocationState
 
     const [activeStep, setActiveStep] = useState(0)
     const [fileDownloadUrl, setFileDownloadUrl] = useState("")
     const [errorSnack, setErrorSnack] = useState("")
+    const [currSimulatedOutput, setCurrSimulatedOutput] = useState<SimulationResult | null>(null)
+
+    const scenarioState = useForm<ScenarioProperties>({
+        mode: "onBlur",
+        defaultValues: {
+            num_processes: 10,
+            start_date: moment().format("YYYY-MM-DDTHH:mm:ss.sssZ")
+        }
+    })
+    const { getValues: getScenarioValues } = scenarioState
+
     const linkDownloadRef = useRef<HTMLAnchorElement>(null)
 
     const { xmlData, tasksFromModel, gateways } = useBpmnFile(bpmnFile)
@@ -149,12 +151,12 @@ const SimulationParameters = (props: SimulationParametersProps) => {
                     xmlData={xmlData}
                 />
             case 6:
-                return <SubmitStep
-                    formState={formState}
-                    scenarioState={scenarioState}
-                    setErrorMessage={setErrorMessage}
-                    bpmnFile={bpmnFile}
-                />
+                if (!!currSimulatedOutput)
+                    return <SimulationResults
+                        output={currSimulatedOutput}
+                    />
+
+                return <></>
         }
     };
 
@@ -175,7 +177,24 @@ const SimulationParameters = (props: SimulationParametersProps) => {
             default:
                 return <></>
         }
-    }
+    };
+
+    const onStartSimulation = () => {
+        const newJsonFile = fromContentToBlob(getValues())
+        const { num_processes: numProcesses, start_date: startDate } = getScenarioValues()
+        
+        simulate(startDate, numProcesses, newJsonFile, bpmnFile)
+            .then(((res: any) => {
+                setCurrSimulatedOutput(res.data)
+
+                // redirect to results step
+                setActiveStep(6)
+            }))
+            .catch((error: any) => {
+                console.log(error.response)
+                setErrorMessage(error.response.data.displayMessage)
+            })
+    };
 
     return (
         <form>
@@ -190,17 +209,26 @@ const SimulationParameters = (props: SimulationParametersProps) => {
                             </ButtonGroup>
                         </Grid>
                         <Grid item container xs={6} justifyContent="flex-end">
-                            <Button
-                                type="button"
-                                variant="outlined"
-                                onClick={(_e) => onDownload()}
-                            >Download as a .json</Button>
-                            <a
-                                style={{ display: "none" }}
-                                download={"json-file-name.json"}
-                                href={fileDownloadUrl}
-                                ref={linkDownloadRef}
-                            >Download json</a>
+                            <ButtonGroup>
+                                <Button>
+                                    View Model
+                                </Button>
+                                <Button
+                                    onClick={onStartSimulation}>
+                                    Start Simulation
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="outlined"
+                                    onClick={(_e) => onDownload()}
+                                >Download as a .json</Button>
+                                <a
+                                    style={{ display: "none" }}
+                                    download={"json-file-name.json"}
+                                    href={fileDownloadUrl}
+                                    ref={linkDownloadRef}
+                                >Download json</a>
+                            </ButtonGroup>
                         </Grid>
                     </Grid>
                     <Grid item container xs={12} className={classes.stepper} alignItems="center" justifyContent="center" >
