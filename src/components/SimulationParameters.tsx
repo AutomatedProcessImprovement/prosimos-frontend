@@ -17,6 +17,12 @@ import useFormState from './simulationParameters/useFormState';
 import CustomizedSnackbar from './results/CustomizedSnackbar';
 import SubmitStep from './SubmitStep';
 import useNewModel from './simulationParameters/useNewModel';
+import CallSplitIcon from '@mui/icons-material/CallSplit';
+import GroupsIcon from '@mui/icons-material/Groups';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 const styles = (theme: Theme) => createStyles({
     simParamsGrid: {
@@ -152,6 +158,25 @@ const SimulationParameters = (props: SimulationParametersProps) => {
         }
     };
 
+    const getStepIcon = (index: number): React.ReactNode => {
+        switch (index) {
+            case 0:
+                return <SettingsIcon/>
+            case 1:
+                return <DateRangeIcon/>
+            case 2:
+                return <GroupsIcon/>
+            case 3:
+                return <AssignmentIndIcon/>
+            case 4:
+                return <CallSplitIcon/>
+            case 6:
+                return <BarChartIcon/>
+            default:
+                return <></>
+        }
+    }
+
     return (
         <form>
             <Grid container alignItems="center" justifyContent="center" className={classes.simParamsGrid}>
@@ -179,10 +204,10 @@ const SimulationParameters = (props: SimulationParametersProps) => {
                         </Grid>
                     </Grid>
                     <Grid item container xs={12} className={classes.stepper} alignItems="center" justifyContent="center" >
-                        <Stepper nonLinear alternativeLabel activeStep={activeStep}>
+                        <Stepper nonLinear alternativeLabel activeStep={activeStep} connector={<></>}>
                             {Object.values(tabs_name).map((label, index) => (
                                 <Step key={label}>
-                                    <StepButton color="inherit" onClick={handleStep(index)}>
+                                    <StepButton color="inherit" onClick={handleStep(index)} icon={getStepIcon(index)}>
                                         {label}
                                     </StepButton>
                                 </Step>
