@@ -9,7 +9,6 @@ import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
 import ResourcePools from './ResourcePools';
 import ResourceCalendars from './ResourceCalendars';
 import ResourceAllocation from './resource_allocation/ResourceAllocation';
-import BPMNModelViewer from './model/BPMNModelViewer';
 import CaseCreation from './caseCreation/CaseCreation';
 import useBpmnFile from './simulationParameters/useBpmnFile';
 import useJsonFile from './simulationParameters/useJsonFile';
@@ -24,6 +23,7 @@ import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { simulate } from '../api/api';
 import SimulationResults, { SimulationResult } from './results/SimulationResults';
+import paths from "../router/paths";
 
 const styles = (theme: Theme) => createStyles({
     simParamsGrid: {
@@ -40,7 +40,6 @@ const tabs_name = {
     RESOURCES: "Resources",
     RESOURCE_ALLOCATION: "Resource Allocation",
     BRANCHING_PROB: "Branching Probabilities",
-    PROCESS_MODEL: "Process Model",
     SIMULATION_RESULTS: "Simulation Results"
 }
 
@@ -147,10 +146,6 @@ const SimulationParameters = (props: SimulationParametersProps) => {
                     gateways={gateways}
                 />
             case 5:
-                return <BPMNModelViewer
-                    xmlData={xmlData}
-                />
-            case 6:
                 if (!!currSimulatedOutput)
                     return <SimulationResults
                         output={currSimulatedOutput}
@@ -163,17 +158,17 @@ const SimulationParameters = (props: SimulationParametersProps) => {
     const getStepIcon = (index: number): React.ReactNode => {
         switch (index) {
             case 0:
-                return <SettingsIcon/>
+                return <SettingsIcon />
             case 1:
-                return <DateRangeIcon/>
+                return <DateRangeIcon />
             case 2:
-                return <GroupsIcon/>
+                return <GroupsIcon />
             case 3:
-                return <AssignmentIndIcon/>
+                return <AssignmentIndIcon />
             case 4:
-                return <CallSplitIcon/>
-            case 6:
-                return <BarChartIcon/>
+                return <CallSplitIcon />
+            case 5:
+                return <BarChartIcon />
             default:
                 return <></>
         }
@@ -182,9 +177,11 @@ const SimulationParameters = (props: SimulationParametersProps) => {
     const onStartSimulation = () => {
         const newJsonFile = fromContentToBlob(getValues())
         const { num_processes: numProcesses, start_date: startDate } = getScenarioValues()
-        
+        localStorage.setItem("bpmnContent", JSON.stringify(xmlData))
+
         simulate(startDate, numProcesses, newJsonFile, bpmnFile)
             .then(((res: any) => {
+                console.log(res.data)
                 setCurrSimulatedOutput(res.data)
 
                 // redirect to results step
@@ -194,6 +191,10 @@ const SimulationParameters = (props: SimulationParametersProps) => {
                 console.log(error.response)
                 setErrorMessage(error.response.data.displayMessage)
             })
+    };
+
+    const onViewModel = () => {
+        window.open(paths.MODEL_VIEWER, '_blank')
     };
 
     return (
@@ -210,7 +211,8 @@ const SimulationParameters = (props: SimulationParametersProps) => {
                         </Grid>
                         <Grid item container xs={6} justifyContent="flex-end">
                             <ButtonGroup>
-                                <Button>
+                                <Button
+                                    onClick={onViewModel}>
                                     View Model
                                 </Button>
                                 <Button

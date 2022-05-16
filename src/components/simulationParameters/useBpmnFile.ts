@@ -28,6 +28,7 @@ const useBpmnFile = (bpmnFile: any) => {
             const importXml = async () => {
                 const fileData = bpmnFileReader.result as string
                 setXmlData(fileData)
+                localStorage.setItem("bpmnContent", fileData)
 
                 const modeler = new BpmnModeler()
                 const result = await modeler.importXML(fileData)
