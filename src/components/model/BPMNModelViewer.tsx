@@ -1,28 +1,41 @@
 import { useEffect, useRef } from 'react';
 import BpmnViewer from "bpmn-js/lib/NavigatedViewer";
-import { Paper } from '@mui/material';
+import { Grid, Paper, Typography } from '@mui/material';
 
-interface ModelViewerProps {
-    xmlData: any
-}
-
-const BPMNModelViewer = (props: ModelViewerProps) => {
-    const { xmlData } = props
+const BPMNModelViewer = () => {
+    const xmlData = localStorage.getItem("bpmnContent")
     const modelViewerRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        const bpmnViewer = new BpmnViewer({
-            container: "#canvas"
-        })
-        bpmnViewer.importXML(xmlData)
-        const canvas = bpmnViewer.get('canvas')
-        canvas.zoom('fit-viewport')
-    }, [modelViewerRef, xmlData])
+        if (!!xmlData) {
+            const bpmnViewer = new BpmnViewer({
+                container: "#canvas"
+            })
+            bpmnViewer.importXML(xmlData, (err: any, warnings: any) => {
+                const canvas = bpmnViewer.get('canvas')
+                canvas.zoom('fit-viewport')
+            })
+        }
+    }, [xmlData]);
 
-    return (
-        <Paper elevation={5} sx={{ p:2 }} style={{ width: "100%" }}>
-            <div id="canvas" ref={modelViewerRef} style={{ width: "100%", height: "70vh" }}></div>
-        </Paper>
+    return (<Grid container alignItems="center" justifyContent="center" style={{ width: "100%", height: "100%", marginTop: "3vh" }}>
+        {(!!xmlData)
+            ?
+            <span>No BPMN file found</span>
+            :
+            <Grid container alignItems="center" justifyContent="center" style={{ width: "100%", height: "80vh" }}>
+                <Grid item xs={10} style={{ height: "100%" }} >
+                    <Paper style={{ height: "80vh" }} sx={{ p: 2 }}>
+                        <Typography variant="h6"> Model Viewer </Typography>
+                        <div
+                            id="canvas"
+                            ref={modelViewerRef}
+                            style={{ width: "100%", height: "70vh", padding: "2vh" }}
+                        />
+                    </Paper>
+                </Grid>
+            </Grid>}
+    </Grid>
     )
 }
 
