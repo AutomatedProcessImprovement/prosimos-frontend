@@ -24,6 +24,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { simulate } from '../api/api';
 import SimulationResults, { SimulationResult } from './results/SimulationResults';
 import paths from "../router/paths";
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 
 const styles = (theme: Theme) => createStyles({
     simParamsGrid: {
@@ -202,22 +203,26 @@ const SimulationParameters = (props: SimulationParametersProps) => {
             <Grid container alignItems="center" justifyContent="center" className={classes.simParamsGrid}>
                 <Grid item xs={10}>
                     <Grid container item xs={12}>
-                        <Grid item xs={6} justifyContent="flex-start">
+                        <Grid item xs={4} justifyContent="flex-start">
                             <ButtonGroup>
                                 <Button
                                     onClick={onUploadNewModel}
+                                    startIcon={<ArrowBackIosNewIcon />}
                                 >Upload new model</Button>
                             </ButtonGroup>
                         </Grid>
-                        <Grid item container xs={6} justifyContent="flex-end">
+                        <Grid item container xs={3} justifyContent="center">
+                            <ButtonGroup>
+                                <Button
+                                    onClick={onStartSimulation}
+                                >Start Simulation</Button>
+                            </ButtonGroup>
+                        </Grid>
+                        <Grid item container xs={5} justifyContent="flex-end">
                             <ButtonGroup>
                                 <Button
                                     onClick={onViewModel}>
                                     View Model
-                                </Button>
-                                <Button
-                                    onClick={onStartSimulation}>
-                                    Start Simulation
                                 </Button>
                                 <Button
                                     type="button"

@@ -219,7 +219,7 @@ const Upload = () => {
                         onClick={onContinueClick}
                         loading={loading}
                     >
-                        Continue
+                        Specify Scenario Parameters
                     </LoadingButton>
                 </Grid>
             </Grid>
