@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import moment from 'moment';
-import { Button, ButtonGroup, createStyles, Grid, Step, StepButton, Stepper, Theme } from '@mui/material';
-import { WithStyles, withStyles } from '@material-ui/core/styles';
+import { useTheme } from '@material-ui/core/styles';
+import { Button, ButtonGroup, Grid, Step, StepButton, StepIcon, Stepper, Theme } from '@mui/material';
 import { ScenarioProperties } from './formData';
 import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
 import ResourcePools from './ResourcePools';
@@ -25,15 +25,19 @@ import { simulate } from '../api/api';
 import SimulationResults, { SimulationResult } from './results/SimulationResults';
 import paths from "../router/paths";
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import { makeStyles } from "@material-ui/core/styles";
 
-const styles = (theme: Theme) => createStyles({
+const useStyles = makeStyles( (theme: Theme) => ({
     simParamsGrid: {
         marginTop: "2vh!important"
     },
-    stepper: {
+    stepperGrid: {
         marginTop: "3vh!important"
+    },
+    stepper: {
+        "& .Mui-active": { color: theme.palette.info.dark }
     }
-})
+}));
 
 const tabs_name = {
     CASE_CREATION: "Case Creation",
@@ -42,12 +46,12 @@ const tabs_name = {
     RESOURCE_ALLOCATION: "Resource Allocation",
     BRANCHING_PROB: "Branching Probabilities",
     SIMULATION_RESULTS: "Simulation Results"
-}
+};
 
 interface LocationState {
     bpmnFile: File
     jsonFile: File
-}
+};
 
 const fromContentToBlob = (values: any) => {
     const content = JSON.stringify(values)
@@ -55,10 +59,12 @@ const fromContentToBlob = (values: any) => {
     return blob
 };
 
-type SimulationParametersProps = WithStyles<typeof styles>
+const SimulationParameters = () => {
+    const classes = useStyles()
 
-const SimulationParameters = (props: SimulationParametersProps) => {
-    const { classes } = props
+    const theme = useTheme()
+    const activeColor = theme.palette.info.dark
+
     const { state } = useLocation()
     const { bpmnFile, jsonFile } = state as LocationState
 
@@ -157,22 +163,37 @@ const SimulationParameters = (props: SimulationParametersProps) => {
     };
 
     const getStepIcon = (index: number): React.ReactNode => {
+        const isActiveStep = activeStep === index
+        const styles = isActiveStep ? { color: activeColor } : {}
+
+        let Icon: React.ReactNode
         switch (index) {
             case 0:
-                return <SettingsIcon />
+                Icon = <SettingsIcon style={styles}/>
+                break
             case 1:
-                return <DateRangeIcon />
+                Icon = <DateRangeIcon style={styles}/>
+                break
             case 2:
-                return <GroupsIcon />
+                Icon = <GroupsIcon style={styles}/>
+                break
             case 3:
-                return <AssignmentIndIcon />
+                Icon = <AssignmentIndIcon style={styles}/>
+                break
             case 4:
-                return <CallSplitIcon />
+                Icon = <CallSplitIcon style={styles}/>
+                break
             case 5:
-                return <BarChartIcon />
+                Icon = <BarChartIcon style={styles}/>
+                break
             default:
                 return <></>
         }
+
+        return <StepIcon
+            active={activeStep === index}
+            icon={Icon}
+        />
     };
 
     const onStartSimulation = () => {
@@ -238,8 +259,8 @@ const SimulationParameters = (props: SimulationParametersProps) => {
                             </ButtonGroup>
                         </Grid>
                     </Grid>
-                    <Grid item container xs={12} className={classes.stepper} alignItems="center" justifyContent="center" >
-                        <Stepper nonLinear alternativeLabel activeStep={activeStep} connector={<></>}>
+                    <Grid item container xs={12} className={classes.stepperGrid} alignItems="center" justifyContent="center" >
+                        <Stepper className={classes.stepper} nonLinear alternativeLabel activeStep={activeStep} connector={<></>}>
                             {Object.values(tabs_name).map((label, index) => (
                                 <Step key={label}>
                                     <StepButton color="inherit" onClick={handleStep(index)} icon={getStepIcon(index)}>
@@ -262,4 +283,4 @@ const SimulationParameters = (props: SimulationParametersProps) => {
     );
 }
 
-export default withStyles(styles)(SimulationParameters);
+export default SimulationParameters;
