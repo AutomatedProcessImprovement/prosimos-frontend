@@ -5,3 +5,4 @@ export const MIN_LENGTH_REQUIRED_MSG = (entity_name: string) => {
     return `At least one ${entity_name} should be defined`
 }
 export const SHOULD_BE_NUMBER_MSG = "Should be a number"
+export const SHOULD_BE_GREATER_0_MSG = "Should be greater than 0"

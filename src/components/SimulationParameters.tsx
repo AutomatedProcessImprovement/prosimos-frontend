@@ -80,7 +80,7 @@ const SimulationParameters = () => {
             start_date: moment().format("YYYY-MM-DDTHH:mm:ss.sssZ")
         }
     })
-    const { getValues: getScenarioValues } = scenarioState
+    const { getValues: getScenarioValues, trigger: triggerScenario } = scenarioState
 
     const linkDownloadRef = useRef<HTMLAnchorElement>(null)
 
@@ -88,15 +88,20 @@ const SimulationParameters = () => {
     const { jsonData } = useJsonFile(jsonFile)
 
     const { formState } = useFormState(tasksFromModel, gateways, jsonData)
-    const { formState: { errors, isValid, isSubmitted, submitCount }, getValues } = formState
+    const { formState: { errors, isValid, isSubmitted, submitCount }, getValues, handleSubmit } = formState
+    const [ isScenarioParamsValid, setIsScenarioParamsValid ] = useState(true)
 
     const { onUploadNewModel } = useNewModel()
 
+    // validate both forms: scenatio params and json fields
     useEffect(() => {
-        if (isSubmitted && !isValid) {
+        // isValid doesn't work properly on init
+        const isJsonParamsValid = Object.keys(errors)?.length === 0
+
+        if (!isScenarioParamsValid || !isJsonParamsValid) {
             setErrorMessage("There are validation errors")
         }
-    }, [isValid, isSubmitted, submitCount, errors])
+    }, [isSubmitted, submitCount]);
 
     const handleStep = (index: number) => () => {
         setActiveStep(index)
@@ -196,14 +201,20 @@ const SimulationParameters = () => {
         />
     };
 
-    const onStartSimulation = () => {
+    const onStartSimulation = async () => {
+        const isScenarioValid = await triggerScenario()
+        setIsScenarioParamsValid(isScenarioValid)
+
+        // scenario params or json params or both are not valid
+        if (!isValid || !isScenarioValid) {
+            return;
+        }
+
         const newJsonFile = fromContentToBlob(getValues())
         const { num_processes: numProcesses, start_date: startDate } = getScenarioValues()
-        localStorage.setItem("bpmnContent", JSON.stringify(xmlData))
 
         simulate(startDate, numProcesses, newJsonFile, bpmnFile)
             .then(((res: any) => {
-                console.log(res.data)
                 setCurrSimulatedOutput(res.data)
 
                 // redirect to results step
@@ -235,7 +246,8 @@ const SimulationParameters = () => {
                         <Grid item container xs={3} justifyContent="center">
                             <ButtonGroup>
                                 <Button
-                                    onClick={onStartSimulation}
+                                    type="submit"
+                                    onClick={handleSubmit(onStartSimulation)}
                                 >Start Simulation</Button>
                             </ButtonGroup>
                         </Grid>

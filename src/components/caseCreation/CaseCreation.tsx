@@ -1,7 +1,7 @@
 import { Card, Grid, TextField, Typography } from "@mui/material";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { JsonData, ScenarioProperties } from "../formData";
-import { REQUIRED_ERROR_MSG } from "../validationMessages";
+import { REQUIRED_ERROR_MSG, SHOULD_BE_GREATER_0_MSG } from "../validationMessages";
 import AdapterMoment from "@mui/lab/AdapterMoment";
 import { DateTimePicker, LocalizationProvider } from "@mui/lab";
 import moment from "moment";
@@ -15,7 +15,7 @@ interface CaseCreationProps {
 
 const CaseCreation = (props: CaseCreationProps) => {
     const { control: formControl, formState: { errors } } = props.scenarioFormState
-
+    
     return (
         <Card elevation={5} sx={{ p: 2 }}>
         <Grid container spacing={2}>
@@ -28,7 +28,10 @@ const CaseCreation = (props: CaseCreationProps) => {
                 <Controller
                     name="num_processes"
                     control={formControl}
-                    rules={{ required: REQUIRED_ERROR_MSG }}
+                    rules={{ 
+                        required: REQUIRED_ERROR_MSG, 
+                        min: { value: 1, message: SHOULD_BE_GREATER_0_MSG }
+                    }}
                     render={({ field: { onChange, value } }) => (
                         <TextField
                             type="number"
@@ -40,7 +43,6 @@ const CaseCreation = (props: CaseCreationProps) => {
                             inputProps={{
                                 step: "1",
                                 min: "1",
-                                pattern: '[0-9]'
                             }}
                             error={errors?.num_processes !== undefined}
                             helperText={errors?.num_processes?.message || ""}
