@@ -207,7 +207,7 @@ const SimulationParameters = () => {
                 setCurrSimulatedOutput(res.data)
 
                 // redirect to results step
-                setActiveStep(6)
+                setActiveStep(5)
             }))
             .catch((error: any) => {
                 console.log(error.response)

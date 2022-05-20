@@ -11,30 +11,38 @@ const BPMNModelViewer = () => {
             const bpmnViewer = new BpmnViewer({
                 container: "#canvas"
             })
-            bpmnViewer.importXML(xmlData, (err: any, warnings: any) => {
-                const canvas = bpmnViewer.get('canvas')
-                canvas.zoom('fit-viewport')
-            })
+
+            const onImportXml = async () => {
+                const result = await bpmnViewer.importXML(xmlData)
+                const { warnings } = result;
+                if (warnings.length === 0) {
+                    const canvas = bpmnViewer.get('canvas')
+                    canvas.zoom('fit-viewport')
+                } 
+            };
+
+            try {
+                onImportXml()
+            } catch (err: any) {
+                console.log(err.message, err.warnings);
+            }
         }
     }, [xmlData]);
 
     return (<Grid container alignItems="center" justifyContent="center" style={{ width: "100%", height: "100%", marginTop: "3vh" }}>
-        {(!!xmlData)
-            ?
-            <Grid container alignItems="center" justifyContent="center" style={{ width: "100%", height: "80vh" }}>
-                <Grid item xs={10} style={{ height: "100%" }} >
-                    <Paper style={{ height: "80vh" }} sx={{ p: 2 }}>
-                        <Typography variant="h6"> Model Viewer </Typography>
-                        <div
-                            id="canvas"
-                            ref={modelViewerRef}
-                            style={{ width: "100%", height: "70vh", padding: "2vh" }}
-                        />
-                    </Paper>
-                </Grid>
+        <Grid container alignItems="center" justifyContent="center" style={{ width: "100%", height: "80vh" }}>
+            <Grid item xs={10} style={{ height: "100%" }} >
+                <Paper style={{ height: "80vh" }} sx={{ p: 2 }}>
+                    <Typography variant="h6"> Model Viewer </Typography>
+                    {(xmlData === null) && <span>No BPMN file found</span>}
+                    <div
+                        id="canvas"
+                        ref={modelViewerRef}
+                        style={{ width: "100%", height: "70vh", padding: "2vh" }}
+                    />
+                </Paper>
             </Grid>
-            :
-            <span>No BPMN file found</span>}
+        </Grid>
     </Grid>
     )
 }
