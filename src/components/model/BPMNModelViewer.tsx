@@ -21,8 +21,6 @@ const BPMNModelViewer = () => {
     return (<Grid container alignItems="center" justifyContent="center" style={{ width: "100%", height: "100%", marginTop: "3vh" }}>
         {(!!xmlData)
             ?
-            <span>No BPMN file found</span>
-            :
             <Grid container alignItems="center" justifyContent="center" style={{ width: "100%", height: "80vh" }}>
                 <Grid item xs={10} style={{ height: "100%" }} >
                     <Paper style={{ height: "80vh" }} sx={{ p: 2 }}>
@@ -34,7 +32,9 @@ const BPMNModelViewer = () => {
                         />
                     </Paper>
                 </Grid>
-            </Grid>}
+            </Grid>
+            :
+            <span>No BPMN file found</span>}
     </Grid>
     )
 }
