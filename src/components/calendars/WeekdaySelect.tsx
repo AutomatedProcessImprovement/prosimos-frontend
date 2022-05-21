@@ -9,12 +9,13 @@ interface WeekdaySelectProps<FieldValues>{
 }
 
 const WeekdaySelect = <FieldValues,>(props: WeekdaySelectProps<FieldValues>) => {
+    console.log(props.fieldError?.message)
     return (
         <TextField 
             sx={{ width: "100%" }}
             {...props.field}
             error={props.fieldError !== undefined}
-            helperText={props.fieldError?.message}
+            helperText={props.fieldError?.message || ""}
             label={props.label}
             variant="standard"
             select

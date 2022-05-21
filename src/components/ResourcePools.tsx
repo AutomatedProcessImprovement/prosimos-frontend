@@ -121,7 +121,7 @@ const Row = (props: RowProps) => {
                                     error={areAnyErrors}
                                     helperText={errorMessage}
                                     variant="standard"
-                                    placeholder="Resource pool name"
+                                    placeholder="Resource Pool Name"
                                 />
                             )
                         }}

@@ -42,7 +42,7 @@ const TimePeriodGridItemsWithAdd = <FieldValues,>(props: TimePeriodGridItemsWith
                 <TimePeriodGridItem
                     key={item.key}
                     formState={props.formState}
-                    objectFieldName={`${objectFieldNamePart}.${index}` as unknown as keyof FieldValues}
+                    objectFieldName={`${objectFieldNamePart}.${index}`}
                     isWithDeleteButton={!isWithoutDeleteButton}
                     timePeriodIndex={index}
                     onDelete={props.onTimePeriodRemove}
@@ -60,7 +60,7 @@ const TimePeriodGridItemsWithAdd = <FieldValues,>(props: TimePeriodGridItemsWith
                             ref={listRef}
                             width={width}
                             height={height}
-                            rowHeight={50}
+                            rowHeight={70}
                             rowRenderer={renderRow}
                             rowCount={fields.length}
                             overscanRowCount={10}
