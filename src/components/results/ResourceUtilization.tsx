@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { TableContainer, Paper, Toolbar, Typography, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
+import { millisecondsToNearest } from "../../helpers/timeConversions";
 
 interface ResourceUtilizationProps {
     data: any
@@ -27,6 +28,12 @@ const ResourceUtilization = (props: ResourceUtilizationProps) => {
         setProcessedData(processed)
     }, [data])
 
+    const formatSeconds = (seconds: string) => {
+        const secNum = parseFloat(seconds)
+        const millisecNum = secNum * 1000
+        return millisecondsToNearest(millisecNum.toString())
+    };
+
     return (
         <TableContainer component={Paper}>
             <Toolbar >
@@ -52,10 +59,10 @@ const ResourceUtilization = (props: ResourceUtilizationProps) => {
                             Tasks Allocated
                         </TableCell>
                         <TableCell align="center" colSpan={1}>
-                            Worked Time (seconds)
+                            Worked Time
                         </TableCell>
                         <TableCell align="center" colSpan={1}>
-                            Available Time (seconds)
+                            Available Time
                         </TableCell>
                     </TableRow>
                 </TableHead>
@@ -66,8 +73,8 @@ const ResourceUtilization = (props: ResourceUtilizationProps) => {
                             <TableCell>{row["Resource name"]}</TableCell>
                             <TableCell align="right">{row["Utilization Ratio"]}</TableCell>
                             <TableCell align="right">{row["Tasks Allocated"]}</TableCell>
-                            <TableCell align="right">{row["Worked Time (seconds)"]}</TableCell>
-                            <TableCell align="right">{row["Available Time (seconds)"]}</TableCell>
+                            <TableCell align="right">{formatSeconds(row["Worked Time (seconds)"])}</TableCell>
+                            <TableCell align="right">{formatSeconds(row["Available Time (seconds)"])}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
