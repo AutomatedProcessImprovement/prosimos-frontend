@@ -5,7 +5,7 @@ import { AllModelTasks, Gateways } from "../modelData";
 import { defaultTemplateSchedule, defaultArrivalTimeDistribution, defaultArrivalCalendarArr, defaultResourceProfiles } from "./defaultValues";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, SUMMATION_ONE_MSG } from "./../validationMessages";
+import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, SUMMATION_ONE_MSG, INVALID_TIME_FORMAT } from "./../validationMessages";
 
 const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonData?: JsonData) => {
     const [data, setData] = useState({})
@@ -47,8 +47,8 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
                 yup.object().shape({
                 from: yup.string().required(REQUIRED_ERROR_MSG),
                 to: yup.string().required(REQUIRED_ERROR_MSG),
-                beginTime: yup.string().required(REQUIRED_ERROR_MSG),
-                endTime: yup.string().required(REQUIRED_ERROR_MSG),
+                beginTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
+                endTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
             })
             )
             .required()
@@ -107,8 +107,8 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
                             yup.object().shape({
                                 from: yup.string().required(REQUIRED_ERROR_MSG),
                                 to: yup.string().required(REQUIRED_ERROR_MSG),
-                                beginTime: yup.string().required(REQUIRED_ERROR_MSG),
-                                endTime: yup.string().required(REQUIRED_ERROR_MSG),
+                                beginTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
+                                endTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
                             })
                         )
                         .required()
