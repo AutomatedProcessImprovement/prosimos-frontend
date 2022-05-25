@@ -5,10 +5,11 @@ import { REQUIRED_ERROR_MSG } from "../validationMessages";
 import TimePickerController from "./TimePickerController";
 import WeekdaySelect from "./WeekdaySelect";
 import DeleteIcon from '@mui/icons-material/Delete';
+import { useState, useEffect } from "react";
 
 interface TimePeriodGridItemProps<FieldValues> {
     formState: UseFormReturn<FieldValues, object>
-    objectFieldName: keyof FieldValues
+    objectFieldName: string
     timePeriodIndex?: number
     isWithDeleteButton: boolean
     onDelete?: (index: number) => void
@@ -16,7 +17,17 @@ interface TimePeriodGridItemProps<FieldValues> {
 
 const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldValues>) => {
     const { formState: { control: formControl, formState: { errors } }, objectFieldName, isWithDeleteButton, timePeriodIndex, onDelete } = props
-    const currErrors = (errors as any)?.[objectFieldName]
+    const [currErrors, setCurrErrors] = useState({})
+
+    useEffect(() => {
+        if (Object.keys(errors).length !== 0) {
+            let currErrors = errors as any
+            objectFieldName.split(".").forEach((key) => {
+                currErrors = currErrors[key];
+            })
+            setCurrErrors(currErrors)
+        }
+    }, [errors, objectFieldName])
 
     const onDeleteClicked = () => {
         if (onDelete && timePeriodIndex !== undefined) {
@@ -35,7 +46,7 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
                         <WeekdaySelect
                             field={field}
                             label="Begin Day"
-                            fieldError={currErrors?.from}
+                            fieldError={(currErrors as any)?.from}
                         />
                     )}
                 />
@@ -49,7 +60,7 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
                         <WeekdaySelect
                             field={field}
                             label="End Day"
-                            fieldError={currErrors?.to}
+                            fieldError={(currErrors as any)?.to}
                         />
                     )}
                 />
@@ -59,7 +70,7 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
                     name={`${objectFieldName}.beginTime` as Path<FieldValues>}
                     formState={props.formState}
                     label="Begin Time"
-                    fieldError={currErrors?.beginTime}
+                    fieldError={(currErrors as any)?.beginTime}
                 />
             </Grid>
             <Grid item xs={2.5}>
@@ -67,10 +78,10 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
                     name={`${objectFieldName}.endTime` as Path<FieldValues>}
                     formState={props.formState}
                     label="End Time"
-                    fieldError={currErrors?.endTime}
+                    fieldError={(currErrors as any)?.endTime}
                 />
             </Grid>
-            {isWithDeleteButton && <Grid item xs={2} style= {{
+            {isWithDeleteButton && <Grid item xs={2} style={{
                 textAlign: 'center',
                 display: 'flex',
                 justifyContent: 'center',

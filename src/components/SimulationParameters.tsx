@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import moment from 'moment';
 import { useTheme } from '@material-ui/core/styles';
-import { Button, ButtonGroup, Grid, Step, StepButton, StepIcon, Stepper, Theme } from '@mui/material';
+import { Badge, Button, ButtonGroup, Grid, Step, StepButton, StepIcon, Stepper, Theme } from '@mui/material';
 import { ScenarioProperties } from './formData';
 import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
 import ResourcePools from './ResourcePools';
@@ -26,6 +26,8 @@ import SimulationResults, { SimulationResult } from './results/SimulationResults
 import paths from "../router/paths";
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import { makeStyles } from "@material-ui/core/styles";
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const useStyles = makeStyles( (theme: Theme) => ({
     simParamsGrid: {
@@ -64,6 +66,8 @@ const SimulationParameters = () => {
 
     const theme = useTheme()
     const activeColor = theme.palette.info.dark
+    const successColor = theme.palette.success.light
+    const errorColor = theme.palette.error.light
 
     const { state } = useLocation()
     const { bpmnFile, jsonFile } = state as LocationState
@@ -80,7 +84,7 @@ const SimulationParameters = () => {
             start_date: moment().format("YYYY-MM-DDTHH:mm:ss.sssZ")
         }
     })
-    const { getValues: getScenarioValues } = scenarioState
+    const { getValues: getScenarioValues, trigger: triggerScenario, formState: { errors: scenarioErrors} } = scenarioState
 
     const linkDownloadRef = useRef<HTMLAnchorElement>(null)
 
@@ -88,15 +92,20 @@ const SimulationParameters = () => {
     const { jsonData } = useJsonFile(jsonFile)
 
     const { formState } = useFormState(tasksFromModel, gateways, jsonData)
-    const { formState: { errors, isValid, isSubmitted, submitCount }, getValues } = formState
+    const { formState: { errors, isValid, isSubmitted, submitCount }, getValues, handleSubmit } = formState
+    const [ isScenarioParamsValid, setIsScenarioParamsValid ] = useState(true)
 
     const { onUploadNewModel } = useNewModel()
 
+    // validate both forms: scenatio params and json fields
     useEffect(() => {
-        if (isSubmitted && !isValid) {
+        // isValid doesn't work properly on init
+        const isJsonParamsValid = Object.keys(errors)?.length === 0
+
+        if (!isScenarioParamsValid || !isJsonParamsValid) {
             setErrorMessage("There are validation errors")
         }
-    }, [isValid, isSubmitted, submitCount, errors])
+    }, [isSubmitted, submitCount]);
 
     const handleStep = (index: number) => () => {
         setActiveStep(index)
@@ -161,49 +170,86 @@ const SimulationParameters = () => {
                 return <></>
         }
     };
-
+    
     const getStepIcon = (index: number): React.ReactNode => {
         const isActiveStep = activeStep === index
         const styles = isActiveStep ? { color: activeColor } : {}
 
         let Icon: React.ReactNode
+        let currError: any
+        let lastStep = false
         switch (index) {
             case 0:
+                currError = errors.arrival_time_calendar || errors.arrival_time_distribution || scenarioErrors
                 Icon = <SettingsIcon style={styles}/>
                 break
             case 1:
-                Icon = <DateRangeIcon style={styles}/>
+                currError = errors.resource_calendars
+                Icon = <DateRangeIcon style={styles}/> 
                 break
             case 2:
-                Icon = <GroupsIcon style={styles}/>
+                currError = errors.resource_profiles
+                Icon =  <GroupsIcon style={styles}/>
                 break
             case 3:
+                currError = errors.task_resource_distribution
                 Icon = <AssignmentIndIcon style={styles}/>
                 break
             case 4:
+                currError = errors.gateway_branching_probabilities
                 Icon = <CallSplitIcon style={styles}/>
                 break
             case 5:
+                lastStep = true
                 Icon = <BarChartIcon style={styles}/>
                 break
             default:
                 return <></>
         }
 
+        const getBadgeContent = (areAnyErrors: boolean) => {
+            let BadgeIcon: typeof CancelIcon | typeof CheckCircleIcon, color: string
+            if (areAnyErrors) {
+                BadgeIcon = CancelIcon
+                color = errorColor
+            } else {
+                BadgeIcon = CheckCircleIcon
+                color = successColor
+            }
+
+            return (<BadgeIcon style={{ marginRight: "-9px", color: color}} />)
+        }
+
+        const areAnyErrors = currError && (currError.length > 0 || Object.keys(currError)?.length > 0)
+        const finalIcon = 
+            (isSubmitted && !lastStep)
+            ? ( <Badge 
+                    badgeContent={getBadgeContent(areAnyErrors)}
+                    overlap="circular"> {Icon} 
+                </Badge>
+            )
+            : Icon
+
         return <StepIcon
             active={activeStep === index}
-            icon={Icon}
+            icon={finalIcon}
         />
     };
 
-    const onStartSimulation = () => {
+    const onStartSimulation = async () => {
+        const isScenarioValid = await triggerScenario()
+        setIsScenarioParamsValid(isScenarioValid)
+
+        // scenario params or json params or both are not valid
+        if (!isValid || !isScenarioValid) {
+            return;
+        }
+
         const newJsonFile = fromContentToBlob(getValues())
         const { num_processes: numProcesses, start_date: startDate } = getScenarioValues()
-        localStorage.setItem("bpmnContent", JSON.stringify(xmlData))
 
         simulate(startDate, numProcesses, newJsonFile, bpmnFile)
             .then(((res: any) => {
-                console.log(res.data)
                 setCurrSimulatedOutput(res.data)
 
                 // redirect to results step
@@ -235,7 +281,8 @@ const SimulationParameters = () => {
                         <Grid item container xs={3} justifyContent="center">
                             <ButtonGroup>
                                 <Button
-                                    onClick={onStartSimulation}
+                                    type="submit"
+                                    onClick={handleSubmit(onStartSimulation)}
                                 >Start Simulation</Button>
                             </ButtonGroup>
                         </Grid>

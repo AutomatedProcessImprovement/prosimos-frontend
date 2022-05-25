@@ -1,11 +1,14 @@
-import { Dialog, DialogTitle, DialogContent, Grid, TextField, DialogActions, Button, MenuItem } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import yup from "../../yup-extended";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
+import { Dialog, DialogTitle, DialogContent, Grid, TextField, DialogActions, Button, MenuItem } from "@mui/material";
 import CalendarNameDialog from "./CalendarNameDialog";
 import { JsonData, ResourceCalendar } from "../formData";
 import { UpdateResourceCalendarRequest } from "./ResourceProfilesTable";
 import { defaultWorkWeekTimePeriod } from "../simulationParameters/defaultValues";
 import TimePeriodGridItemsWithAdd from "../calendars/TimePeriodGridItemsWithAdd";
+import { INVALID_TIME_FORMAT } from "./../validationMessages";
 
 export interface ModalInfo {
     poolIndex: number
@@ -31,6 +34,22 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
     const [currCalendarIndex, setCurrCalendarIndex] = useState<number>()
     const [isNameDialogOpen, setIsNameDialogOpen] = useState<boolean>(false)
     const allCalendars = getValues("resource_calendars")
+    
+    const resourceCalendarsValidationSchema = useMemo(() => (
+        yup.object().shape({
+            id: yup.string().required(),
+            name: yup.string().required(),
+            time_periods: yup.array()
+                .of(
+                    yup.object().shape({
+                        from: yup.string(),
+                        to: yup.string(),
+                        beginTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
+                        endTime: yup.string().timeFormat(INVALID_TIME_FORMAT)
+                    })
+                )
+        })
+    ), []);
 
     useEffect(() => {
         const currCalendarIndex = allCalendars.findIndex((item) => item.id === calendarId)
@@ -38,12 +57,18 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
         setInitialCalendarIndex(currCalendarIndex)
     }, [calendarId, allCalendars])
 
-    const currCalendar = (currCalendarIndex !== undefined) ? allCalendars[currCalendarIndex] : {} 
+    const currCalendar = (currCalendarIndex !== undefined) ? allCalendars[currCalendarIndex] : {}
     const formState = useForm<ResourceCalendar>({
+        resolver: yupResolver(resourceCalendarsValidationSchema),
         mode: "onBlur", // validate on blur
         defaultValues: currCalendar
     })
-    const { formState: { isDirty }, control: modalFormControl, reset, getValues: getModalValues } = formState
+
+    const {
+        formState: { isDirty },
+        control: modalFormControl, reset, getValues: getModalValues,
+        trigger: triggerCalendarValidation
+    } = formState
 
     useEffect(() => {
         const currCalendar = (currCalendarIndex !== undefined) ? allCalendars[currCalendarIndex] : {}
@@ -59,12 +84,18 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
     const handleCalendarSelectChange = (event: any) => {
         const selectedCalendarIndex = event.target.value
         setCurrCalendarIndex(Number(selectedCalendarIndex))
-        
+
         const newSelectedCalendar = allCalendars[selectedCalendarIndex]
         reset(newSelectedCalendar)
     }
 
-    const onModalSave = () => {
+    const onModalSave = async () => {
+        const isValid = await triggerCalendarValidation()
+
+        if (!isValid) {
+            return
+        }
+        
         if (isDirty) {
             setIsNameDialogOpen(true)
         } else {
@@ -116,7 +147,7 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
             PaperProps={{
                 sx: {
                     minHeight: "60vh",
-                    minWidth: "70vh" 
+                    minWidth: "70vh"
                 }
             }}
         >
