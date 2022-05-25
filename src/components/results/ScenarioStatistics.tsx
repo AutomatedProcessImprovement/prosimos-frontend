@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { TableContainer, Paper, Toolbar, Typography, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
+import { millisecondsToNearest } from "../../helpers/timeConversions";
 
 interface ScenarioStatisticsProps {
     data: any
@@ -79,13 +80,13 @@ const ScenarioStatistics = (props: ScenarioStatisticsProps) => {
                 </TableHead>
                 <TableBody>
                     {processedData.map((row: any) => (
-                        <TableRow key={`${row["KPI"]}`}>
+                        <TableRow key={`${row["KPI"]}`} hover>
                             <TableCell component="th" scope="row">{row["KPI_display_name"]}</TableCell>
-                            <TableCell align="right">{row["Min"]}</TableCell>
-                            <TableCell align="right">{row["Max"]}</TableCell>
-                            <TableCell align="right">{row["Average"]}</TableCell>
-                            <TableCell align="right">{row["Accumulated Value"]}</TableCell>
-                            <TableCell align="right">{row["Trace Ocurrences"]}</TableCell>
+                            <TableCell align="center" >{millisecondsToNearest(row["Min"] as string)}</TableCell>
+                            <TableCell align="center">{millisecondsToNearest(row["Max"] as string)}</TableCell>
+                            <TableCell align="center">{millisecondsToNearest(row["Average"] as string)}</TableCell>
+                            <TableCell align="center">{millisecondsToNearest(row["Accumulated Value"] as string)}</TableCell>
+                            <TableCell align="center">{row["Trace Ocurrences"]}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
