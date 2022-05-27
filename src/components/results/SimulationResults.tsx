@@ -112,6 +112,11 @@ const SimulationResults = (props: SimulationResultsProps) => {
                 </Grid>
             </Grid>
             <Grid item xs={10} className={classes.resultsGrid}>
+                <ScenarioStatistics
+                    data={currOutput["OverallScenarioStatistics"]}
+                />
+            </Grid>
+            <Grid item xs={10} className={classes.resultsGrid}>
                 <TaskStatistics
                     data={currOutput["IndividualTaskStatistics"]}
                 />
@@ -119,11 +124,6 @@ const SimulationResults = (props: SimulationResultsProps) => {
             <Grid item xs={10} className={classes.resultsGrid}>
                 <ResourceUtilization
                     data={currOutput["ResourceUtilization"]}
-                />
-            </Grid>
-            <Grid item xs={10} className={classes.resultsGrid}>
-                <ScenarioStatistics
-                    data={currOutput["OverallScenarioStatistics"]}
                 />
             </Grid>
         </Grid>
