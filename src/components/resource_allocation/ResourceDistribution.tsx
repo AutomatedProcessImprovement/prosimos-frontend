@@ -1,13 +1,12 @@
 import { Grid, IconButton, Paper, Typography } from "@mui/material";
 import { UseFormReturn } from "react-hook-form";
 import TimeDistribution from "../distributions/TimeDistribution";
-import { JsonData, ProbabilityDistributionForResource } from "../formData";
+import { JsonData } from "../formData";
 import ResourceSelect from "./ResourceSelect";
 import DeleteIcon from '@mui/icons-material/Delete';
 
 interface ResourceDistributionProps {
     formState: UseFormReturn<JsonData, object>
-    resourceDistr: ProbabilityDistributionForResource
     allocationIndex: number
     resourceIndex: number
     allowedResources: { [key: string]: { name: string } }
@@ -16,7 +15,7 @@ interface ResourceDistributionProps {
 }
 
 const ResourceDistribution = (props: ResourceDistributionProps) => {
-    const { formState, allocationIndex, resourceIndex, allowedResources, setErrorMessage } = props
+    const { formState, allocationIndex, resourceIndex, allowedResources, setErrorMessage, onResourceAllocationDelete } = props
     const { formState: { errors } } = formState
     
     const currentErrors = errors?.task_resource_distribution?.[allocationIndex]?.resources?.[resourceIndex]
@@ -26,7 +25,7 @@ const ResourceDistribution = (props: ResourceDistributionProps) => {
     }
 
     const onDelete = () => {
-        props.onResourceAllocationDelete(resourceIndex)
+        onResourceAllocationDelete(resourceIndex)
     }
 
     return (
