@@ -2,9 +2,6 @@ import { Grid, TextField } from "@mui/material";
 import { Controller, FieldError, useFieldArray, UseFormReturn } from "react-hook-form";
 import { JsonData } from "../formData";
 import { REQUIRED_ERROR_MSG } from "../validationMessages";
-import AddIcon from '@mui/icons-material/Add'
-import RemoveIcon from '@mui/icons-material/Remove';
-import GridItemWithCenteredIcon from "./GridItemWithCenteredIcon";
 import DistrFuncSelect from "./DistrFuncSelect";
 import { DISTR_FUNC } from "./DistrFuncSelect"
 
@@ -39,24 +36,26 @@ const distrFuncWithNumOfParams: { [key in DISTR_FUNC]: any [] } = {
 const TimeDistribution = (props: TimeDistributionProps) => {
     const { control: formControl, setValue } = props.formState
     const { objectNamePath, errors: distrErrors } = props
-    const { fields, append, remove, replace } = useFieldArray({
+    const { fields, replace } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: `${objectNamePath}.distribution_params` as AllowedDistrParamsName
-    })
-    
-    const onDistrFuncParamAdd = () => append({ value: 0 })
+    });
 
-    const onDistrFuncParamRemove = () => {
-        const fieldsLength = fields.length
-        if (fieldsLength === 2) {
-            props.setErrorMessage("Two required parameters should be defined")
-            return
-        }
+    // TODO: will be back once we allow user all set of the possible distribution functions
 
-        const lastIndex = fieldsLength - 1
-        remove(lastIndex)
-    };
+    // const onDistrFuncParamAdd = () => append({ value: 0 })
+
+    // const onDistrFuncParamRemove = () => {
+    //     const fieldsLength = fields.length
+    //     if (fieldsLength === 2) {
+    //         props.setErrorMessage("Two required parameters should be defined")
+    //         return
+    //     }
+
+    //     const lastIndex = fieldsLength - 1
+    //     remove(lastIndex)
+    // };
 
     const updateParamsNum = (newDistrFunc: DISTR_FUNC) => {
         const newDefaultParams = distrFuncWithNumOfParams[newDistrFunc]
