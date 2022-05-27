@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
 import { TableContainer, Paper, Toolbar, Typography, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
 import { millisecondsToNearest } from "../../helpers/timeConversions";
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles(() => ({
+    borderRight: {
+        borderRight: "1px solid rgba(224, 224, 224, 1)"
+    }
+}));
 
 interface ScenarioStatisticsProps {
     data: any
@@ -17,6 +24,7 @@ const makeFirstLetterUppercase = (str: string) => {
 const ScenarioStatistics = (props: ScenarioStatisticsProps) => {
     const { data } = props
     const [processedData, setProcessedData] = useState([])
+    const classes = useStyles()
 
     useEffect(() => {
         const processed = data.map((item: any) => {
@@ -81,12 +89,12 @@ const ScenarioStatistics = (props: ScenarioStatisticsProps) => {
                 <TableBody>
                     {processedData.map((row: any) => (
                         <TableRow key={`${row["KPI"]}`} hover>
-                            <TableCell component="th" scope="row">{row["KPI_display_name"]}</TableCell>
-                            <TableCell align="center" >{millisecondsToNearest(row["Min"] as string)}</TableCell>
-                            <TableCell align="center">{millisecondsToNearest(row["Max"] as string)}</TableCell>
-                            <TableCell align="center">{millisecondsToNearest(row["Average"] as string)}</TableCell>
-                            <TableCell align="center">{millisecondsToNearest(row["Accumulated Value"] as string)}</TableCell>
-                            <TableCell align="center">{row["Trace Ocurrences"]}</TableCell>
+                            <TableCell component="th" scope="row" className={classes.borderRight}>{row["KPI_display_name"]}</TableCell>
+                            <TableCell align="center" className={classes.borderRight}>{millisecondsToNearest(row["Min"] as string)}</TableCell>
+                            <TableCell align="center" className={classes.borderRight}>{millisecondsToNearest(row["Max"] as string)}</TableCell>
+                            <TableCell align="center" className={classes.borderRight}>{millisecondsToNearest(row["Average"] as string)}</TableCell>
+                            <TableCell align="center" className={classes.borderRight}>{millisecondsToNearest(row["Accumulated Value"] as string)}</TableCell>
+                            <TableCell align="center" className={classes.borderRight}>{row["Trace Ocurrences"]}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
