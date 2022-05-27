@@ -68,7 +68,7 @@ const ResourceUtilization = (props: ResourceUtilizationProps) => {
                 </TableHead>
                 <TableBody>
                     {processedData.map((row: any) => (
-                        <TableRow key={`${row["Resource ID"]}`}>
+                        <TableRow key={`${row["Resource ID"]}`} hover>
                             <TableCell component="th" scope="row">{row["Pool name"]}</TableCell>
                             <TableCell>{row["Resource name"]}</TableCell>
                             <TableCell align="right">{row["Utilization Ratio"]}</TableCell>

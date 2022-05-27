@@ -11,6 +11,9 @@ const useStyles = makeStyles(() => ({
         left: 0,
         zIndex: 1,
     },
+    borderRight: {
+        borderRight: "1px solid rgba(224, 224, 224, 1)"
+    }
 }));
 
 interface TaskStatisticsProps {
@@ -54,23 +57,24 @@ const TaskStatistics = (props: TaskStatisticsProps) => {
         const isTimeValue = (keyName !== SECTIONS_ORDER.Cost) ? true : false
         const values = isTimeValue
         ? [
-            millisecondsToNearest(row[`Min ${keyName}`] as string),
-            millisecondsToNearest(row[`Avg ${keyName}`] as string),
-            millisecondsToNearest(row[`Max ${keyName}`] as string),
-            millisecondsToNearest(row[`Total ${keyName}`] as string)
+            { value: millisecondsToNearest(row[`Min ${keyName}`] as string), measure: "min" },
+            { value: millisecondsToNearest(row[`Avg ${keyName}`] as string), measure: "avg" },
+            { value: millisecondsToNearest(row[`Max ${keyName}`] as string), measure: "max" },
+            { value: millisecondsToNearest(row[`Total ${keyName}`] as string), measure: "total" }
         ]
         : [
-            row[`Min ${keyName}`],
-            row[`Avg ${keyName}`],
-            row[`Max ${keyName}`],
-            row[`Total ${keyName}`]
+            { value: row[`Min ${keyName}`], measure: "min" },
+            { value: row[`Avg ${keyName}`], measure: "avg" },
+            { value: row[`Max ${keyName}`], measure: "max" },
+            { value: row[`Total ${keyName}`], measure: "total" }
         ]
 
         return (
             <React.Fragment key={`${keyName}_groupedValues`}>
-                {values.map((value) => (
-                    <TableCell colSpan={2} align="center">{value}</TableCell>
-                ))}
+                {values.map(({ value, measure}) => {
+                    const className = (measure === "total") ? classes.borderRight : undefined
+                    return <TableCell colSpan={2} align="center" className={className}>{value}</TableCell>
+                })}
             </React.Fragment>
         )
     }
@@ -80,7 +84,7 @@ const TaskStatistics = (props: TaskStatisticsProps) => {
             <TableCell align="center" colSpan={2} >Min</TableCell>
             <TableCell align="center" colSpan={2} >Avg</TableCell>
             <TableCell align="center" colSpan={2} >Max</TableCell>
-            <TableCell align="center" colSpan={2} >Total</TableCell>
+            <TableCell align="center" colSpan={2} className={classes.borderRight}>Total</TableCell>
         </React.Fragment>
     )
 
@@ -96,21 +100,21 @@ const TaskStatistics = (props: TaskStatisticsProps) => {
             <Table size="small">
                 <TableHead>
                     <TableRow>
-                        <TableCell align="center" colSpan={1} className={classes.stickyFirstColumn}>
+                        <TableCell align="center" colSpan={1} className={`${classes.stickyFirstColumn}`} >
                             Name
                         </TableCell>
                         <TableCell align="center" colSpan={1}>
                             Count
                         </TableCell>
                         {Object.values(SECTIONS_ORDER).map((keyName: string) => (
-                            <TableCell key={`${keyName}_headcell`} align="center" colSpan={4}>
+                            <TableCell key={`${keyName}_headcell`} align="center" colSpan={8}>
                                 {keyName}
                             </TableCell>
                         ))}
                     </TableRow>
                     <TableRow>
-                        <TableCell className={classes.stickyFirstColumn}></TableCell>
-                        <TableCell></TableCell>
+                        <TableCell className={`${classes.stickyFirstColumn} ${classes.borderRight}`}></TableCell>
+                        <TableCell className={classes.borderRight}></TableCell>
                         {Object.keys(SECTIONS_ORDER).map((id: string) =>
                             getSubHeaders(id)
                         )}
@@ -120,13 +124,20 @@ const TaskStatistics = (props: TaskStatisticsProps) => {
                     {processedData.map((row: any, index: number) => (
                         <TableRow
                             key={`${row["Name"]}_${index}`}
+                            hover
                         >
-                            <TableCell component="th" scope="row" align="left" className={classes.stickyFirstColumn}>{row["Name"]}</TableCell>
-                            <TableCell align="center">{row["Count"]}</TableCell>
+                            <TableCell 
+                                component="th"
+                                scope="row"
+                                align="left"
+                                className={`${classes.stickyFirstColumn} ${classes.borderRight}`}>{row["Name"]}</TableCell>
+                            <TableCell
+                                align="center"
+                                className={classes.borderRight}
+                            >{row["Count"]}</TableCell>
                             {Object.values(SECTIONS_ORDER).map((keyName: string) => (
                                 getGroupedValues(row, keyName)
                             ))}
-                            <TableCell></TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
