@@ -28,7 +28,7 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
     const {
         openModal, handleCloseModal, handleSaveModal,
         formState: { getValues },
-        detailModal: { poolIndex, resourceIndex, calendarId }
+        detailModal: { resourceIndex, calendarId }
     } = props
     const [initialCalendarIndex, setInitialCalendarIndex] = useState<number>()
     const [currCalendarIndex, setCurrCalendarIndex] = useState<number>()

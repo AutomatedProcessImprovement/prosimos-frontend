@@ -52,6 +52,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
             setFocus(`resource_calendars.${firstVisibleRowBefore}.name`)
             setIsRowAdding(false)
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fields, isRowAdding]);
 
     const onAddNewCalendar = () => {

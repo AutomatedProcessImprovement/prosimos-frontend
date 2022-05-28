@@ -20,6 +20,7 @@ const FileUploader = (props: FileUploaderProps) => {
                 inputRef.current.value = ""
             }
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.file]);
 
     const onFileChange = (event: any) => {

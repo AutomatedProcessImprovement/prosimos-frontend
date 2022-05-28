@@ -191,7 +191,7 @@ const ResourcePools = (props: ResourcePoolsProps) => {
             setFocus(`resource_profiles.1.name`)
             setIsRowAdding(false)
         }
-
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [fields, isRowAdding])
 
     const onNewPoolCreation = async () => {

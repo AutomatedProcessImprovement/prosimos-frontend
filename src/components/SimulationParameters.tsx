@@ -88,7 +88,7 @@ const SimulationParameters = () => {
 
     const linkDownloadRef = useRef<HTMLAnchorElement>(null)
 
-    const { xmlData, tasksFromModel, gateways } = useBpmnFile(bpmnFile)
+    const { tasksFromModel, gateways } = useBpmnFile(bpmnFile)
     const { jsonData } = useJsonFile(jsonFile)
 
     const { formState } = useFormState(tasksFromModel, gateways, jsonData)
@@ -105,6 +105,7 @@ const SimulationParameters = () => {
         if (!isScenarioParamsValid || !isJsonParamsValid) {
             setErrorMessage("There are validation errors")
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isSubmitted, submitCount]);
 
     const handleStep = (index: number) => () => {

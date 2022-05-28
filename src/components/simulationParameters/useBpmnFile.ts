@@ -32,11 +32,15 @@ const useBpmnFile = (bpmnFile: any) => {
 
                 const modeler = new BpmnModeler()
                 const result = await modeler.importXML(fileData)
-                const { warnings } = result;
+
+                if (process.env.NODE_ENV === 'development') {
+                    const { warnings } = result;
+                    console.log(warnings)
+                }
 
                 // moddle
                 const moddle = new BpmnModdle()
-                const res = await moddle.fromXML(fileData)
+                await moddle.fromXML(fileData)
 
                 const elementRegistry = modeler.get('elementRegistry')
 

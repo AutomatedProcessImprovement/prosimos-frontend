@@ -55,6 +55,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
             setFocus(`resource_profiles.${resourcePoolIndex}.resource_list.1.name`)
             setIsRowAdding(false)
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fields, isRowAdding])
 
     const onResourceProfileDelete = (index: number) => {
