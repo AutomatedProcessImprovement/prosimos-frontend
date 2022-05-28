@@ -1,6 +1,5 @@
 export const millisecondsToNearest = (ms: string) => {
     const msNum = parseFloat(ms)
-    console.log(msNum)
 
     if (isNaN(msNum)) {
         return ""

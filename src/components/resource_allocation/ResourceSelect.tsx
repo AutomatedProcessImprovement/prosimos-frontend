@@ -38,7 +38,7 @@ const ResourceSelect = (props: ResourceSelectProps) => {
                 <TextField 
                     sx={{ width: "100%" }}
                     {...field}
-                    label="Resource"
+                    label="Resource Profile"
                     variant="standard"
                     select
                     error={currentError !== undefined}

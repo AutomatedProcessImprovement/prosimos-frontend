@@ -84,10 +84,9 @@ const Row = (props: RowProps) => {
         const resourceDistr = fields[index]
 
         return (
-            <Grid item xs={12} key={`resource_distr_${allocationIndex}_${index}`} style={{ ...style, padding: "10px"}}>
+            <Grid item xs={12} key={`resource_distr_${resourceDistr.key}`} style={{ ...style, padding: "10px"}}>
                 <ResourceDistribution
                     formState={props.formState}
-                    resourceDistr={resourceDistr}
                     allocationIndex={allocationIndex}
                     resourceIndex={index}
                     allowedResources={allowedResources}
