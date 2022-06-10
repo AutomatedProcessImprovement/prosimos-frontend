@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { TableContainer, Paper, Toolbar, Typography, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
-import { millisecondsToNearest } from "../../helpers/timeConversions";
+import { secondsToNearest } from "../../helpers/timeConversions";
 import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles(() => ({
@@ -12,6 +12,15 @@ const useStyles = makeStyles(() => ({
 interface ScenarioStatisticsProps {
     data: any
 }
+
+enum COLUMNS_NAME {
+    KPI = "KPI",
+    Min = "Min",
+    Max = "Max",
+    Average = "Average",
+    AccumulatedValue = "Accumulated Value",
+    TraceOcurrences = "Trace Ocurrences"
+};
 
 const removeUnderscores = (str: string) => {
     return str.replace(/_/g, ' ')
@@ -29,7 +38,7 @@ const ScenarioStatistics = (props: ScenarioStatisticsProps) => {
     useEffect(() => {
         const processed = data.map((item: any) => {
             const upd = Object.entries(item).reduce((acc: {}, [key, value]: any) => {
-                if (key === "KPI") {
+                if (key === COLUMNS_NAME.KPI) {
                     const displayName = makeFirstLetterUppercase(removeUnderscores(value))
 
                     return {
@@ -39,8 +48,11 @@ const ScenarioStatistics = (props: ScenarioStatisticsProps) => {
                     }
                 }
 
-                const shouldValueBeUpdated = (typeof value == "number" && key !== "Trace Ocurrences")
-                const formatedValue = shouldValueBeUpdated ? value.toFixed(1) : value
+                let formatedValue = value
+
+                if (typeof value == "number" && key !== COLUMNS_NAME.TraceOcurrences) {
+                    formatedValue = secondsToNearest(value)
+                }
 
                 return {
                     ...acc,
@@ -88,13 +100,13 @@ const ScenarioStatistics = (props: ScenarioStatisticsProps) => {
                 </TableHead>
                 <TableBody>
                     {processedData.map((row: any) => (
-                        <TableRow key={`${row["KPI"]}`} hover>
+                        <TableRow key={`${row[COLUMNS_NAME.KPI]}`} hover>
                             <TableCell component="th" scope="row" className={classes.borderRight}>{row["KPI_display_name"]}</TableCell>
-                            <TableCell align="center" className={classes.borderRight}>{millisecondsToNearest(row["Min"] as string)}</TableCell>
-                            <TableCell align="center" className={classes.borderRight}>{millisecondsToNearest(row["Max"] as string)}</TableCell>
-                            <TableCell align="center" className={classes.borderRight}>{millisecondsToNearest(row["Average"] as string)}</TableCell>
-                            <TableCell align="center" className={classes.borderRight}>{millisecondsToNearest(row["Accumulated Value"] as string)}</TableCell>
-                            <TableCell align="center" className={classes.borderRight}>{row["Trace Ocurrences"]}</TableCell>
+                            <TableCell align="center" className={classes.borderRight}>{row[COLUMNS_NAME.Min]}</TableCell>
+                            <TableCell align="center" className={classes.borderRight}>{row[COLUMNS_NAME.Max]}</TableCell>
+                            <TableCell align="center" className={classes.borderRight}>{row[COLUMNS_NAME.Average]}</TableCell>
+                            <TableCell align="center" className={classes.borderRight}>{row[COLUMNS_NAME.AccumulatedValue]}</TableCell>
+                            <TableCell align="center" className={classes.borderRight}>{row[COLUMNS_NAME.TraceOcurrences]}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

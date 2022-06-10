@@ -1,7 +1,7 @@
 import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Toolbar, Typography } from "@mui/material";
 import React from "react";
 import { useEffect, useState } from "react";
-import { millisecondsToNearest } from "../../helpers/timeConversions";
+import { secondsToNearest } from "../../helpers/timeConversions";
 import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles(() => ({
@@ -57,10 +57,10 @@ const TaskStatistics = (props: TaskStatisticsProps) => {
         const isTimeValue = (keyName !== SECTIONS_ORDER.Cost) ? true : false
         const values = isTimeValue
         ? [
-            { value: millisecondsToNearest(row[`Min ${keyName}`] as string), measure: "min" },
-            { value: millisecondsToNearest(row[`Avg ${keyName}`] as string), measure: "avg" },
-            { value: millisecondsToNearest(row[`Max ${keyName}`] as string), measure: "max" },
-            { value: millisecondsToNearest(row[`Total ${keyName}`] as string), measure: "total" }
+            { value: secondsToNearest(row[`Min ${keyName}`] as string), measure: "min" },
+            { value: secondsToNearest(row[`Avg ${keyName}`] as string), measure: "avg" },
+            { value: secondsToNearest(row[`Max ${keyName}`] as string), measure: "max" },
+            { value: secondsToNearest(row[`Total ${keyName}`] as string), measure: "total" }
         ]
         : [
             { value: row[`Min ${keyName}`], measure: "min" },
