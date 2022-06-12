@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import moment from 'moment';
 import { useTheme } from '@material-ui/core/styles';
-import { Badge, Button, ButtonGroup, Grid, Step, StepButton, StepIcon, Stepper, Theme } from '@mui/material';
+import { AlertColor, Badge, Button, ButtonGroup, Grid, Step, StepButton, StepIcon, Stepper, Theme } from '@mui/material';
 import { ScenarioProperties } from './formData';
 import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
 import ResourcePools from './ResourcePools';
@@ -74,7 +74,8 @@ const SimulationParameters = () => {
 
     const [activeStep, setActiveStep] = useState(0)
     const [fileDownloadUrl, setFileDownloadUrl] = useState("")
-    const [errorSnack, setErrorSnack] = useState("")
+    const [snackMessage, setSnackMessage] = useState("")
+    const [snackColor, setSnackColor] = useState<AlertColor | undefined>(undefined)
     const [currSimulatedOutput, setCurrSimulatedOutput] = useState<SimulationResult | null>(null)
 
     const scenarioState = useForm<ScenarioProperties>({
@@ -113,7 +114,13 @@ const SimulationParameters = () => {
     };
 
     const setErrorMessage = (value: string) => {
-        setErrorSnack(value)
+        setSnackColor("error")
+        setSnackMessage(value)
+    };
+
+    const setInfoMessage = (value: string) => {
+        setSnackColor("success")
+        setSnackMessage(value)
     };
 
     useEffect(() => {
@@ -238,6 +245,7 @@ const SimulationParameters = () => {
     };
 
     const onStartSimulation = async () => {
+        setInfoMessage("Simulation started...")
         const isScenarioValid = await triggerScenario()
         setIsScenarioParamsValid(isScenarioValid)
 
@@ -324,7 +332,8 @@ const SimulationParameters = () => {
                 </Grid>
             </Grid>
             <CustomizedSnackbar
-                message={errorSnack}
+                message={snackMessage}
+                severityLevel={snackColor}
                 onSnackbarClose={onSnackbarClose}
             />
         </form>

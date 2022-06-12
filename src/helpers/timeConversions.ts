@@ -1,30 +1,39 @@
-export const millisecondsToNearest = (ms: string) => {
-    const msNum = parseFloat(ms)
+export const secondsToNearest = (sec: string | number) => {
+    const secNum : number = (typeof sec === 'string') ? parseFloat(sec) : sec
 
-    if (isNaN(msNum)) {
+    if (isNaN(secNum)) {
         return ""
     }
 
     let finalNum, measure
-    if (msNum >= 2629800000) {          // >= 1 month
-        finalNum =  msNum / 2629800000
-        measure = "M"
-    } else if (msNum >= 604800000) {    // >= 1 week
-        finalNum =  msNum / 604800000
-        measure = "wks"
-    } else if (msNum >= 3600000) {      // >= 1 hour
-        finalNum =  msNum / 3600000
-        measure = "hrs"
-    } else if (msNum >= 60000) {        // >= 1 min
-        finalNum =  msNum / 60000
+    if (secNum >= 31560000) {           // >= 1 year
+        finalNum =  secNum / 31560000
+        measure = "year"
+    } else if (secNum >= 2628000) {     // >= 1 month
+        finalNum =  secNum / 2628000
+        measure = "month"
+    } else if (secNum >= 86400) {       // >= 1 day
+        finalNum =  secNum / 86400
+        measure = "day"
+    } else if (secNum >= 3600) {        // >= 1 hour
+        finalNum =  secNum / 3600
+        measure = "hour"
+    } else if (secNum >= 60) {          // >= 1 min
+        finalNum =  secNum / 60
         measure = "min"
-    } else if (msNum >= 1000) {         // >= 1 sec
-        finalNum =  msNum / 1000
-        measure = "s"
     } else {
-        finalNum =  msNum
-        measure = "ms"
+        finalNum =  secNum
+        measure = "sec"
     }
 
-    return finalNum.toFixed(2) + " " + measure
+    return +(finalNum).toFixed(2) + " " + isPlural(finalNum, measure)
 };
+
+const isPlural = (num: number, timeUnit: string) => {
+    if (num >= -1 && num <= 1) {
+        return timeUnit
+    }
+    else {
+        return timeUnit + "s"
+    }
+}
