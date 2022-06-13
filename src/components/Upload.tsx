@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FormControlLabel, Grid, Paper, Radio, RadioGroup, Typography } from "@mui/material";
+import { AlertColor, FormControlLabel, Grid, Paper, Radio, RadioGroup, Typography } from "@mui/material";
 import FileUploader from './FileUploader';
 import { useNavigate } from 'react-router-dom';
 import paths from '../router/paths'
@@ -19,7 +19,8 @@ const Upload = () => {
     const [selectedParamFile, setSelectedParamFile] = useState<File | null>(null);
     const [selectedLogsFile, setSelectedLogsFile] = useState<File | null>(null);
     const [simParamsSource, setSimParamsSource] = useState<Source>(Source.empty);
-    const [errorMessage, setErrorMessage] = useState("");
+    const [snackMessage, setSnackMessage] = useState("");
+    const [snackColor, setSnackColor] = useState<AlertColor | undefined>(undefined)
     const [loading, setLoading] = useState<boolean>(false);
 
     const navigate = useNavigate()
@@ -44,9 +45,18 @@ const Upload = () => {
         }
     };
 
-    const updateErrorMessage = (text: string) => {
-        setLoading(false)
-        setErrorMessage(text)
+    const setInfoMessage = (value: string) => {
+        updateSnackMessage(value)
+        setSnackColor("info")
+    };
+
+    const setErrorMessage = (value: string) => {
+        updateSnackMessage(value)
+        setSnackColor("error")
+    };
+
+    const updateSnackMessage = (text: string) => {
+        setSnackMessage(text)
     };
 
     // validate that selected option and appropriate file selection matches
@@ -68,7 +78,7 @@ const Upload = () => {
         }
 
         if (!isBpmnFileProvided || !isJsonFileValidInput) {
-            updateErrorMessage("Please provide the correct selection for the files")
+            updateSnackMessage("Please provide the correct selection for the files")
             return false
         }
 
@@ -83,6 +93,8 @@ const Upload = () => {
         }
 
         if (simParamsSource === Source.logs) {
+            setInfoMessage("Discovery started...")
+
             // call API to get json params
             const formData = new FormData()
             formData.append("logsFile", selectedLogsFile as Blob)
@@ -104,7 +116,9 @@ const Upload = () => {
                     })
                 }))
                 .catch((error: any) => {
-                    updateErrorMessage(error.response.data.displayMessage || "Something went wrong")
+                    updateSnackMessage(error.response.data.displayMessage || "Something went wrong")
+                    setLoading(false)
+                    onSnackbarClose()
                 })
         } else {
             navigate(paths.SIMULATOR_SCENARIO_PATH, {
@@ -132,7 +146,7 @@ const Upload = () => {
     };
 
     const onSnackbarClose = () => {
-        updateErrorMessage("")
+        updateSnackMessage("")
     };
 
     return (
@@ -223,10 +237,11 @@ const Upload = () => {
                     </LoadingButton>
                 </Grid>
             </Grid>
-            <CustomizedSnackbar
-                message={errorMessage}
+            {snackMessage && <CustomizedSnackbar
+                message={snackMessage}
                 onSnackbarClose={onSnackbarClose}
-            />
+                severityLevel={snackColor}
+            />}
         </>
     );
 }

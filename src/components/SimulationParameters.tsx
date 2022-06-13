@@ -119,7 +119,7 @@ const SimulationParameters = () => {
     };
 
     const setInfoMessage = (value: string) => {
-        setSnackColor("success")
+        setSnackColor("info")
         setSnackMessage(value)
     };
 
@@ -263,6 +263,9 @@ const SimulationParameters = () => {
 
                 // redirect to results step
                 setActiveStep(5)
+
+                // hide info message
+                onSnackbarClose()
             }))
             .catch((error: any) => {
                 console.log(error.response)
@@ -331,11 +334,11 @@ const SimulationParameters = () => {
                     </Grid>
                 </Grid>
             </Grid>
-            <CustomizedSnackbar
+            {snackMessage && <CustomizedSnackbar
                 message={snackMessage}
                 severityLevel={snackColor}
                 onSnackbarClose={onSnackbarClose}
-            />
+            />}
         </form>
     );
 }
