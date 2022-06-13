@@ -328,7 +328,7 @@ const SimulationParameters = () => {
                                 </Step>
                             ))}
                         </Stepper>
-                        <Grid container mt={3}>
+                        <Grid container mt={3} style={{ marginBottom: "2%" }}>
                             {getStepContent(activeStep)}
                         </Grid>
                     </Grid>

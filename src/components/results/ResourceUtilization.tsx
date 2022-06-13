@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { TableContainer, Paper, Toolbar, Typography, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
+import { TableContainer, Paper, Toolbar, Typography, Table, TableHead, TableRow, TableBody } from "@mui/material";
 import { secondsToNearest } from "../../helpers/timeConversions";
 import { makeStyles } from "@material-ui/core/styles";
+import { TableCellRightBorder, TableCellLeftRightBorder } from "./StyledTableCells";
 
 const useStyles = makeStyles(() => ({
-    borderRight: {
-        borderRight: "1px solid rgba(224, 224, 224, 1)"
+    borderTop: {
+        borderTop: "1px solid rgba(224, 224, 224, 1)"
     }
 }));
 
@@ -61,36 +62,36 @@ const ResourceUtilization = (props: ResourceUtilizationProps) => {
             </Toolbar>
             <Table size="small">
                 <TableHead>
-                    <TableRow>
-                        <TableCell align="center" colSpan={1}>
+                    <TableRow className={classes.borderTop}>
+                        <TableCellLeftRightBorder align="center" colSpan={1}>
                             Pool Name
-                        </TableCell>
-                        <TableCell align="center" colSpan={1}>
+                        </TableCellLeftRightBorder>
+                        <TableCellRightBorder align="center" colSpan={1}>
                             Resource Name
-                        </TableCell>
-                        <TableCell align="center" colSpan={1}>
+                        </TableCellRightBorder>
+                        <TableCellRightBorder align="center" colSpan={1}>
                             Utilization Ratio
-                        </TableCell>
-                        <TableCell align="center" colSpan={1}>
+                        </TableCellRightBorder>
+                        <TableCellRightBorder align="center" colSpan={1}>
                             Tasks Allocated
-                        </TableCell>
-                        <TableCell align="center" colSpan={1}>
+                        </TableCellRightBorder>
+                        <TableCellRightBorder align="center" colSpan={1}>
                             Worked Time
-                        </TableCell>
-                        <TableCell align="center" colSpan={1}>
+                        </TableCellRightBorder>
+                        <TableCellRightBorder align="center" colSpan={1}>
                             Available Time
-                        </TableCell>
+                        </TableCellRightBorder>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {processedData.map((row: any) => (
                         <TableRow key={`${row["Resource ID"]}`} hover>
-                            <TableCell component="th" scope="row" className={classes.borderRight}>{row[COLUMNS_NAME.PoolName]}</TableCell>
-                            <TableCell className={classes.borderRight}>{row[COLUMNS_NAME.ResourceName]}</TableCell>
-                            <TableCell align="center" className={classes.borderRight}>{row[COLUMNS_NAME.UtilizationRatio]}</TableCell>
-                            <TableCell align="center" className={classes.borderRight}>{row[COLUMNS_NAME.TasksAllocated]}</TableCell>
-                            <TableCell align="center" className={classes.borderRight}>{row[COLUMNS_NAME.WorkedTime]}</TableCell>
-                            <TableCell align="center" className={classes.borderRight}>{row[COLUMNS_NAME.AvailableTime]}</TableCell>
+                            <TableCellLeftRightBorder component="th" scope="row" >{row[COLUMNS_NAME.PoolName]}</TableCellLeftRightBorder>
+                            <TableCellRightBorder >{row[COLUMNS_NAME.ResourceName]}</TableCellRightBorder>
+                            <TableCellRightBorder align="center" >{row[COLUMNS_NAME.UtilizationRatio]}</TableCellRightBorder>
+                            <TableCellRightBorder align="center" >{row[COLUMNS_NAME.TasksAllocated]}</TableCellRightBorder>
+                            <TableCellRightBorder align="center" >{row[COLUMNS_NAME.WorkedTime]}</TableCellRightBorder>
+                            <TableCellRightBorder align="center" >{row[COLUMNS_NAME.AvailableTime]}</TableCellRightBorder>
                         </TableRow>
                     ))}
                 </TableBody>

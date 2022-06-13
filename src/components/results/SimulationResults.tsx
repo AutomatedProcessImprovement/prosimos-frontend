@@ -121,7 +121,7 @@ const SimulationResults = (props: SimulationResultsProps) => {
                     data={currOutput["IndividualTaskStatistics"]}
                 />
             </Grid>
-            <Grid item xs={10} className={classes.resultsGrid}>
+            <Grid item xs={10} className={classes.resultsGrid} style={{ marginBottom: "1%" }}>
                 <ResourceUtilization
                     data={currOutput["ResourceUtilization"]}
                 />
