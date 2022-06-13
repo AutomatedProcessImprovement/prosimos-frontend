@@ -119,7 +119,7 @@ const SimulationParameters = () => {
     };
 
     const setInfoMessage = (value: string) => {
-        setSnackColor("success")
+        setSnackColor("info")
         setSnackMessage(value)
     };
 
