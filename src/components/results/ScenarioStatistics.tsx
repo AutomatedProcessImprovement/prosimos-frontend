@@ -1,24 +1,24 @@
 import { useState, useEffect } from "react";
-import { TableContainer, Paper, Toolbar, Typography, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
+import { TableContainer, Paper, Toolbar, Typography, Table, TableHead, TableRow, TableBody } from "@mui/material";
 import { secondsToNearest } from "../../helpers/timeConversions";
 import { makeStyles } from "@material-ui/core/styles";
+import { TableCellRightBorder, TableCellLeftRightBorder } from "./StyledTableCells";
 
 const useStyles = makeStyles(() => ({
-    borderRight: {
-        borderRight: "1px solid rgba(224, 224, 224, 1)"
+    borderTop: {
+        borderTop: "1px solid rgba(224, 224, 224, 1)"
     }
 }));
 
 interface ScenarioStatisticsProps {
     data: any
-}
+};
 
 enum COLUMNS_NAME {
     KPI = "KPI",
     Min = "Min",
     Max = "Max",
     Average = "Average",
-    AccumulatedValue = "Accumulated Value",
     TraceOcurrences = "Trace Ocurrences"
 };
 
@@ -77,36 +77,32 @@ const ScenarioStatistics = (props: ScenarioStatisticsProps) => {
             </Toolbar>
             <Table size="small">
                 <TableHead>
-                    <TableRow>
-                        <TableCell align="center" colSpan={1}>
+                    <TableRow className={`${classes.borderTop}`}>
+                        <TableCellLeftRightBorder align="center" colSpan={1}>
                             KPI
-                        </TableCell>
-                        <TableCell align="center" colSpan={1}>
+                        </TableCellLeftRightBorder>
+                        <TableCellRightBorder align="center" colSpan={1}>
                             Min
-                        </TableCell>
-                        <TableCell align="center" colSpan={1}>
+                        </TableCellRightBorder>
+                        <TableCellRightBorder align="center" colSpan={1}>
                             Max
-                        </TableCell>
-                        <TableCell align="center" colSpan={1}>
+                        </TableCellRightBorder>
+                        <TableCellRightBorder align="center" colSpan={1}>
                             Average
-                        </TableCell>
-                        <TableCell align="center" colSpan={1}>
-                            Accumulated Value
-                        </TableCell>
-                        <TableCell align="center" colSpan={1}>
+                        </TableCellRightBorder>
+                        <TableCellRightBorder align="center" colSpan={1}>
                             Trace Ocurrences
-                        </TableCell>
+                        </TableCellRightBorder>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {processedData.map((row: any) => (
                         <TableRow key={`${row[COLUMNS_NAME.KPI]}`} hover>
-                            <TableCell component="th" scope="row" className={classes.borderRight}>{row["KPI_display_name"]}</TableCell>
-                            <TableCell align="center" className={classes.borderRight}>{row[COLUMNS_NAME.Min]}</TableCell>
-                            <TableCell align="center" className={classes.borderRight}>{row[COLUMNS_NAME.Max]}</TableCell>
-                            <TableCell align="center" className={classes.borderRight}>{row[COLUMNS_NAME.Average]}</TableCell>
-                            <TableCell align="center" className={classes.borderRight}>{row[COLUMNS_NAME.AccumulatedValue]}</TableCell>
-                            <TableCell align="center" className={classes.borderRight}>{row[COLUMNS_NAME.TraceOcurrences]}</TableCell>
+                            <TableCellLeftRightBorder component="th" scope="row">{row["KPI_display_name"]}</TableCellLeftRightBorder>
+                            <TableCellRightBorder align="center">{row[COLUMNS_NAME.Min]}</TableCellRightBorder>
+                            <TableCellRightBorder align="center">{row[COLUMNS_NAME.Max]}</TableCellRightBorder>
+                            <TableCellRightBorder align="center">{row[COLUMNS_NAME.Average]}</TableCellRightBorder>
+                            <TableCellRightBorder align="center">{row[COLUMNS_NAME.TraceOcurrences]}</TableCellRightBorder>
                         </TableRow>
                     ))}
                 </TableBody>

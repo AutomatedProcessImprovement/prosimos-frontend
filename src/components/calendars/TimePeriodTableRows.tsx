@@ -77,7 +77,7 @@ const TimePeriodTableRows = (props: TimePeriodTableRowsProps) => {
                                     error={calErrors?.name !== undefined}
                                     helperText={calErrors?.name?.message || ""}
                                     variant="standard"
-                                    placeholder="Resource Name"
+                                    placeholder="Resource calendar name"
                                 />
                             )}
                         />
