@@ -64,10 +64,10 @@ const ResourceUtilization = (props: ResourceUtilizationProps) => {
                 <TableHead>
                     <TableRow className={classes.borderTop}>
                         <TableCellLeftRightBorder align="center" colSpan={1}>
-                            Pool Name
+                            Resource Pool
                         </TableCellLeftRightBorder>
                         <TableCellRightBorder align="center" colSpan={1}>
-                            Resource Name
+                            Resource Profile
                         </TableCellRightBorder>
                         <TableCellRightBorder align="center" colSpan={1}>
                             Utilization Ratio
