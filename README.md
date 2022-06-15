@@ -1,5 +1,12 @@
 # Prosimos Client
 
+![build_badge](https://github.com/AutomatedProcessImprovement/prosimos-frontend/actions/workflows/build.yml/badge.svg)
+
+![prod_push_badge](https://github.com/AutomatedProcessImprovement/prosimos-frontend/actions/workflows/push-docker-image.yml/badge.svg)
+
+![local_push_badge](https://github.com/AutomatedProcessImprovement/prosimos-frontend/actions/workflows/push-local-docker-image.yml/badge.svg)
+
+
 The web client implemented as a part of the [Prosimos Web Application](https://github.com/AutomatedProcessImprovement/prosimos-docker). 
 
 
