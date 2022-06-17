@@ -81,7 +81,7 @@ const SimulationParameters = () => {
     const scenarioState = useForm<ScenarioProperties>({
         mode: "onBlur",
         defaultValues: {
-            num_processes: 10,
+            num_processes: 100,
             start_date: moment().format("YYYY-MM-DDTHH:mm:ss.sssZ")
         }
     })
