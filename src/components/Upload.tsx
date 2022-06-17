@@ -116,7 +116,7 @@ const Upload = () => {
                     })
                 }))
                 .catch((error: any) => {
-                    updateSnackMessage(error.response.data.displayMessage || "Something went wrong")
+                    updateSnackMessage(error?.response?.data?.displayMessage || "Something went wrong")
                     setLoading(false)
                     onSnackbarClose()
                 })
