@@ -23,9 +23,10 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
         if (Object.keys(errors).length !== 0) {
             let currErrors = errors as any
             objectFieldName.split(".").forEach((key) => {
-                currErrors = currErrors[key];
+                currErrors = currErrors?.[key];
             })
-            setCurrErrors(currErrors)
+            const finalErrors = currErrors || "Something went wrong, please check the simulation scenario parameters"
+            setCurrErrors(finalErrors)
         }
     }, [errors, objectFieldName])
 
