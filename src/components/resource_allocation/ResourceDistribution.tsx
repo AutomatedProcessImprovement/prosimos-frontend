@@ -29,7 +29,7 @@ const ResourceDistribution = (props: ResourceDistributionProps) => {
     }
 
     return (
-        <Paper elevation={5} sx={{ p: 3 }}>
+        <Paper elevation={5} sx={{ pr: 3, pl: 3, minHeight: "230px" }}>
             <Grid container spacing={2}>
                 <Grid item xs={11}>
                     <ResourceSelect

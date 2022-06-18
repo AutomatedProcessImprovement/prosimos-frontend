@@ -139,7 +139,7 @@ const Row = (props: RowProps) => {
                                                 ref={listRef}
                                                 width={width}
                                                 height={height}
-                                                rowHeight={220}
+                                                rowHeight={235}
                                                 rowRenderer={renderRow}
                                                 rowCount={fields.length}
                                                 overscanRowCount={2}
