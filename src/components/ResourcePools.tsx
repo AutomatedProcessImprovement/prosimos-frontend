@@ -290,7 +290,7 @@ const ResourcePools = (props: ResourcePoolsProps) => {
             </Toolbar>
 
             <TableContainer component={Paper} style={{ width: "100%", height: "60vh" }}>
-                <Table style={{ width: "100%", height: "100%" }}>
+                <Table style={{ width: "100%", height: "60vh" }}>
                     <TableHead>
                         <TableRow>
                             <TableCell style={{ width: colWidth[0] }}></TableCell>
@@ -299,23 +299,23 @@ const ResourcePools = (props: ResourcePoolsProps) => {
                             <TableCell style={{ width: colWidth[3] }}>Actions</TableCell>
                         </TableRow>
                     </TableHead>
-                    <TableBody>
-                    <AutoSizer>
-                        {({ height, width }) => (
-                            <VariableSizeList
-                                ref={ref}
-                                width={width}
-                                height={height}
-                                itemSize={getItemSize}
-                                itemCount={fields.length}
-                                itemData={fields}
-                                itemKey={(i: number) => fields[i].key}
-                                overscanCount={4}
-                            >
-                                {renderRow}
-                            </VariableSizeList>
-                        )}
-                    </AutoSizer>
+                    <TableBody style={{ height: "50vh" }}>
+                        <AutoSizer>
+                            {({ height, width }) => (
+                                <VariableSizeList
+                                    ref={ref}
+                                    width={width}
+                                    height={height}
+                                    itemSize={getItemSize}
+                                    itemCount={fields.length}
+                                    itemData={fields}
+                                    itemKey={(i: number) => fields[i].key}
+                                    overscanCount={4}
+                                >
+                                    {renderRow}
+                                </VariableSizeList>
+                            )}
+                        </AutoSizer>
                     </TableBody>
                 </Table>
             </TableContainer>

@@ -188,7 +188,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
             </Toolbar>
 
             <TableContainer component={Paper} style={{ width: "100%", height: "60vh"}}>
-                <Table style={{ width: "100%", height: "100%" }}>
+                <Table style={{ width: "100%", height: "60vh" }} >
                     <TableHead>
                         <TableRow>
                             <TableCell width={colWidth[0]} padding="checkbox">
@@ -207,7 +207,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
                             <TableCell width={colWidth[6]}>Actions</TableCell>
                         </TableRow>
                     </TableHead>
-                    <TableBody>
+                    <TableBody style={{ height: "50vh" }} >
                         <AutoSizer>
                             {({ height, width }) => (
                                 <VariableSizeList
