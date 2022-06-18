@@ -70,14 +70,14 @@ const TimeDistribution = (props: TimeDistributionProps) => {
             <Grid container item xs={4}>
                 <Grid item xs={12}>
                     <Controller
-                        name={`${objectNamePath}.distribution_name` as unknown as keyof JsonData} 
+                        name={`${objectNamePath}.distribution_name` as unknown as keyof JsonData}
                         control={formControl}
                         rules={{ required: REQUIRED_ERROR_MSG }}
                         render={({ field }) => (
                             <DistrFuncSelect
                                 field={field}
                                 fieldError={distrErrors?.distribution_name}
-                                label={ props.funcLabel || "Distribution Function" }
+                                label={props.funcLabel || "Distribution Function"}
                                 updateParamsNum={updateParamsNum}
                             />
                         )}
