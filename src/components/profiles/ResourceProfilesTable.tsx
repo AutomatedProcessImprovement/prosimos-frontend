@@ -153,7 +153,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
                         <TableCell width={colWidth[3]}>Actions</TableCell>
                     </TableRow>
                 </TableHead>
-                <TableBody>
+                <TableBody style={{ height: "30vh" }}>
                     <AutoSizer>
                         {({ height, width }) => (
                             <FixedSizeList
