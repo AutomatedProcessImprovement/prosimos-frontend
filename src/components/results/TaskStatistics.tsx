@@ -27,7 +27,8 @@ enum SECTIONS_ORDER {
     IdleProcessingTime = "Idle Processing Time",
     CycleTime = "Cycle Time",
     IdleCycleTime = "Idle Cycle Time",
-    Cost = "Cost"
+    // TODO: will be back once backend calculates those values
+    // Cost = "Cost"
 }
 
 const TaskStatistics = (props: TaskStatisticsProps) => {
@@ -55,17 +56,10 @@ const TaskStatistics = (props: TaskStatisticsProps) => {
     }, [data])
 
     const getGroupedValues = (row: any, keyName: string) => {
-        const isTimeValue = (keyName !== SECTIONS_ORDER.Cost) ? true : false
-        const values = isTimeValue
-        ? [
+        const values = [
             { value: secondsToNearest(row[`Min ${keyName}`] as string), measure: "min" },
             { value: secondsToNearest(row[`Avg ${keyName}`] as string), measure: "avg" },
             { value: secondsToNearest(row[`Max ${keyName}`] as string), measure: "max" },
-        ]
-        : [
-            { value: row[`Min ${keyName}`], measure: "min" },
-            { value: row[`Avg ${keyName}`], measure: "avg" },
-            { value: row[`Max ${keyName}`], measure: "max" },
         ]
 
         return (
