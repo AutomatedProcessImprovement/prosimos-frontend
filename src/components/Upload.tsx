@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AlertColor, FormControlLabel, Grid, Paper, Radio, RadioGroup, Typography } from "@mui/material";
 import FileUploader from './FileUploader';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +7,7 @@ import CustomizedSnackbar from './results/CustomizedSnackbar';
 import CustomDropzoneArea from './upload/CustomDropzoneArea';
 import axios from '../axios';
 import { LoadingButton } from '@mui/lab';
+import { useInterval } from 'usehooks-ts'
 
 enum Source {
     empty,
@@ -21,9 +22,52 @@ const Upload = () => {
     const [simParamsSource, setSimParamsSource] = useState<Source>(Source.empty);
     const [snackMessage, setSnackMessage] = useState("");
     const [snackColor, setSnackColor] = useState<AlertColor | undefined>(undefined)
-    const [loading, setLoading] = useState<boolean>(false);
+    const [loading, setLoading] = useState(false);
+    const [isPollingEnabled, setIsPollingEnabled] = useState(false)
+    const [pendingTaskId, setPendingTaskId] = useState("")
+    const [discoveredFileName, setDiscoveredFileName] = useState("")
 
     const navigate = useNavigate()
+
+    useEffect(() => {
+        axios
+            .get(`/api/simulationFile?fileName=${discoveredFileName}`)
+            .then((result: any) => {
+                const jsonString = JSON.stringify(result.data)
+                var blob = new Blob([jsonString], { type: "application/json" })
+                const discoveredParamsFile = new File([blob], "name", { type: "application/json" })
+
+                navigate(paths.SIMULATOR_SCENARIO_PATH, {
+                    state: {
+                        bpmnFile: selectedBpmnFile,
+                        jsonFile: discoveredParamsFile,
+                    }
+                })
+            })
+    }, [discoveredFileName])
+
+    useInterval(
+        () => {
+            axios
+                .get(`/api/task?taskId=${pendingTaskId}`)
+                .then((result: any) => {
+                    const dataJson = result.data
+                    if (dataJson.TaskStatus === "SUCCESS") {
+                        setIsPollingEnabled(false)
+
+                        const taskResponseJson = dataJson.TaskResponse
+                        setDiscoveredFileName(taskResponseJson['discovery_res_filename'])
+                        setLoading(false)
+                    }
+                })
+                .catch((error: any) => {
+                    console.log(error)
+                    console.log(error.response)
+                    setErrorMessage(error.response.data.displayMessage || "Something went wrong")
+                })
+        },
+        isPollingEnabled ? 3000 : null
+    );
 
     const onJsonFileChange = (file: File) => {
         setSelectedParamFile(file)
@@ -103,19 +147,17 @@ const Upload = () => {
             axios.post(
                 '/api/discovery',
                 formData)
-                .then(((res: any) => {
-                    const jsonString = JSON.stringify(res.data)
-                    var blob = new Blob([jsonString], { type: "application/json" })
-                    const discoveredParamsFile = new File([blob], "name", { type: "application/json" })
+                .then(((result: any) => {
+                    const dataJson = result.data
+                    if (dataJson.TaskId) {
+                        setIsPollingEnabled(true)
+                        setPendingTaskId(dataJson.TaskId)
+                    } else {
 
-                    navigate(paths.SIMULATOR_SCENARIO_PATH, {
-                        state: {
-                            bpmnFile: selectedBpmnFile,
-                            jsonFile: discoveredParamsFile,
-                        }
-                    })
+                    }
                 }))
                 .catch((error: any) => {
+                    console.log(error)
                     updateSnackMessage(error?.response?.data?.displayMessage || "Something went wrong")
                     setLoading(false)
                     onSnackbarClose()
