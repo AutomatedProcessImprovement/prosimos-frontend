@@ -5,9 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import paths from '../router/paths'
 import CustomizedSnackbar from './results/CustomizedSnackbar';
 import CustomDropzoneArea from './upload/CustomDropzoneArea';
-import axios from '../axios';
 import { LoadingButton } from '@mui/lab';
 import { useInterval } from 'usehooks-ts'
+import { discoverScenariosParams, getFileByFileName, getTaskByTaskId } from '../api/api';
 
 enum Source {
     empty,
@@ -30,8 +30,7 @@ const Upload = () => {
     const navigate = useNavigate()
 
     useEffect(() => {
-        axios
-            .get(`/api/simulationFile?fileName=${discoveredFileName}`)
+        getFileByFileName(discoveredFileName)
             .then((result: any) => {
                 const jsonString = JSON.stringify(result.data)
                 var blob = new Blob([jsonString], { type: "application/json" })
@@ -48,8 +47,7 @@ const Upload = () => {
 
     useInterval(
         () => {
-            axios
-                .get(`/api/task?taskId=${pendingTaskId}`)
+            getTaskByTaskId(pendingTaskId)
                 .then((result: any) => {
                     const dataJson = result.data
                     if (dataJson.TaskStatus === "SUCCESS") {
@@ -139,21 +137,16 @@ const Upload = () => {
         if (simParamsSource === Source.logs) {
             setInfoMessage("Discovery started...")
 
-            // call API to get json params
-            const formData = new FormData()
-            formData.append("logsFile", selectedLogsFile as Blob)
-            formData.append("bpmnFile", selectedBpmnFile as Blob)
-
-            axios.post(
-                '/api/discovery',
-                formData)
+            // call API to get scenario params
+            discoverScenariosParams(selectedLogsFile as Blob, selectedBpmnFile as Blob)
                 .then(((result: any) => {
                     const dataJson = result.data
+
+                    // discovery task was started
+                    // polling to receive task results
                     if (dataJson.TaskId) {
                         setIsPollingEnabled(true)
                         setPendingTaskId(dataJson.TaskId)
-                    } else {
-
                     }
                 }))
                 .catch((error: any) => {
