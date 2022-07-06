@@ -26,7 +26,9 @@ export const getTaskByTaskId = async (taskId: string) => {
     )
 };
 
-export const discoverScenariosParams = async (selectedLogsFile: Blob, selectedBpmnFile: Blob) => {
+export const discoverScenariosParams = async (selectedLogsFile: Blob, 
+    selectedBpmnFile: Blob
+) => {
     const formData = new FormData()
     formData.append("logsFile", selectedLogsFile)
     formData.append("bpmnFile", selectedBpmnFile)

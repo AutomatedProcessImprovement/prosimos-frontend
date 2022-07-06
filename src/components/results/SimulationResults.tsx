@@ -29,19 +29,24 @@ interface SimulationResultsProps {
 const SimulationResults = (props: SimulationResultsProps) => {
     const classes = useStyles();
     const { output: outputFromPrevPage, } = props
-    const [currOutput, setCurrOutput] = useState(outputFromPrevPage)
+    const [currOutput, setCurrOutput] = useState<SimulationResult | null>()
     const [logsFilename, setLogsFilename] = useState("")
     const [statsFilename, setStatsFilename] = useState("")
     const [errorMessage, setErrorMessage] = useState("")
 
     useEffect(() => {
-        setCurrOutput(outputFromPrevPage)
+        setCurrOutput({
+            ...outputFromPrevPage,
+            "ResourceUtilization": JSON.parse(JSON.parse(outputFromPrevPage["ResourceUtilization"])),
+            "OverallScenarioStatistics": JSON.parse(JSON.parse(outputFromPrevPage["OverallScenarioStatistics"])),
+            "IndividualTaskStatistics": JSON.parse(JSON.parse(outputFromPrevPage["IndividualTaskStatistics"])),
+        })
     }, [outputFromPrevPage]);
 
     useEffect(() => {
-        if (currOutput !== null) {
-            setLogsFilename(currOutput["LogsFilename"])
-            setStatsFilename(currOutput["StatsFilename"])
+        if (currOutput) {
+            setLogsFilename(currOutput!["LogsFilename"])
+            setStatsFilename(currOutput!["StatsFilename"])
         }
     }, [currOutput]);
 
@@ -112,19 +117,19 @@ const SimulationResults = (props: SimulationResultsProps) => {
                 </Grid>
             </Grid>
             <Grid item xs={10} className={classes.resultsGrid}>
-                <ScenarioStatistics
+                {currOutput && <ScenarioStatistics
                     data={currOutput["OverallScenarioStatistics"]}
-                />
+                />}
             </Grid>
             <Grid item xs={10} className={classes.resultsGrid}>
-                <TaskStatistics
+                {currOutput && <TaskStatistics
                     data={currOutput["IndividualTaskStatistics"]}
-                />
+                />}
             </Grid>
             <Grid item xs={10} className={classes.resultsGrid} style={{ marginBottom: "1%" }}>
-                <ResourceUtilization
+                {currOutput && <ResourceUtilization
                     data={currOutput["ResourceUtilization"]}
-                />
+                />}
             </Grid>
         </Grid>
         <CustomizedSnackbar
