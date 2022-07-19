@@ -7,6 +7,7 @@ yup.addMethod<yup.StringSchema>(yup.string, "timeFormat", function (errorMessage
         const { path, createError } = this;
 
         return (
+            moment(value, "HH:mm:ss.SSSSSS", true).isValid() ||
             moment(value, "HH:mm:ss.SSS", true).isValid() ||
             moment(value, "HH:mm:ss", true).isValid() ||
             createError({ path, message: errorMessage })
