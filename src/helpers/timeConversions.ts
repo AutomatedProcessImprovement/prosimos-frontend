@@ -26,7 +26,7 @@ export const secondsToNearest = (sec: string | number) => {
         measure = "sec"
     }
 
-    return +(finalNum).toFixed(2) + " " + isPlural(finalNum, measure)
+    return round(finalNum, 2) + " " + isPlural(finalNum, measure)
 };
 
 const isPlural = (num: number, timeUnit: string) => {
@@ -36,4 +36,8 @@ const isPlural = (num: number, timeUnit: string) => {
     else {
         return timeUnit + "s"
     }
-}
+};
+
+export const round = (num: number, digits: number): number => {
+    return +(num).toFixed(digits) 
+};

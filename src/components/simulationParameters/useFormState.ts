@@ -6,6 +6,7 @@ import { defaultTemplateSchedule, defaultArrivalTimeDistribution, defaultArrival
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, SUMMATION_ONE_MSG, INVALID_TIME_FORMAT } from "./../validationMessages";
+import { round } from "../../helpers/timeConversions";
 
 const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonData?: JsonData) => {
     const [data, setData] = useState({})
@@ -68,8 +69,9 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
                             'sum',
                             SUMMATION_ONE_MSG,
                             (probs = []) => {
-                                const total = probs.reduce((acc, curr) => Number(acc) + Number(curr.value) , 0)
-                                return total === 1;
+                                const total = probs.reduce((acc, curr) => Number(acc) + Number(curr.value), 0)
+                                const rounded = round(total, 5)
+                                return rounded === 1;
                             }
                         )
                 })

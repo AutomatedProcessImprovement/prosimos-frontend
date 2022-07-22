@@ -53,6 +53,7 @@ const Upload = () => {
     const setErrorMessage = (value: string) => {
         updateSnackMessage(value)
         setSnackColor("error")
+        setLoading(false)
     };
 
     const updateSnackMessage = (text: string) => {
@@ -78,7 +79,7 @@ const Upload = () => {
         }
 
         if (!isBpmnFileProvided || !isJsonFileValidInput) {
-            updateSnackMessage("Please provide the correct selection for the files")
+            setErrorMessage("Please provide the correct selection for the files")
             return false
         }
 
@@ -116,9 +117,7 @@ const Upload = () => {
                     })
                 }))
                 .catch((error: any) => {
-                    updateSnackMessage(error?.response?.data?.displayMessage || "Something went wrong")
-                    setLoading(false)
-                    onSnackbarClose()
+                    setErrorMessage(error?.response?.data?.displayMessage || "Something went wrong")
                 })
         } else {
             navigate(paths.SIMULATOR_SCENARIO_PATH, {
@@ -233,7 +232,7 @@ const Upload = () => {
                         onClick={onContinueClick}
                         loading={loading}
                     >
-                        Specify Scenario Parameters
+                        Next
                     </LoadingButton>
                 </Grid>
             </Grid>
