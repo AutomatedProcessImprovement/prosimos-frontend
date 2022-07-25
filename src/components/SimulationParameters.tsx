@@ -21,13 +21,14 @@ import DateRangeIcon from '@mui/icons-material/DateRange';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { simulate } from '../api/api';
+import { getTaskByTaskId, simulate } from '../api/api';
 import SimulationResults, { SimulationResult } from './results/SimulationResults';
 import paths from "../router/paths";
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import { makeStyles } from "@material-ui/core/styles";
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { useInterval } from 'usehooks-ts'
 import Tooltip from '@mui/material/Tooltip';
 
 const useStyles = makeStyles( (theme: Theme) => ({
@@ -92,6 +93,8 @@ const SimulationParameters = () => {
     const [snackMessage, setSnackMessage] = useState("")
     const [snackColor, setSnackColor] = useState<AlertColor | undefined>(undefined)
     const [currSimulatedOutput, setCurrSimulatedOutput] = useState<SimulationResult | null>(null)
+    const [isPollingEnabled, setIsPollingEnabled] = useState(false)
+    const [pendingTaskId, setPendingTaskId] = useState("")
 
     const scenarioState = useForm<ScenarioProperties>({
         mode: "onBlur",
@@ -144,6 +147,32 @@ const SimulationParameters = () => {
             URL.revokeObjectURL(fileDownloadUrl);
         }
     }, [fileDownloadUrl]);
+
+    useInterval(
+        () => {
+            getTaskByTaskId(pendingTaskId)
+                .then((result: any) => {
+                    const dataJson = result.data
+
+                    if (dataJson.TaskStatus === "SUCCESS") {
+                        setIsPollingEnabled(false)
+                        setCurrSimulatedOutput(dataJson.TaskResponse )
+                        
+                        // redirect to results step
+                        setActiveStep(5)
+
+                        // hide info message
+                        onSnackbarClose()
+                    }
+                })
+                .catch((error: any) => {
+                    console.log(error)
+                    console.log(error.response)
+                    setErrorMessage(error.response.data.displayMessage || "Something went wrong")
+                })
+        },
+        isPollingEnabled ? 3000 : null
+    );
 
     const onDownload = () => {
         const blob = fromContentToBlob(getValues())
@@ -273,14 +302,10 @@ const SimulationParameters = () => {
         const { num_processes: numProcesses, start_date: startDate } = getScenarioValues()
 
         simulate(startDate, numProcesses, newJsonFile, bpmnFile)
-            .then(((res: any) => {
-                setCurrSimulatedOutput(res.data)
-
-                // redirect to results step
-                setActiveStep(5)
-
-                // hide info message
-                onSnackbarClose()
+            .then(((result: any) => {
+                const dataJson = result.data
+                setPendingTaskId(dataJson.TaskId)
+                setIsPollingEnabled(true)
             }))
             .catch((error: any) => {
                 console.log(error.response)

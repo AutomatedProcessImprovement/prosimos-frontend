@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AlertColor, FormControlLabel, Grid, Paper, Radio, RadioGroup, Typography } from "@mui/material";
 import FileUploader from './FileUploader';
 import { useNavigate } from 'react-router-dom';
 import paths from '../router/paths'
 import CustomizedSnackbar from './results/CustomizedSnackbar';
 import CustomDropzoneArea from './upload/CustomDropzoneArea';
-import axios from '../axios';
 import { LoadingButton } from '@mui/lab';
+import { useInterval } from 'usehooks-ts'
+import { discoverScenariosParams, getFileByFileName, getTaskByTaskId } from '../api/api';
 
 enum Source {
     empty,
@@ -21,9 +22,51 @@ const Upload = () => {
     const [simParamsSource, setSimParamsSource] = useState<Source>(Source.empty);
     const [snackMessage, setSnackMessage] = useState("");
     const [snackColor, setSnackColor] = useState<AlertColor | undefined>(undefined)
-    const [loading, setLoading] = useState<boolean>(false);
+    const [loading, setLoading] = useState(false);
+    const [isPollingEnabled, setIsPollingEnabled] = useState(false)
+    const [pendingTaskId, setPendingTaskId] = useState("")
+    const [discoveredFileName, setDiscoveredFileName] = useState("")
 
     const navigate = useNavigate()
+
+    useEffect(() => {
+        getFileByFileName(discoveredFileName)
+            .then((result: any) => {
+                const jsonString = JSON.stringify(result.data)
+                var blob = new Blob([jsonString], { type: "application/json" })
+                const discoveredParamsFile = new File([blob], "name", { type: "application/json" })
+
+                navigate(paths.SIMULATOR_SCENARIO_PATH, {
+                    state: {
+                        bpmnFile: selectedBpmnFile,
+                        jsonFile: discoveredParamsFile,
+                    }
+                })
+            })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [discoveredFileName])
+
+    useInterval(
+        () => {
+            getTaskByTaskId(pendingTaskId)
+                .then((result: any) => {
+                    const dataJson = result.data
+                    if (dataJson.TaskStatus === "SUCCESS") {
+                        setIsPollingEnabled(false)
+
+                        const taskResponseJson = dataJson.TaskResponse
+                        setDiscoveredFileName(taskResponseJson['discovery_res_filename'])
+                        setLoading(false)
+                    }
+                })
+                .catch((error: any) => {
+                    console.log(error)
+                    console.log(error.response)
+                    setErrorMessage(error.response.data.displayMessage || "Something went wrong")
+                })
+        },
+        isPollingEnabled ? 3000 : null
+    );
 
     const onJsonFileChange = (file: File) => {
         setSelectedParamFile(file)
@@ -96,28 +139,23 @@ const Upload = () => {
         if (simParamsSource === Source.logs) {
             setInfoMessage("Discovery started...")
 
-            // call API to get json params
-            const formData = new FormData()
-            formData.append("logsFile", selectedLogsFile as Blob)
-            formData.append("bpmnFile", selectedBpmnFile as Blob)
+            // call API to get scenario params
+            discoverScenariosParams(selectedLogsFile as Blob, selectedBpmnFile as Blob)
+                .then(((result: any) => {
+                    const dataJson = result.data
 
-            axios.post(
-                '/api/discovery',
-                formData)
-                .then(((res: any) => {
-                    const jsonString = JSON.stringify(res.data)
-                    var blob = new Blob([jsonString], { type: "application/json" })
-                    const discoveredParamsFile = new File([blob], "name", { type: "application/json" })
-
-                    navigate(paths.SIMULATOR_SCENARIO_PATH, {
-                        state: {
-                            bpmnFile: selectedBpmnFile,
-                            jsonFile: discoveredParamsFile,
-                        }
-                    })
+                    // discovery task was started
+                    // polling to receive task results
+                    if (dataJson.TaskId) {
+                        setIsPollingEnabled(true)
+                        setPendingTaskId(dataJson.TaskId)
+                    }
                 }))
                 .catch((error: any) => {
+                    console.log(error)
                     setErrorMessage(error?.response?.data?.displayMessage || "Something went wrong")
+                    setLoading(false)
+                    onSnackbarClose()
                 })
         } else {
             navigate(paths.SIMULATOR_SCENARIO_PATH, {
