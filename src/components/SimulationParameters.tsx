@@ -29,6 +29,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useInterval } from 'usehooks-ts'
+import Tooltip from '@mui/material/Tooltip';
 
 const useStyles = makeStyles( (theme: Theme) => ({
     simParamsGrid: {
@@ -42,7 +43,7 @@ const useStyles = makeStyles( (theme: Theme) => ({
     }
 }));
 
-const tabs_name = {
+const tabs_name : { [key: string]: string } = {
     CASE_CREATION: "Case Creation",
     RESOURCE_CALENDARS: "Resource Calendars",
     RESOURCES: "Resources",
@@ -50,6 +51,20 @@ const tabs_name = {
     BRANCHING_PROB: "Branching Probabilities",
     SIMULATION_RESULTS: "Simulation Results"
 };
+
+const tooltip_desc: { [key: string]: string } = {
+    CASE_CREATION: 
+        "Describes when (arrival time calendar) and how (arrival time distribution) new process cases can be started",
+    RESOURCE_CALENDARS: 
+        "Lists the time intervals in which a resource is available to perform a task on a weekly calendar basis",
+    RESOURCES:
+        "Describes the resources grouped into pools. Specifically, it includes a set of resource pools",
+    RESOURCE_ALLOCATION:
+        "Maps each task in the process model and the list of resources that can perform it",
+    BRANCHING_PROB: 
+        "Represents the probability for the process execution to move towards any outgoing flow of each split (inclusive or exclusive) gateway in the process model",
+    SIMULATION_RESULTS: "",
+}
 
 interface LocationState {
     bpmnFile: File
@@ -345,13 +360,17 @@ const SimulationParameters = () => {
                     </Grid>
                     <Grid item container xs={12} className={classes.stepperGrid} alignItems="center" justifyContent="center" >
                         <Stepper className={classes.stepper} nonLinear alternativeLabel activeStep={activeStep} connector={<></>}>
-                            {Object.values(tabs_name).map((label, index) => (
-                                <Step key={label}>
-                                    <StepButton color="inherit" onClick={handleStep(index)} icon={getStepIcon(index)}>
-                                        {label}
-                                    </StepButton>
+                            {Object.entries(Object.entries(tabs_name)).map(([indexStr, [key, label]]) => {
+                                const indexNum = Number(indexStr)
+
+                                return <Step key={label}>
+                                    <Tooltip title={tooltip_desc[key]}>
+                                        <StepButton color="inherit" onClick={handleStep(indexNum)} icon={getStepIcon(indexNum)}>
+                                            {label}
+                                        </StepButton>
+                                    </Tooltip>
                                 </Step>
-                            ))}
+                            })}
                         </Stepper>
                         <Grid container mt={3} style={{ marginBottom: "2%" }}>
                             {getStepContent(activeStep)}
