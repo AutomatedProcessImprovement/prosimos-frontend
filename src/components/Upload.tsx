@@ -58,11 +58,17 @@ const Upload = () => {
                         setDiscoveredFileName(taskResponseJson['discovery_res_filename'])
                         setLoading(false)
                     }
+                    else if (dataJson.TaskStatus === "FAILURE") {
+                        setIsPollingEnabled(false)
+
+                        console.log(dataJson)
+                        setErrorMessage("Discovery Task failed")
+                    }
                 })
                 .catch((error: any) => {
                     console.log(error)
-                    console.log(error.response)
-                    setErrorMessage(error.response.data.displayMessage || "Something went wrong")
+                    const errorMessage = error?.response?.data?.displayMessage || "Something went wrong"
+                    setErrorMessage("Task Executing: " + errorMessage)
                 })
         },
         isPollingEnabled ? 3000 : null
@@ -153,8 +159,8 @@ const Upload = () => {
                 }))
                 .catch((error: any) => {
                     console.log(error)
-                    setErrorMessage(error?.response?.data?.displayMessage || "Something went wrong")
-                    setLoading(false)
+                    const errorMessage = error?.response?.data?.displayMessage || "Something went wrong"
+                    setErrorMessage("Task Creation: " + errorMessage)
                 })
         } else {
             navigate(paths.SIMULATOR_SCENARIO_PATH, {
