@@ -155,7 +155,6 @@ const Upload = () => {
                     console.log(error)
                     setErrorMessage(error?.response?.data?.displayMessage || "Something went wrong")
                     setLoading(false)
-                    onSnackbarClose()
                 })
         } else {
             navigate(paths.SIMULATOR_SCENARIO_PATH, {
