@@ -30,6 +30,10 @@ const Upload = () => {
     const navigate = useNavigate()
 
     useEffect(() => {
+        if (discoveredFileName === "") {
+            return
+        }
+
         getFileByFileName(discoveredFileName)
             .then((result: any) => {
                 const jsonString = JSON.stringify(result.data)
@@ -42,6 +46,11 @@ const Upload = () => {
                         jsonFile: discoveredParamsFile,
                     }
                 })
+            })
+            .catch((error: any) => {
+                console.log(error?.response || error)
+                const errorMessage = error?.response?.data?.displayMessage || "Something went wrong"
+                setErrorMessage("Loading File: " + errorMessage)
             })
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [discoveredFileName])
