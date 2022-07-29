@@ -30,6 +30,10 @@ const Upload = () => {
     const navigate = useNavigate()
 
     useEffect(() => {
+        if (discoveredFileName === "") {
+            return
+        }
+
         getFileByFileName(discoveredFileName)
             .then((result: any) => {
                 const jsonString = JSON.stringify(result.data)
@@ -43,6 +47,11 @@ const Upload = () => {
                     }
                 })
             })
+            .catch((error: any) => {
+                console.log(error?.response || error)
+                const errorMessage = error?.response?.data?.displayMessage || "Something went wrong"
+                setErrorMessage("Loading File: " + errorMessage)
+            })
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [discoveredFileName])
 
@@ -55,8 +64,13 @@ const Upload = () => {
                         setIsPollingEnabled(false)
 
                         const taskResponseJson = dataJson.TaskResponse
-                        setDiscoveredFileName(taskResponseJson['discovery_res_filename'])
-                        setLoading(false)
+                        if (taskResponseJson["success"] === false) {
+                            setIsPollingEnabled(false)
+                            setErrorMessage(`Discovery Task: ${taskResponseJson['errorMessage']}`)
+                        } else {
+                            setDiscoveredFileName(taskResponseJson['discovery_res_filename'])
+                            setLoading(false)
+                        }
                     }
                     else if (dataJson.TaskStatus === "FAILURE") {
                         setIsPollingEnabled(false)
