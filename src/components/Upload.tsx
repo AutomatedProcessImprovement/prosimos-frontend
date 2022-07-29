@@ -64,8 +64,13 @@ const Upload = () => {
                         setIsPollingEnabled(false)
 
                         const taskResponseJson = dataJson.TaskResponse
-                        setDiscoveredFileName(taskResponseJson['discovery_res_filename'])
-                        setLoading(false)
+                        if (taskResponseJson["success"] === false) {
+                            setIsPollingEnabled(false)
+                            setErrorMessage(`Discovery Task: ${taskResponseJson['errorMessage']}`)
+                        } else {
+                            setDiscoveredFileName(taskResponseJson['discovery_res_filename'])
+                            setLoading(false)
+                        }
                     }
                     else if (dataJson.TaskStatus === "FAILURE") {
                         setIsPollingEnabled(false)
