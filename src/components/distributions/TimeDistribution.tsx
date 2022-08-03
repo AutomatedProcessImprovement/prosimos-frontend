@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Grid, TextField } from "@mui/material";
 import { Controller, FieldError, useFieldArray, UseFormReturn } from "react-hook-form";
 import { JsonData } from "../formData";
@@ -34,13 +35,14 @@ const distrFuncWithNumOfParams: { [key in DISTR_FUNC]: any [] } = {
 }
 
 const TimeDistribution = (props: TimeDistributionProps) => {
-    const { control: formControl, setValue } = props.formState
-    const { objectNamePath, errors: distrErrors } = props
+    const { control: formControl, setValue, getValues } = props.formState
+    const { objectNamePath, errors: distrErrors, setErrorMessage } = props
     const { fields, replace } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: `${objectNamePath}.distribution_params` as AllowedDistrParamsName
     });
+    const [currSelectedFunc, setCurrSelectedFunc] = useState<DISTR_FUNC | null>(null)
 
     // TODO: will be back once we allow user all set of the possible distribution functions
 
@@ -58,6 +60,7 @@ const TimeDistribution = (props: TimeDistributionProps) => {
     // };
 
     const updateParamsNum = (newDistrFunc: DISTR_FUNC) => {
+        setCurrSelectedFunc(newDistrFunc)
         const newDefaultParams = distrFuncWithNumOfParams[newDistrFunc]
         replace(newDefaultParams)
         newDefaultParams.forEach((item, index) => {
@@ -65,6 +68,25 @@ const TimeDistribution = (props: TimeDistributionProps) => {
         })
     };
 
+    const onNumberFieldChange = (num: Number, label: String, onChange: (value: Number) => void) => {
+        let newDistrFunc = null
+        if (currSelectedFunc == null) {
+            newDistrFunc = getValues(`${objectNamePath}.distribution_name`) as DISTR_FUNC
+            setCurrSelectedFunc(newDistrFunc)
+        }
+
+        const distrFunc = currSelectedFunc ?? newDistrFunc
+        
+        if (distrFunc === DISTR_FUNC.triang && label === "Param 1") {
+            if (num < 0 || num > 1)
+                setErrorMessage("Parameter 1 (shape parameter) should be in the range [0, 1]")
+            else 
+                onChange(num)
+        } else {
+            onChange(num)
+        }
+    };
+    
     return (
         <Grid container spacing={2}>
             <Grid container item xs={4}>
@@ -106,12 +128,13 @@ const TimeDistribution = (props: TimeDistributionProps) => {
                                 render={({ 
                                     field: { onChange, value }
                                  }) => {
+                                    const label = labelName || `Param ${paramIndex+1}`
                                     return <TextField
                                         type="number"
                                         value={value}
-                                        label={labelName || `Param ${paramIndex+1}`}
+                                        label={label}
                                         onChange={(e) => {
-                                            onChange(Number(e.target.value))
+                                            onNumberFieldChange(Number(e.target.value), label, onChange)
                                         }}
                                         inputProps={{
                                             step: "any"
