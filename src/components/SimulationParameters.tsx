@@ -164,11 +164,18 @@ const SimulationParameters = () => {
                         // hide info message
                         onSnackbarClose()
                     }
+                    else if (dataJson.TaskStatus === "FAILURE") {
+                        setIsPollingEnabled(false)
+
+                        console.log(dataJson)
+                        setErrorMessage("Simulation Task failed")
+                    }
                 })
                 .catch((error: any) => {
                     console.log(error)
                     console.log(error.response)
-                    setErrorMessage(error.response.data.displayMessage || "Something went wrong")
+                    const errorMessage = error?.response?.data?.displayMessage || "Something went wrong"
+                    setErrorMessage("Task Executing: " + errorMessage)
                 })
         },
         isPollingEnabled ? 3000 : null
@@ -305,7 +312,7 @@ const SimulationParameters = () => {
             .then(((result: any) => {
                 const dataJson = result.data
                 setPendingTaskId(dataJson.TaskId)
-                setIsPollingEnabled(true)
+                setIsPollingEnabled(true) 
             }))
             .catch((error: any) => {
                 console.log(error.response)
