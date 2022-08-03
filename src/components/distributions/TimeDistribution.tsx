@@ -26,7 +26,7 @@ const distrFuncWithNumOfParams: { [key in DISTR_FUNC]: any [] } = {
     [DISTR_FUNC.fix]: [0,0,1],
     [DISTR_FUNC.norm]: new Array(2+2).fill(0),
     [DISTR_FUNC.expon]: new Array(2+2).fill(0),
-    [DISTR_FUNC.exponnorm]: new Array(2+2).fill(0),
+    [DISTR_FUNC.exponnorm]: new Array(3+2).fill(0),
     [DISTR_FUNC.uniform]: new Array(2+2).fill(0),
     [DISTR_FUNC.gamma]: new Array(3+2).fill(0),
     [DISTR_FUNC.triang]: new Array(3+2).fill(0),
