@@ -61,7 +61,10 @@ const useBpmnFile = (bpmnFile: any) => {
                 setTasksFromModel(tasks)
                 
                 const gateways = elementRegistry
-                    .filter((e: { type: string; }) => e.type === "bpmn:ExclusiveGateway")
+                    .filter((e: { type: string; }) => 
+                        e.type === "bpmn:ExclusiveGateway" ||
+                        e.type === "bpmn:InclusiveGateway"
+                    )
                     .reduce((acc: any, current: { id: any; businessObject: any, type: any }) => {
                         const bObj = current.businessObject
                         if (bObj.gatewayDirection !== "Diverging" && bObj.outgoing.length < 2) {

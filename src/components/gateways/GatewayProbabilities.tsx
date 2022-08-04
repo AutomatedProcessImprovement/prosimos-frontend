@@ -20,11 +20,12 @@ const GatewayProbabilities = (props: BranchingProbProps) => {
         control: formControl,
         name: `gateway_branching_probabilities.${gatewayIndex}.probabilities`
     })
+
     return (
         <Grid container spacing={1} key={gatewayKey + 'Grid'}>
             <Grid item xs={12}>
                 <Typography key={gatewayKey + 'Key'} variant="h6" align="left">
-                    {gateway.name || gatewayKey}
+                    {gateway?.name || gatewayKey}
                 </Typography>
             </Grid>
             {fields.map(({ path_id: activityKey }, index) => {
