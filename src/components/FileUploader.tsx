@@ -28,20 +28,22 @@ const FileUploader = (props: FileUploaderProps) => {
 
     const onFileChange = (event: any) => {
         const selectedFile = event.target.files[0]
-        const fileSizeInMb = selectedFile.size / 1000000
-        if (sizeLimitInMb && fileSizeInMb > sizeLimitInMb) {
-            setErrorMessage(`File exceeds the size limit of ${sizeLimitInMb} MB`)
-
-            /// nullify so that selecting the same file one more time will trigger onFileChange
-            if (inputRef.current) {
-                inputRef.current.value = ""
+        if (selectedFile) {
+            const fileSizeInMb = selectedFile.size / 1000000
+            if (sizeLimitInMb && fileSizeInMb > sizeLimitInMb) {
+                setErrorMessage(`File exceeds the size limit of ${sizeLimitInMb} MB`)
+    
+                /// nullify so that selecting the same file one more time will trigger onFileChange
+                if (inputRef.current) {
+                    inputRef.current.value = ""
+                }
+    
+                return
             }
 
-            return
+            setSelectedFile(selectedFile)
+            props.onFileChange(selectedFile)
         }
-
-        setSelectedFile(selectedFile)
-        props.onFileChange(selectedFile)
     };
     
     return (<Grid container alignItems="center" justifyContent="center">
