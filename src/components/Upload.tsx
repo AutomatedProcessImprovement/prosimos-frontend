@@ -172,7 +172,11 @@ const Upload = () => {
                     }
                 }))
                 .catch((error: any) => {
-                    console.log(error)
+                    if (error.response?.status === 413) {
+                        setErrorMessage("Task Creation: File exceeds the maximum file size")
+                        return
+                    }
+
                     const errorMessage = error?.response?.data?.displayMessage || "Something went wrong"
                     setErrorMessage("Task Creation: " + errorMessage)
                 })
@@ -262,6 +266,7 @@ const Upload = () => {
                                                         startId="existing_params_file"
                                                         ext=".json"
                                                         onFileChange={onJsonFileChange}
+                                                        setErrorMessage={setErrorMessage}
                                                     />
                                                 </Grid>
                                             </Grid>
@@ -273,6 +278,8 @@ const Upload = () => {
                                                         startId="logs_file"
                                                         ext=".xes, .csv"
                                                         onFileChange={onLogFileChange}
+                                                        sizeLimitInMb={25.0}
+                                                        setErrorMessage={setErrorMessage}
                                                     />
                                                 </Grid>
                                             </Grid>

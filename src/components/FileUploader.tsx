@@ -8,10 +8,13 @@ interface FileUploaderProps {
     startId: string
     ext?: string
     onFileChange: (file: any) => void
+    sizeLimitInMb?: number
+    setErrorMessage: (value: string) => void
 }
 
 const FileUploader = (props: FileUploaderProps) => {
-    const [selectedFile, setSelectedFile] = useState<File | null>(props.file)
+    const {file, sizeLimitInMb, setErrorMessage} = props
+    const [selectedFile, setSelectedFile] = useState<File | null>(file)
     const inputRef = useRef<HTMLInputElement>(null)
     useEffect(() => {
         if (props.file !== selectedFile) {
@@ -25,6 +28,18 @@ const FileUploader = (props: FileUploaderProps) => {
 
     const onFileChange = (event: any) => {
         const selectedFile = event.target.files[0]
+        const fileSizeInMb = selectedFile.size / 1000000
+        if (sizeLimitInMb && fileSizeInMb > sizeLimitInMb) {
+            setErrorMessage(`File exceeds the size limit of ${sizeLimitInMb} MB`)
+
+            /// nullify so that selecting the same file one more time will trigger onFileChange
+            if (inputRef.current) {
+                inputRef.current.value = ""
+            }
+
+            return
+        }
+
         setSelectedFile(selectedFile)
         props.onFileChange(selectedFile)
     };
@@ -50,7 +65,7 @@ const FileUploader = (props: FileUploaderProps) => {
         </Grid>
         {
             (selectedFile !== null && selectedFile !== undefined) && (
-                <Grid xs={12} className="centeredContent">
+                <Grid item xs={12} className="centeredContent">
                     <p>Uploaded file: {selectedFile && selectedFile.name}</p>
                 </Grid>
             )
