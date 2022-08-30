@@ -80,6 +80,8 @@ const Upload = () => {
                     }
                 })
                 .catch((error: any) => {
+                    setIsPollingEnabled(false)
+
                     console.log(error)
                     const errorMessage = error?.response?.data?.displayMessage || "Something went wrong"
                     setErrorMessage("Task Executing: " + errorMessage)
