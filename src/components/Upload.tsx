@@ -278,7 +278,7 @@ const Upload = () => {
                                                     <FileUploader
                                                         file={selectedLogsFile}
                                                         startId="logs_file"
-                                                        ext=".xes, .csv"
+                                                        ext=".xes, .csv, application/zip"
                                                         onFileChange={onLogFileChange}
                                                         sizeLimitInMb={25.0}
                                                         setErrorMessage={setErrorMessage}
