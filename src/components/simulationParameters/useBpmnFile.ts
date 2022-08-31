@@ -67,7 +67,8 @@ const useBpmnFile = (bpmnFile: any) => {
                     )
                     .reduce((acc: any, current: { id: any; businessObject: any, type: any }) => {
                         const bObj = current.businessObject
-                        if (bObj.gatewayDirection in ["Unspecified", "Converging"] && bObj.outgoing.length < 2) {
+                        if (bObj.gatewayDirection in ["Unspecified", "Converging"]) {
+                            // ignore gateways with "Unspecified", "Converging" direction type
                             return acc
                         }
 
