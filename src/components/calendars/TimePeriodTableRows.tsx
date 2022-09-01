@@ -3,8 +3,10 @@ import { TableRow, TableCell, Checkbox, TextField } from "@mui/material"
 import WeekdaySelect from "./WeekdaySelect"
 import TimePickerController from "./TimePickerController"
 import { JsonData } from "../formData"
-import { colWidth } from "../ResourceCalendars"
 import TimePeriodActionsColumn from "./TimePeriodActionsColumn"
+
+const colWidth = [ "1%", "18%", "15%", "15%", "14%", "14%", "15%" ]
+
 interface TimePeriodTableRowsProps {
     formState: UseFormReturn<JsonData, object>
     index: number,
