@@ -9,6 +9,7 @@ import { defaultWorkWeekTimePeriod } from "./simulationParameters/defaultValues"
 import DeleteButtonToolbar from "./toolbar/DeleteButtonToolbar"
 import AddButtonToolbar from "./toolbar/AddButtonToolbar"
 import { makeStyles } from "@material-ui/core/styles";
+import CalendarNameDialog from "./profiles/CalendarNameDialog"
 
 const useStyles = makeStyles( (theme: Theme) => ({
     centeredGrid: {
@@ -39,7 +40,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
     })
 
     const onAddNewCalendar = () => {
-        prependCalendarFields(defaultTemplateSchedule(true))
+        setIsNameDialogOpen(true)
     };
 
     const onDeleteCalendars = () => {
@@ -56,11 +57,19 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
         removeCalendarsFields(currCalendarIndex)
         updateCurrCalendar(undefined)
     };
-    console.log(currCalendarIndex)
-    console.log(allCalendars)
+
+    const onNameDialogSave = (name: string) => {
+        const newDefaultResourceCalendar = defaultTemplateSchedule(false, name)
+        prependCalendarFields(newDefaultResourceCalendar)
+        updateCurrCalendar(0)
+        setIsNameDialogOpen(false)
+    };
+
+    const onNameDialogClose = () => {
+        setIsNameDialogOpen(false)
+    };
 
     const handleCalendarSelectChange = (event: any) => {
-        console.log(event)
         const selectedCalendarIndex = event.target.value
         updateCurrCalendar(Number(selectedCalendarIndex))
     }
@@ -72,7 +81,6 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
             setCurrCalendarKey("")
         } else {
             const calendarKey = allCalendars[index]?.key || ""
-            console.log(calendarKey)
             setCurrCalendarKey(calendarKey)
         }
     }
@@ -132,6 +140,13 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
                     />
                 </Grid>
             }
+            {isNameDialogOpen && <CalendarNameDialog
+                modalOpen={isNameDialogOpen}
+                handleClose={onNameDialogClose}
+                handleSubmit={onNameDialogSave}
+                dialogTitle="Create Calendar"
+                isDialogTextShown={false}
+            />}
         </Grid>
     )
 }

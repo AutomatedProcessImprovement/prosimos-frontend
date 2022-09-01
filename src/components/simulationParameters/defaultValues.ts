@@ -10,7 +10,7 @@ export const defaultWorkWeekTimePeriod = {
     endTime: "17:00:00.000"
 }
 
-export const defaultTemplateSchedule = (withWeekends: boolean) => {
+export const defaultTemplateSchedule = (withWeekends: boolean, userDefinedName?: string) => {
     const tp = [defaultWorkWeekTimePeriod]
 
     if (withWeekends) {
@@ -22,9 +22,13 @@ export const defaultTemplateSchedule = (withWeekends: boolean) => {
         })
     }
 
+    const name = (typeof userDefinedName !== 'undefined') 
+        ? userDefinedName
+        : DEFAULT_SCHEDULE_NAME
+
     return {
         id: "sid-" + uuid(),
-        name: DEFAULT_SCHEDULE_NAME,
+        name: name,
         time_periods: tp
     }
 }
