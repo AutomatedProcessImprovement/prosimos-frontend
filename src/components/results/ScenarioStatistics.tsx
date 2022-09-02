@@ -85,10 +85,10 @@ const ScenarioStatistics = (props: ScenarioStatisticsProps) => {
                             Min
                         </TableCellRightBorder>
                         <TableCellRightBorder align="center" colSpan={1}>
-                            Max
+                            Average
                         </TableCellRightBorder>
                         <TableCellRightBorder align="center" colSpan={1}>
-                            Average
+                            Max
                         </TableCellRightBorder>
                         <TableCellRightBorder align="center" colSpan={1}>
                             Trace Ocurrences
@@ -100,8 +100,8 @@ const ScenarioStatistics = (props: ScenarioStatisticsProps) => {
                         <TableRow key={`${row[COLUMNS_NAME.KPI]}`} hover>
                             <TableCellLeftRightBorder component="th" scope="row">{row["KPI_display_name"]}</TableCellLeftRightBorder>
                             <TableCellRightBorder align="center">{row[COLUMNS_NAME.Min]}</TableCellRightBorder>
-                            <TableCellRightBorder align="center">{row[COLUMNS_NAME.Max]}</TableCellRightBorder>
                             <TableCellRightBorder align="center">{row[COLUMNS_NAME.Average]}</TableCellRightBorder>
+                            <TableCellRightBorder align="center">{row[COLUMNS_NAME.Max]}</TableCellRightBorder>
                             <TableCellRightBorder align="center">{row[COLUMNS_NAME.TraceOcurrences]}</TableCellRightBorder>
                         </TableRow>
                     ))}

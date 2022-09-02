@@ -4,6 +4,7 @@ import ButtonToolbarBase from "./ButtonToolbarBase";
 interface AddButtonToolbarProps {
     onClick: () => void
     labelName: string
+    variant?: "text" | "outlined"
 }
 
 const AddButtonToolbar = (props: AddButtonToolbarProps) => {
@@ -12,7 +13,7 @@ const AddButtonToolbar = (props: AddButtonToolbarProps) => {
             onClick={props.onClick}
             labelName={props.labelName}
             startIcon={<AddIcon />}
-            variant="outlined"
+            variant={ props.variant || "outlined"}
         />
     )
 }

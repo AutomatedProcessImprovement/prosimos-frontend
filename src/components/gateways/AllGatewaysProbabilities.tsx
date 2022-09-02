@@ -3,6 +3,7 @@ import { JsonData } from "../formData";
 import GatewayProbabilities from "./GatewayProbabilities";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { Gateways } from "../modelData";
+import { List , AutoSizer } from 'react-virtualized';
 
 interface GatewayBranchingProbProps {
     formState: UseFormReturn<JsonData, object>
@@ -16,22 +17,39 @@ const AllGatewaysProbabilities = (props: GatewayBranchingProbProps) => {
         control: formControl,
         name: `gateway_branching_probabilities`
     })
-    
+
+    const renderRow = ({ index, key, style }: any) => {
+        const item = fields[index]
+        const gatewayKey = item.gateway_id
+
+        return <Grid key={`${gatewayKey}Grid`} item xs={12} style={style}>
+            <Card elevation={5} sx={{ m: 1, p: 1 }}>
+                <GatewayProbabilities
+                    gatewayKey={gatewayKey}
+                    index={index}
+                    formState={props.formState}
+                    gateway={gateways?.[gatewayKey]}
+                />
+            </Card>
+        </Grid>
+    }
+
     return (
-        <Grid container spacing={2}>
-            {fields.map((probability, index) => {
-                const gatewayKey = probability.gateway_id
-                return <Grid key={`${gatewayKey}Grid`} item xs={12}>
-                    <Card elevation={5} sx={{ p: 1 }}>
-                        <GatewayProbabilities
-                            gatewayKey={gatewayKey}
-                            index={index}
-                            formState={props.formState}
-                            gateway={gateways?.[gatewayKey]}
+        <Grid item xs={12} container spacing={2}>
+            <Grid item container xs={12} style={{ minHeight: "60vh" }}>
+                <AutoSizer>
+                    {({ width, height }) => {
+                        return <List
+                            width={width}
+                            height={height}
+                            rowHeight={240}
+                            rowRenderer={renderRow}
+                            rowCount={fields.length}
+                            overscanRowCount={5}
                         />
-                    </Card>
-                </Grid>
-            })}
+                    }}
+                </AutoSizer>
+            </Grid>
         </Grid>
     )
 }

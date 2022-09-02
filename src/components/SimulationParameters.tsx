@@ -172,6 +172,8 @@ const SimulationParameters = () => {
                     }
                 })
                 .catch((error: any) => {
+                    setIsPollingEnabled(false)
+
                     console.log(error)
                     console.log(error.response)
                     const errorMessage = error?.response?.data?.displayMessage || "Something went wrong"

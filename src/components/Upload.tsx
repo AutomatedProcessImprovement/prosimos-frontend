@@ -80,6 +80,8 @@ const Upload = () => {
                     }
                 })
                 .catch((error: any) => {
+                    setIsPollingEnabled(false)
+
                     console.log(error)
                     const errorMessage = error?.response?.data?.displayMessage || "Something went wrong"
                     setErrorMessage("Task Executing: " + errorMessage)
@@ -276,7 +278,7 @@ const Upload = () => {
                                                     <FileUploader
                                                         file={selectedLogsFile}
                                                         startId="logs_file"
-                                                        ext=".xes, .csv"
+                                                        ext=".xes, .csv, application/zip"
                                                         onFileChange={onLogFileChange}
                                                         sizeLimitInMb={25.0}
                                                         setErrorMessage={setErrorMessage}

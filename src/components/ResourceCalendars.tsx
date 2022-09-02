@@ -1,19 +1,23 @@
-import { alpha } from '@mui/material/styles'
-import { Checkbox, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Toolbar, Typography } from "@mui/material"
+import { Grid, MenuItem, TextField, Typography, Theme} from "@mui/material"
 import { useState, useEffect } from "react"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
-import AddButtonToolbar from "./toolbar/AddButtonToolbar"
-import TimePeriodTableRows from "./calendars/TimePeriodTableRows"
-import DeleteButtonToolbar from './toolbar/DeleteButtonToolbar'
+import TimePeriodGridItemsWithAdd from "./calendars/TimePeriodGridItemsWithAdd"
 import { JsonData } from './formData'
 import { defaultTemplateSchedule } from './simulationParameters/defaultValues'
 import { MIN_LENGTH_REQUIRED_MSG } from './validationMessages'
-import { VariableSizeList } from 'react-window'
-import { AutoSizer } from 'react-virtualized'
-import React from 'react'
+import { defaultWorkWeekTimePeriod } from "./simulationParameters/defaultValues";
+import DeleteButtonToolbar from "./toolbar/DeleteButtonToolbar"
+import AddButtonToolbar from "./toolbar/AddButtonToolbar"
+import { makeStyles } from "@material-ui/core/styles";
+import CalendarNameDialog from "./profiles/CalendarNameDialog"
 
-const ROW_HEIGHT = 67
-export const colWidth = [ "1%", "18%", "15%", "15%", "14%", "14%", "15%" ]
+const useStyles = makeStyles( (theme: Theme) => ({
+    centeredGrid: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center" 
+    }
+}));
 
 interface ResourceCalendarsProps {
     formState: UseFormReturn<JsonData, object>
@@ -21,213 +25,170 @@ interface ResourceCalendarsProps {
 }
 
 const ResourceCalendars = (props: ResourceCalendarsProps) => {
-    const { control: formControl, setFocus } = props.formState
+    const { formState } = props 
+    const classes = useStyles()
+    const { control: formControl } = formState
     const { setErrorMessage } = props
-    const [isRowAdding, setIsRowAdding] = useState(false)
-    const listRef = React.useRef<VariableSizeList>(null)
+    const [currCalendarIndex, setCurrCalendarIndex] = useState<number>()
+    const [currCalendarKey, setCurrCalendarKey] = useState<string>("")
+    const [isNameDialogOpen, setIsNameDialogOpen] = useState<boolean>(false)
 
-    const { fields, prepend: prependCalendarFields, remove: removeCalendarsFields } = useFieldArray({
+    const { fields: allCalendars, prepend: prependCalendarFields, remove: removeCalendarsFields } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: "resource_calendars"
     })
 
-    const initialRowSizes = new Array(fields.length).fill(true).reduce((acc, item, i) => {
-        acc[i] = fields[i].time_periods.length * ROW_HEIGHT;
-        return acc;
-    }, [])
-    const [rowSizes, setRowSizes] = useState<number[]>(initialRowSizes)
-
-    const [selected, setSelected] = useState<readonly string[]>([])
-
-    useEffect(() => {
-        if (listRef.current) {
-            listRef.current && listRef.current!.resetAfterIndex(0);
-        }
-    }, [rowSizes]);
-
-    useEffect(() => {
-        if (isRowAdding) {
-            const firstVisibleRowBefore = 1
-            setFocus(`resource_calendars.${firstVisibleRowBefore}.name`)
-            setIsRowAdding(false)
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fields, isRowAdding]);
-
     const onAddNewCalendar = () => {
-        prependCalendarFields(defaultTemplateSchedule(true))
-
-        setIsRowAdding(true)
-        const rs = [
-            ROW_HEIGHT * 2,
-            ...rowSizes
-        ]
-        setRowSizes(rs)
+        setIsNameDialogOpen(true)
     };
 
     const onDeleteCalendars = () => {
-        if (fields.length === 1) {
+        if (currCalendarIndex === undefined) {
+            setErrorMessage("Calendar is not selected")
+            return
+        }
+
+        if (allCalendars.length === 1) {
             setErrorMessage(MIN_LENGTH_REQUIRED_MSG("calendar"))
             return
         }
 
-        const fieldsNames = fields.reduce((acc, curr) => acc.concat(curr.id), [] as string[])
-        const selectedCalsIndex = selected.map((val) => fieldsNames.indexOf(val))
-
-        removeCalendarsFields(selectedCalsIndex)
-        setSelected([])
-
-        // update row heights for visualizing
-        const rs = [...rowSizes]
-        selectedCalsIndex.sort()
-        selectedCalsIndex.forEach((index: number) => {
-            rs.splice(index, 1)
-        })
-
-        setRowSizes(rs)
+        removeCalendarsFields(currCalendarIndex)
+        updateCurrCalendar(undefined)
     };
 
-    const handleClick = (calendarId: string) => {
-        const selectedIndex = selected.indexOf(calendarId)
-        let newSelected: readonly string[] = []
+    const onNameDialogSave = (name: string) => {
+        const newDefaultResourceCalendar = defaultTemplateSchedule(false, name)
+        prependCalendarFields(newDefaultResourceCalendar)
+        updateCurrCalendar(0)
+        setIsNameDialogOpen(false)
+    };
 
-        if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, calendarId)
-        } else if (selectedIndex === 0) {
-            newSelected = newSelected.concat(selected.slice(1))
-        } else if (selectedIndex === selected.length - 1) {
-            newSelected = newSelected.concat(selected.slice(0, -1))
-        } else if (selectedIndex > 0) {
-            newSelected = newSelected.concat(
-                selected.slice(0, selectedIndex),
-                selected.slice(selectedIndex + 1),
-            )
+    const onNameDialogClose = () => {
+        setIsNameDialogOpen(false)
+    };
+
+    const handleCalendarSelectChange = (event: any) => {
+        const selectedCalendarIndex = event.target.value
+        updateCurrCalendar(Number(selectedCalendarIndex))
+    }
+
+    const updateCurrCalendar = (index: number | undefined) => {
+        setCurrCalendarIndex(index)
+
+        if (index === undefined) {
+            setCurrCalendarKey("")
+        } else {
+            const calendarKey = allCalendars[index]?.key || ""
+            setCurrCalendarKey(calendarKey)
         }
+    }
 
-        setSelected(newSelected)
-    };
-
-    const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.checked) {
-            const newSelectedIds = fields.map((n) => n.id)
-            setSelected(newSelectedIds)
-            return
-        }
-
-        setSelected([])
-    };
-
-    const updateRowSizes = (index: number, timePeriodsCount: number) => {
-        const rs = [
-            ...rowSizes.slice(0, index),
-            timePeriodsCount * ROW_HEIGHT,
-            ...rowSizes.slice(index+1)            
-        ]
-        setRowSizes(rs)
-    };
-
-    const numSelected = selected.length
-    const calendarsCount = fields.length
-
-    const renderRow = (({ style, index, data }: any) => {
-        const calendar = fields[index]
-        const isItemSelected = selected.indexOf(calendar.id) !== -1
-
-        return <TimePeriodTableRows
-            key={`calendar_${index}_${calendar.key}`}
-            formState={props.formState}
-            index={index}
-            isItemSelected={isItemSelected}
-            handleClick={handleClick}
-            style={style}
-            updateRowSizes={updateRowSizes}
-        />
-    });
-
-    const getItemSize = (index: number) => {
-        return rowSizes[index]
-    };
-    
     return (
-        <Grid container spacing={2}>
-            <Toolbar
-                sx={{
-                    width: "100%",
-                    pl: { sm: 2 },
-                    pr: { xs: 1, sm: 1 },
-                    ...(numSelected > 0 && {
-                        bgcolor: (theme) =>
-                            alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
-                    }),
-                }}>
-                <Grid container>
-                    <Grid item xs={6} justifyContent="flex-start">
-                        {numSelected > 0 && (
-                            <Typography
-                                color="inherit"
-                            >
-                                {selected.length} calendar(s) selected
-                            </Typography>
-                        )}
-                    </Grid>
-
-                    <Grid item container justifyContent="flex-end" xs={6}>
-                        {numSelected > 0
-                            ? <DeleteButtonToolbar
-                                onClick={onDeleteCalendars}
-                                labelName="Delete"
-                            />
-                            : <AddButtonToolbar
-                                onClick={onAddNewCalendar}
-                                labelName="Add new calendar"
-                            />
-                        }
+        <Grid container width="100%" spacing={2}>
+            <Grid container item xs={12}>
+                <Grid container item xs={8} className={classes.centeredGrid}>
+                    <Grid item xs={8}>
+                        <TextField
+                            sx={{ width: "100%" }}
+                            label="Calendar"
+                            variant="standard"
+                            value={currCalendarIndex ?? ''}
+                            onChange={handleCalendarSelectChange}
+                            select
+                        >
+                            {allCalendars.map((item, index) => {
+                                const {key} = item
+                                return <MenuItem
+                                    key={`calendar_select_${key}`}
+                                    value={index}
+                                >
+                                    {item.name}
+                                </MenuItem>
+                            })}
+                        </TextField>
                     </Grid>
                 </Grid>
-            </Toolbar>
-
-            <TableContainer component={Paper} style={{ width: "100%", height: "60vh"}}>
-                <Table style={{ width: "100%", height: "60vh" }} >
-                    <TableHead>
-                        <TableRow>
-                            <TableCell width={colWidth[0]} padding="checkbox">
-                                <Checkbox
-                                    color="primary"
-                                    indeterminate={numSelected > 0 && numSelected < calendarsCount}
-                                    checked={calendarsCount > 0 && numSelected === calendarsCount}
-                                    onChange={handleSelectAllClick}
-                                />
-                            </TableCell>
-                            <TableCell width={colWidth[1]}>Name</TableCell>
-                            <TableCell width={colWidth[2]}>Begin Day</TableCell>
-                            <TableCell width={colWidth[3]}>End Day</TableCell>
-                            <TableCell width={colWidth[4]}>Begin Time</TableCell>
-                            <TableCell width={colWidth[5]}>End Time</TableCell>
-                            <TableCell width={colWidth[6]}>Actions</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody style={{ height: "50vh" }} >
-                        <AutoSizer>
-                            {({ height, width }) => (
-                                <VariableSizeList
-                                    ref={listRef}
-                                    width={width}
-                                    height={height}
-                                    itemSize={getItemSize}
-                                    itemCount= {fields.length}
-                                    itemData={fields}
-                                    itemKey={(i: number) => fields[i].id}
-                                >
-                                    {renderRow}
-                                </VariableSizeList>
-                            )}
-                        </AutoSizer>
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                <Grid item xs={2} className={classes.centeredGrid}>
+                    <DeleteButtonToolbar
+                        onClick={onDeleteCalendars}
+                        labelName="Delete selected"
+                    />
+                </Grid>
+                <Grid item xs={1} className={classes.centeredGrid}>
+                    <AddButtonToolbar
+                        onClick={onAddNewCalendar}
+                        labelName="Add new"
+                        variant="text"
+                    />
+                </Grid>
+            </Grid>
+            {(currCalendarIndex === undefined)
+                ? <Grid xs={12} className={classes.centeredGrid} sx={{ p: 2 }}> 
+                    <Typography>
+                        Please select the calendar to see its time periods
+                    </Typography>
+                </Grid>
+                : <Grid xs={12} sx={{ p: 2 }}>
+                    <TimePeriodList
+                        key={`resource_calendars.${currCalendarKey}`}
+                        formState={formState}
+                        setErrorMessage={setErrorMessage}
+                        calendarIndex={currCalendarIndex}
+                        calendarKey={currCalendarKey}
+                    />
+                </Grid>
+            }
+            {isNameDialogOpen && <CalendarNameDialog
+                modalOpen={isNameDialogOpen}
+                handleClose={onNameDialogClose}
+                handleSubmit={onNameDialogSave}
+                dialogTitle="Create Calendar"
+                isDialogTextShown={false}
+            />}
         </Grid>
     )
+}
+
+interface TimePeriodListProps extends ResourceCalendarsProps{
+    calendarIndex: number
+    calendarKey: string
+}
+
+const TimePeriodList = (props: TimePeriodListProps) => {
+    const { formState, calendarIndex, calendarKey } = props
+    const { control } = formState
+    const [index, setIndex] = useState<number>(calendarIndex)
+
+    const { fields: currTimePeriods, append, remove } = useFieldArray({
+        keyName: 'key',
+        control: control,
+        name: `resource_calendars.${index}.time_periods`
+    })
+
+    useEffect(() => {
+        if (index !== calendarIndex) {
+            setIndex(calendarIndex)
+        }
+    }, [calendarIndex, index])
+
+    const onTimePeriodRemove = (index: number) => {
+        remove(index)
+    };
+
+    const onTimePeriodAdd = () => {
+        append(defaultWorkWeekTimePeriod)
+    };
+
+    return <TimePeriodGridItemsWithAdd
+        key={`resource_calendars.${calendarKey}.time_periods`}
+        fields={currTimePeriods}
+        formState={formState}
+        objectFieldNamePart={`resource_calendars.${calendarIndex}.time_periods` as unknown as keyof JsonData}
+        onTimePeriodRemove={onTimePeriodRemove}
+        onTimePeriodAdd={onTimePeriodAdd}
+    />
 }
 
 export default ResourceCalendars;
