@@ -30,6 +30,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useInterval } from 'usehooks-ts'
 import Tooltip from '@mui/material/Tooltip';
+import AllIntermediateEvents from './interEvents/AllIntermediateEvents'
 
 const useStyles = makeStyles( (theme: Theme) => ({
     simParamsGrid: {
@@ -49,6 +50,7 @@ const tabs_name : { [key: string]: string } = {
     RESOURCES: "Resources",
     RESOURCE_ALLOCATION: "Resource Allocation",
     BRANCHING_PROB: "Branching Probabilities",
+    INTERMEDIATE_EVENTS: "Intermediate Events",
     SIMULATION_RESULTS: "Simulation Results"
 };
 
@@ -63,6 +65,8 @@ const tooltip_desc: { [key: string]: string } = {
         "Maps each task in the process model and the list of resources that can perform it",
     BRANCHING_PROB: 
         "Represents the probability for the process execution to move towards any outgoing flow of each split (inclusive or exclusive) gateway in the process model",
+    INTERMEDIATE_EVENTS:
+        "Represents the probability for intermediate events present in the business process model",
     SIMULATION_RESULTS: "",
 }
 
@@ -223,6 +227,11 @@ const SimulationParameters = () => {
                     gateways={gateways}
                 />
             case 5:
+                return <AllIntermediateEvents
+                    formState={formState}
+                    setErrorMessage={setErrorMessage}
+                />
+            case 6:
                 if (!!currSimulatedOutput)
                     return <SimulationResults
                         output={currSimulatedOutput}

@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { JsonData } from "../formData";
+import { EventDistribution, JsonData } from "../formData";
 import { AllModelTasks, Gateways } from "../modelData";
 import { defaultTemplateSchedule, defaultArrivalTimeDistribution, defaultArrivalCalendarArr, defaultResourceProfiles } from "./defaultValues";
 import * as yup from "yup";
@@ -116,7 +116,20 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
                         .required()
                 })
             )
-            .required()
+            .required(),
+        event_distribution: yup.array()
+            .of(
+                yup.object().shape({
+                    event_id: yup.string().required(REQUIRED_ERROR_MSG),
+                    distribution_name: yup.string().required(REQUIRED_ERROR_MSG),
+                    distribution_params: yup.array()
+                        .of(
+                            yup.object().shape({
+                                value: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG)
+                            })
+                        )
+                })
+            )
     })), []);
     
     const formState = useForm<JsonData>({
@@ -154,6 +167,8 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
             })
 
             const defaultResourceCalendars = defaultTemplateSchedule(false)
+            
+            const defaultEventDistribution: EventDistribution[] = []
 
             const updData = {
                 task_resource_distribution: mappedTasksFromModel,
@@ -161,7 +176,8 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
                 gateway_branching_probabilities: mappedGateways,
                 arrival_time_distribution: defaultArrivalTimeDistribution,
                 arrival_time_calendar: defaultArrivalCalendarArr,
-                resource_profiles: defaultResourceProfiles(defaultResourceCalendars.id)
+                resource_profiles: defaultResourceProfiles(defaultResourceCalendars.id),
+                event_distribution: defaultEventDistribution
             }
             setData(updData)
         }
