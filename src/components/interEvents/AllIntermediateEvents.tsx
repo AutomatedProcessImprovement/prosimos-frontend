@@ -30,7 +30,7 @@ const AllIntermediateEvents = (props: AllIntermediateEventsProps) => {
         }
 
         return <Grid key={`${key}`} item xs={12} style={style}>
-            <Card elevation={5} sx={{ m: 1, p: 1 }}>
+            <Card elevation={5} sx={{ m: 1, p: 1, minHeight: "160px" }}>
                 <Grid container item xs={12} sx={{ p: 1}}>
                     <Grid key={`${key}NameGrid`} item xs={12}>
                         <Typography key={`${key}Name`} variant="h6" align="left">
@@ -56,7 +56,7 @@ const AllIntermediateEvents = (props: AllIntermediateEventsProps) => {
                         return <List
                             width={width}
                             height={height}
-                            rowHeight={240}
+                            rowHeight={190}
                             rowRenderer={renderRow}
                             rowCount={fields.length}
                             overscanRowCount={5}
