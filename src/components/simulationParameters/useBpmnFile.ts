@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import BpmnModdle from "bpmn-moddle";
 import BpmnModeler from "bpmn-js/lib/Modeler";
-import { AllModelTasks, Gateways, SequenceElements } from '../modelData';
+import { AllModelTasks, EventsFromModel, Gateways, SequenceElements } from '../modelData';
 
 const useBpmnFile = (bpmnFile: any) => {
     const [xmlData, setXmlData] = useState<string>("")
     const [tasksFromModel, setTasksFromModel] = useState<AllModelTasks>({})
     const [gateways, setGateways] = useState<Gateways>({})
+    const [eventsFromModel, setEventsFromModel] = useState<EventsFromModel>({}) // dict of id and name of the intermediate events
 
     const getTargetTaskNameForGateway = (item: any, elementRegistry: any) => {
         let taskName = ""
@@ -91,6 +92,21 @@ const useBpmnFile = (bpmnFile: any) => {
                         }
                     }, {} as Gateways)
                 setGateways(gateways)
+                
+                const eventsFromModel = elementRegistry
+                    .filter((e: { type: string; }) => e.type === 'bpmn:IntermediateCatchEvent')
+                    .reduce((acc: EventsFromModel, t: any) => {
+                        console.log(t)
+                        const new_acc = {
+                            ...acc,
+                            [t.id]: { name: t.businessObject?.name }
+                        } as EventsFromModel
+
+                        return new_acc
+                    }, {} as EventsFromModel)
+                
+                console.log(eventsFromModel)
+                setEventsFromModel(eventsFromModel)
             }
 
             try {
@@ -102,7 +118,7 @@ const useBpmnFile = (bpmnFile: any) => {
         }
     }, [bpmnFile]);
 
-    return { xmlData, tasksFromModel, gateways }
+    return { xmlData, tasksFromModel, gateways, eventsFromModel }
 }
 
 export default useBpmnFile;

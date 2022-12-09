@@ -1,18 +1,22 @@
 
-import { Card, Grid, Typography } from "@mui/material";
+import { Grid } from "@mui/material";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { AutoSizer, List } from "react-virtualized";
-import TimeDistribution from "../distributions/TimeDistribution";
 import { JsonData } from "../formData";
+import { EventsFromModel } from "../modelData";
+import EventCard from "./EventCard";
 
 
 interface AllIntermediateEventsProps {
     formState: UseFormReturn<JsonData, object>
     setErrorMessage: (value: string) => void
+    eventsFromModel: EventsFromModel
 }
 
 const AllIntermediateEvents = (props: AllIntermediateEventsProps) => {
-    const { formState: { control: formControl, formState: { errors } }, setErrorMessage } = props
+    const { formState: { control: formControl }, 
+        setErrorMessage, eventsFromModel } = props
+
     const { fields } = useFieldArray({
         keyName: 'key',
         control: formControl,
@@ -20,32 +24,16 @@ const AllIntermediateEvents = (props: AllIntermediateEventsProps) => {
     })
     
     const renderRow = ({ index, key, style }: any) => {
-        const item = fields[index]
-        const eventIdKey = item.event_id
-
-        const currentErrors = errors?.event_distribution?.[index]
-        const distrErrors = {
-            distribution_name: currentErrors?.distribution_name,
-            distribution_params: currentErrors?.distribution_params
-        }
-
-        return <Grid key={`${key}`} item xs={12} style={style}>
-            <Card elevation={5} sx={{ m: 1, p: 1, minHeight: "160px" }}>
-                <Grid container item xs={12} sx={{ p: 1}}>
-                    <Grid key={`${key}NameGrid`} item xs={12}>
-                        <Typography key={`${key}Name`} variant="h6" align="left">
-                            {eventIdKey}
-                        </Typography>
-                    </Grid>
-                    <TimeDistribution
-                        formState={props.formState}
-                        objectNamePath={`event_distribution.${index}`}
-                        errors={distrErrors}
-                        setErrorMessage={setErrorMessage}
-                    />
-                </Grid>
-            </Card>
-        </Grid>
+        return ( 
+            <EventCard
+                formState={props.formState}
+                setErrorMessage={setErrorMessage}
+                eventsFromModel={eventsFromModel}
+                index={index}
+                key={key}
+                style={style}
+                fields={fields}
+        />)
     }
 
     return (
@@ -56,7 +44,7 @@ const AllIntermediateEvents = (props: AllIntermediateEventsProps) => {
                         return <List
                             width={width}
                             height={height}
-                            rowHeight={190}
+                            rowHeight={215}
                             rowRenderer={renderRow}
                             rowCount={fields.length}
                             overscanRowCount={5}

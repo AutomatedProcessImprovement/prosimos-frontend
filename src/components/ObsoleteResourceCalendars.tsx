@@ -36,7 +36,6 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
         acc[i] = fields[i].time_periods.length * ROW_HEIGHT;
         return acc;
     }, [])
-    console.log(initialRowSizes)
     const [rowSizes, setRowSizes] = useState<number[]>(initialRowSizes)
 
     const [selected, setSelected] = useState<readonly string[]>([])

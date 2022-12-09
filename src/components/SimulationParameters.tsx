@@ -111,10 +111,10 @@ const SimulationParameters = () => {
 
     const linkDownloadRef = useRef<HTMLAnchorElement>(null)
 
-    const { tasksFromModel, gateways } = useBpmnFile(bpmnFile)
-    const { jsonData } = useJsonFile(jsonFile)
+    const { tasksFromModel, gateways, eventsFromModel } = useBpmnFile(bpmnFile)
+    const { jsonData, missedElemNum } = useJsonFile(jsonFile, eventsFromModel)
 
-    const { formState } = useFormState(tasksFromModel, gateways, jsonData)
+    const { formState } = useFormState(tasksFromModel, gateways, eventsFromModel, jsonData)
     const { formState: { errors, isValid, isSubmitted, submitCount }, getValues, handleSubmit } = formState
     const [ isScenarioParamsValid, setIsScenarioParamsValid ] = useState(true)
 
@@ -130,6 +130,14 @@ const SimulationParameters = () => {
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isSubmitted, submitCount]);
+
+    useEffect(() => {
+        // TODO: handle case when we load the page initially and we see this message
+        // that happens when we haven't fully loaded the BPMN model yet
+        if (missedElemNum > 0) {
+            setInfoMessage(`${missedElemNum} elements from config were ignored due to its absence in the BPMN model.`)
+        }
+    }, [missedElemNum])
 
     const handleStep = (index: number) => () => {
         setActiveStep(index)
@@ -230,6 +238,7 @@ const SimulationParameters = () => {
                 return <AllIntermediateEvents
                     formState={formState}
                     setErrorMessage={setErrorMessage}
+                    eventsFromModel={eventsFromModel}
                 />
             case 6:
                 if (!!currSimulatedOutput)

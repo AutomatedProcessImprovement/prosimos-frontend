@@ -1,14 +1,14 @@
 import { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { EventDistribution, JsonData } from "../formData";
-import { AllModelTasks, Gateways } from "../modelData";
+import { AllModelTasks, EventsFromModel, Gateways } from "../modelData";
 import { defaultTemplateSchedule, defaultArrivalTimeDistribution, defaultArrivalCalendarArr, defaultResourceProfiles } from "./defaultValues";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, SUMMATION_ONE_MSG, INVALID_TIME_FORMAT } from "./../validationMessages";
 import { round } from "../../helpers/timeConversions";
 
-const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonData?: JsonData) => {
+const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsFromModel: EventsFromModel, jsonData?: JsonData) => {
     const [data, setData] = useState({})
 
     const taskValidationSchema = useMemo(() => (yup.object().shape({
@@ -166,10 +166,16 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
                 }
             })
 
+            const eventIdsArr = Object.keys(eventsFromModel)
+            const mappedEvents: EventDistribution[] = eventIdsArr.map((eventId) => {
+                return {
+                    event_id: eventId,
+                    ...defaultArrivalTimeDistribution
+                }
+            })
+
             const defaultResourceCalendars = defaultTemplateSchedule(false)
             
-            const defaultEventDistribution: EventDistribution[] = []
-
             const updData = {
                 task_resource_distribution: mappedTasksFromModel,
                 resource_calendars: [defaultResourceCalendars],
@@ -177,11 +183,11 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
                 arrival_time_distribution: defaultArrivalTimeDistribution,
                 arrival_time_calendar: defaultArrivalCalendarArr,
                 resource_profiles: defaultResourceProfiles(defaultResourceCalendars.id),
-                event_distribution: defaultEventDistribution
+                event_distribution: mappedEvents,
             }
             setData(updData)
         }
-    }, [tasksFromModel, jsonData, gateways]);
+    }, [tasksFromModel, jsonData, gateways, eventsFromModel]);
 
     useEffect(() => {
         reset(data)
