@@ -9,7 +9,7 @@ import { EventsFromModel } from "../modelData";
 interface EventCardProps {
     formState: UseFormReturn<JsonData, object>
     setErrorMessage: (value: string) => void
-    eventsFromModel: EventsFromModel
+    eventsFromModel?: EventsFromModel
     index: number
     key: any
     style: any
@@ -36,9 +36,20 @@ const EventCard = (props: EventCardProps) => {
     }, [eventIndex, fields])
 
     useEffect(() => {
-        setEventIdKey(currentField.event_id)
-        setEventLabel(eventsFromModel[eventIdKey]?.name)
-    }, [currentField, eventsFromModel, eventIdKey])
+        const newFieldEventId = currentField.event_id
+        if (newFieldEventId !== eventIdKey) {
+            setEventIdKey(currentField.event_id)
+        }
+    }, [currentField, eventIdKey])
+
+    useEffect(() => {
+        if (eventsFromModel && Object.keys(eventsFromModel).includes(eventIdKey)) {
+            // checking the edge case
+            // double verifying that event with this id exists in the model
+            // if yes, update the state with event label
+            setEventLabel(eventsFromModel[eventIdKey].name)
+        }
+    }, [eventsFromModel, eventIdKey])
 
     useEffect(() => {
         const currentErrors = errors?.event_distribution?.[eventIndex]

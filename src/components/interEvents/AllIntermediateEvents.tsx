@@ -10,7 +10,7 @@ import EventCard from "./EventCard";
 interface AllIntermediateEventsProps {
     formState: UseFormReturn<JsonData, object>
     setErrorMessage: (value: string) => void
-    eventsFromModel: EventsFromModel
+    eventsFromModel?: EventsFromModel
 }
 
 const AllIntermediateEvents = (props: AllIntermediateEventsProps) => {

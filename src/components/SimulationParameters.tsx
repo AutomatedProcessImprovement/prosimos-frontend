@@ -132,8 +132,6 @@ const SimulationParameters = () => {
     }, [isSubmitted, submitCount]);
 
     useEffect(() => {
-        // TODO: handle case when we load the page initially and we see this message
-        // that happens when we haven't fully loaded the BPMN model yet
         if (missedElemNum > 0) {
             setInfoMessage(`${missedElemNum} elements from config were ignored due to its absence in the BPMN model.`)
         }

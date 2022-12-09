@@ -3,13 +3,13 @@ import { JsonData } from "../formData";
 import { EventsFromModel } from "../modelData";
 
 
-const useJsonFile = (jsonFile: any, eventsFromModel: EventsFromModel) => {
+const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
     const [missedElemNum, setMissedElemNum] = useState(0)   // shows num of elements that were present in the config
                                                             // but were absent in BPMN model
     const [jsonData, setJsonData] = useState<JsonData>()
 
     useEffect(() => {
-        if (jsonFile !== null && jsonFile !== "") {
+        if (jsonFile !== null && jsonFile !== "" && eventsFromModel !== undefined) {
             const jsonFileReader = new FileReader();
             jsonFileReader.readAsText(jsonFile, "UTF-8")
             jsonFileReader.onload = e => {

@@ -7,7 +7,7 @@ const useBpmnFile = (bpmnFile: any) => {
     const [xmlData, setXmlData] = useState<string>("")
     const [tasksFromModel, setTasksFromModel] = useState<AllModelTasks>({})
     const [gateways, setGateways] = useState<Gateways>({})
-    const [eventsFromModel, setEventsFromModel] = useState<EventsFromModel>({}) // dict of id and name of the intermediate events
+    const [eventsFromModel, setEventsFromModel] = useState<EventsFromModel | undefined>(undefined) // dict of id and name of the intermediate events
 
     const getTargetTaskNameForGateway = (item: any, elementRegistry: any) => {
         let taskName = ""
@@ -105,7 +105,6 @@ const useBpmnFile = (bpmnFile: any) => {
                         return new_acc
                     }, {} as EventsFromModel)
                 
-                console.log(eventsFromModel)
                 setEventsFromModel(eventsFromModel)
             }
 

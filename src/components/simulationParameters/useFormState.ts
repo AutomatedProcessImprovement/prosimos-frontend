@@ -8,7 +8,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, SUMMATION_ONE_MSG, INVALID_TIME_FORMAT } from "./../validationMessages";
 import { round } from "../../helpers/timeConversions";
 
-const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsFromModel: EventsFromModel, jsonData?: JsonData) => {
+const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsFromModel?: EventsFromModel, jsonData?: JsonData) => {
     const [data, setData] = useState({})
 
     const taskValidationSchema = useMemo(() => (yup.object().shape({
@@ -166,13 +166,16 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                 }
             })
 
-            const eventIdsArr = Object.keys(eventsFromModel)
-            const mappedEvents: EventDistribution[] = eventIdsArr.map((eventId) => {
-                return {
-                    event_id: eventId,
-                    ...defaultArrivalTimeDistribution
-                }
-            })
+            let mappedEvents: EventDistribution[] = []
+            if (eventsFromModel !== undefined) {
+                const eventIdsArr = Object.keys(eventsFromModel)
+                mappedEvents = eventIdsArr.map((eventId) => {
+                    return {
+                        event_id: eventId,
+                        ...defaultArrivalTimeDistribution
+                    }
+                })
+            }
 
             const defaultResourceCalendars = defaultTemplateSchedule(false)
             
