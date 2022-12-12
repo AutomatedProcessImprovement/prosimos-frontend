@@ -1,10 +1,12 @@
 
 import { Grid } from "@mui/material";
+import { useEffect, useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { AutoSizer, List } from "react-virtualized";
 import { JsonData } from "../formData";
 import { EventsFromModel } from "../modelData";
 import EventCard from "./EventCard";
+import NoEventsCard from "./NoEventsCard";
 
 
 interface AllIntermediateEventsProps {
@@ -14,6 +16,7 @@ interface AllIntermediateEventsProps {
 }
 
 const AllIntermediateEvents = (props: AllIntermediateEventsProps) => {
+    const [isAnyEvents, setIsAnyEvents] = useState(false)
     const { formState: { control: formControl }, 
         setErrorMessage, eventsFromModel } = props
 
@@ -22,6 +25,13 @@ const AllIntermediateEvents = (props: AllIntermediateEventsProps) => {
         control: formControl,
         name: 'event_distribution'
     })
+
+    useEffect(()=>{
+        const isAny = fields.length > 0
+        if (isAny !== isAnyEvents) {
+            setIsAnyEvents(isAny)
+        }
+    }, [fields])
     
     const renderRow = ({ index, key, style }: any) => {
         return ( 
@@ -36,8 +46,9 @@ const AllIntermediateEvents = (props: AllIntermediateEventsProps) => {
         />)
     }
 
-    return (
-        <Grid item xs={12} container spacing={2}>
+    return ( !isAnyEvents 
+        ? <NoEventsCard/>
+        : <Grid item xs={12} container spacing={2}>
             <Grid item container xs={12} style={{ minHeight: "60vh" }}>
                 <AutoSizer>
                     {({ width, height }) => {

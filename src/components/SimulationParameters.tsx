@@ -31,6 +31,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useInterval } from 'usehooks-ts'
 import Tooltip from '@mui/material/Tooltip';
 import AllIntermediateEvents from './interEvents/AllIntermediateEvents'
+import EventIcon from '@mui/icons-material/Event';
 
 const useStyles = makeStyles( (theme: Theme) => ({
     simParamsGrid: {
@@ -126,6 +127,7 @@ const SimulationParameters = () => {
         const isJsonParamsValid = Object.keys(errors)?.length === 0
 
         if (!isScenarioParamsValid || !isJsonParamsValid) {
+            console.log(errors)
             setErrorMessage("There are validation errors")
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -277,6 +279,10 @@ const SimulationParameters = () => {
                 Icon = <CallSplitIcon style={styles}/>
                 break
             case 5:
+                currError = errors.event_distribution
+                Icon = <EventIcon style={styles}/>
+                break
+            case 6:
                 lastStep = true
                 Icon = <BarChartIcon style={styles}/>
                 break

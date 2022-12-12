@@ -15,7 +15,11 @@ const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
             jsonFileReader.onload = e => {
                 if (e.target?.result && typeof e.target?.result === 'string') {
                     const rawData = JSON.parse(e.target.result)
-                    const [missedNum, finalEvents] = getMergeEventsList(eventsFromModel, rawData["event_distribution"])
+
+                    // verify events in the config
+                    // remove those that do not exist in the BPMN model
+                    const mergeResults = getMergeEventsList(eventsFromModel, rawData["event_distribution"])
+                    const [missedNum, finalEvents] = mergeResults
                     rawData["event_distribution"] = finalEvents
 
                     setJsonData(rawData)
@@ -36,8 +40,11 @@ const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
  */
 const getMergeEventsList = (eventsFromModel: EventsFromModel, eventsConfig: any) => {
     const eventsArr = Object.keys(eventsFromModel)
-    if (eventsArr.length === 0)
-        return [eventsConfig.length, []] as const
+    if (eventsArr.length === 0) {
+        // no events in the BPMN model
+        const events_config_num = eventsConfig ? eventsConfig.length : 0
+        return [events_config_num, []] as const
+    }
 
     const allModelEvents: string[] = []
     const finalEvents = eventsArr.map((eventId: string) => {
