@@ -1,14 +1,14 @@
 import { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { JsonData } from "../formData";
-import { AllModelTasks, Gateways } from "../modelData";
+import { EventDistribution, JsonData } from "../formData";
+import { AllModelTasks, EventsFromModel, Gateways } from "../modelData";
 import { defaultTemplateSchedule, defaultArrivalTimeDistribution, defaultArrivalCalendarArr, defaultResourceProfiles } from "./defaultValues";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, SUMMATION_ONE_MSG, INVALID_TIME_FORMAT } from "./../validationMessages";
 import { round } from "../../helpers/timeConversions";
 
-const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonData?: JsonData) => {
+const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsFromModel?: EventsFromModel, jsonData?: JsonData) => {
     const [data, setData] = useState({})
 
     const taskValidationSchema = useMemo(() => (yup.object().shape({
@@ -116,7 +116,20 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
                         .required()
                 })
             )
-            .required()
+            .required(),
+        event_distribution: yup.array()
+            .of(
+                yup.object().shape({
+                    event_id: yup.string().required(REQUIRED_ERROR_MSG),
+                    distribution_name: yup.string().required(REQUIRED_ERROR_MSG),
+                    distribution_params: yup.array()
+                        .of(
+                            yup.object().shape({
+                                value: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG)
+                            })
+                        )
+                })
+            )
     })), []);
     
     const formState = useForm<JsonData>({
@@ -153,19 +166,31 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, jsonDat
                 }
             })
 
-            const defaultResourceCalendars = defaultTemplateSchedule(false)
+            let mappedEvents: EventDistribution[] = []
+            if (eventsFromModel !== undefined) {
+                const eventIdsArr = Object.keys(eventsFromModel)
+                mappedEvents = eventIdsArr.map((eventId) => {
+                    return {
+                        event_id: eventId,
+                        ...defaultArrivalTimeDistribution
+                    }
+                })
+            }
 
+            const defaultResourceCalendars = defaultTemplateSchedule(false)
+            
             const updData = {
                 task_resource_distribution: mappedTasksFromModel,
                 resource_calendars: [defaultResourceCalendars],
                 gateway_branching_probabilities: mappedGateways,
                 arrival_time_distribution: defaultArrivalTimeDistribution,
                 arrival_time_calendar: defaultArrivalCalendarArr,
-                resource_profiles: defaultResourceProfiles(defaultResourceCalendars.id)
+                resource_profiles: defaultResourceProfiles(defaultResourceCalendars.id),
+                event_distribution: mappedEvents,
             }
             setData(updData)
         }
-    }, [tasksFromModel, jsonData, gateways]);
+    }, [tasksFromModel, jsonData, gateways, eventsFromModel]);
 
     useEffect(() => {
         reset(data)

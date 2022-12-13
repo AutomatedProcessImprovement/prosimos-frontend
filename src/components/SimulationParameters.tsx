@@ -30,6 +30,8 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useInterval } from 'usehooks-ts'
 import Tooltip from '@mui/material/Tooltip';
+import AllIntermediateEvents from './interEvents/AllIntermediateEvents'
+import EventIcon from '@mui/icons-material/Event';
 
 const useStyles = makeStyles( (theme: Theme) => ({
     simParamsGrid: {
@@ -49,6 +51,7 @@ const tabs_name : { [key: string]: string } = {
     RESOURCES: "Resources",
     RESOURCE_ALLOCATION: "Resource Allocation",
     BRANCHING_PROB: "Branching Probabilities",
+    INTERMEDIATE_EVENTS: "Intermediate Events",
     SIMULATION_RESULTS: "Simulation Results"
 };
 
@@ -63,6 +66,8 @@ const tooltip_desc: { [key: string]: string } = {
         "Maps each task in the process model and the list of resources that can perform it",
     BRANCHING_PROB: 
         "Represents the probability for the process execution to move towards any outgoing flow of each split (inclusive or exclusive) gateway in the process model",
+    INTERMEDIATE_EVENTS:
+        "Represents the probability for intermediate events present in the business process model",
     SIMULATION_RESULTS: "",
 }
 
@@ -107,10 +112,10 @@ const SimulationParameters = () => {
 
     const linkDownloadRef = useRef<HTMLAnchorElement>(null)
 
-    const { tasksFromModel, gateways } = useBpmnFile(bpmnFile)
-    const { jsonData } = useJsonFile(jsonFile)
+    const { tasksFromModel, gateways, eventsFromModel } = useBpmnFile(bpmnFile)
+    const { jsonData, missedElemNum } = useJsonFile(jsonFile, eventsFromModel)
 
-    const { formState } = useFormState(tasksFromModel, gateways, jsonData)
+    const { formState } = useFormState(tasksFromModel, gateways, eventsFromModel, jsonData)
     const { formState: { errors, isValid, isSubmitted, submitCount }, getValues, handleSubmit } = formState
     const [ isScenarioParamsValid, setIsScenarioParamsValid ] = useState(true)
 
@@ -122,10 +127,17 @@ const SimulationParameters = () => {
         const isJsonParamsValid = Object.keys(errors)?.length === 0
 
         if (!isScenarioParamsValid || !isJsonParamsValid) {
+            console.log(errors)
             setErrorMessage("There are validation errors")
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isSubmitted, submitCount]);
+
+    useEffect(() => {
+        if (missedElemNum > 0) {
+            setInfoMessage(`${missedElemNum} elements from config were ignored due to its absence in the BPMN model.`)
+        }
+    }, [missedElemNum])
 
     const handleStep = (index: number) => () => {
         setActiveStep(index)
@@ -223,6 +235,12 @@ const SimulationParameters = () => {
                     gateways={gateways}
                 />
             case 5:
+                return <AllIntermediateEvents
+                    formState={formState}
+                    setErrorMessage={setErrorMessage}
+                    eventsFromModel={eventsFromModel}
+                />
+            case 6:
                 if (!!currSimulatedOutput)
                     return <SimulationResults
                         output={currSimulatedOutput}
@@ -261,6 +279,10 @@ const SimulationParameters = () => {
                 Icon = <CallSplitIcon style={styles}/>
                 break
             case 5:
+                currError = errors.event_distribution
+                Icon = <EventIcon style={styles}/>
+                break
+            case 6:
                 lastStep = true
                 Icon = <BarChartIcon style={styles}/>
                 break

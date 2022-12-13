@@ -22,3 +22,7 @@ export interface SequenceElements {
         name: string
     }
 }
+
+export interface EventsFromModel extends SequenceElements {
+
+}

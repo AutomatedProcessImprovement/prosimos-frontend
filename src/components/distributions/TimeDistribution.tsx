@@ -8,9 +8,11 @@ import { DISTR_FUNC } from "./DistrFuncSelect"
 
 type AllowedObjectName = "arrival_time_distribution" 
     | `task_resource_distribution.${number}.resources.${number}`
+    | `event_distribution.${number}`
 
 type AllowedDistrParamsName = "arrival_time_distribution.distribution_params" 
     | `task_resource_distribution.${number}.resources.${number}.distribution_params`
+    | `event_distribution.${number}.distribution_params`
 
 interface TimeDistributionProps {
     formState: UseFormReturn<JsonData, object>

@@ -5,6 +5,7 @@ export interface JsonData {
     gateway_branching_probabilities: GatewayBranchingProbability[]
     task_resource_distribution: TaskResourceDistribution[]
     resource_calendars: ResourceCalendar[]
+    event_distribution: EventDistribution[]
 }
 
 export interface GatewayBranchingProbability {
@@ -72,4 +73,8 @@ export interface TaskResourceDistribution {
 export interface ScenarioProperties {
     num_processes: number
     start_date: string
+}
+
+export interface EventDistribution extends ProbabilityDistribution {
+    event_id: string
 }
