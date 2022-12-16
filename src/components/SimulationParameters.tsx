@@ -32,6 +32,7 @@ import { useInterval } from 'usehooks-ts'
 import Tooltip from '@mui/material/Tooltip';
 import AllIntermediateEvents from './interEvents/AllIntermediateEvents'
 import EventIcon from '@mui/icons-material/Event';
+import AllBatching from './batching/AllBatching';
 
 const useStyles = makeStyles( (theme: Theme) => ({
     simParamsGrid: {
@@ -52,6 +53,7 @@ const tabs_name : { [key: string]: string } = {
     RESOURCE_ALLOCATION: "Resource Allocation",
     BRANCHING_PROB: "Branching Probabilities",
     INTERMEDIATE_EVENTS: "Intermediate Events",
+    BATCHING: "Batching",
     SIMULATION_RESULTS: "Simulation Results"
 };
 
@@ -68,6 +70,8 @@ const tooltip_desc: { [key: string]: string } = {
         "Represents the probability for the process execution to move towards any outgoing flow of each split (inclusive or exclusive) gateway in the process model",
     INTERMEDIATE_EVENTS:
         "Represents the probability for intermediate events present in the business process model",
+    BATCHING:
+        "Represents the setup needed in order to execute the task in a batched way",
     SIMULATION_RESULTS: "",
 }
 
@@ -241,6 +245,8 @@ const SimulationParameters = () => {
                     eventsFromModel={eventsFromModel}
                 />
             case 6:
+                return <AllBatching/>
+            case 7:
                 if (!!currSimulatedOutput)
                     return <SimulationResults
                         output={currSimulatedOutput}
