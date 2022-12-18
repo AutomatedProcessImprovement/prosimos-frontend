@@ -4,7 +4,8 @@ import {
     useFieldArray,
     Controller,
     get,
-    useForm
+    useForm,
+    UseFormReturn
 } from "react-hook-form";
 
 import {
@@ -24,6 +25,7 @@ import QueryGroupIcon from '@mui/icons-material/AccountTreeRounded';
 import QueryConditionIcon from '@mui/icons-material/FunctionsRounded';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutlineRounded';
 import { exampleSchema, typeOperatorMap, QueryBuilderSchema } from "./schemas";
+import { JsonData } from "../formData";
 
 export type CondType = "number" | "string" | "array" | "boolean";
 export type CondOperator =
@@ -238,12 +240,16 @@ const defaultValues: FormFields = {
     }
 };
 
-export const QueryBuilder = () => {
+interface QueryBuilderProps {
+    formState: UseFormReturn<JsonData, object>
+    taskIndex: number
+}
+
+export const QueryBuilder = (props: QueryBuilderProps) => {
     const formState = useForm({ defaultValues });
 
     return (
         <QueryGroup name={["query"]} formState={formState} />
-
     );
 };
 

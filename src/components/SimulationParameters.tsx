@@ -245,7 +245,10 @@ const SimulationParameters = () => {
                     eventsFromModel={eventsFromModel}
                 />
             case 6:
-                return <AllBatching/>
+                return <AllBatching
+                    tasksFromModel={tasksFromModel}
+                    formState={formState}
+                    setErrorMessage={setErrorMessage} />
             case 7:
                 if (!!currSimulatedOutput)
                     return <SimulationResults

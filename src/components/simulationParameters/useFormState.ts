@@ -129,6 +129,27 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                             })
                         )
                 })
+            ),
+        batch_processing: yup.array()
+            .of(
+                yup.object().shape({
+                    task_id: yup.string().required(REQUIRED_ERROR_MSG),
+                    type: yup.string().required(REQUIRED_ERROR_MSG),
+                    batch_frequency: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG),
+                    size_distrib: yup.array().min(1, MIN_LENGTH_REQUIRED_MSG("size distribution")),
+                    duration_distrib: yup.array().min(1, MIN_LENGTH_REQUIRED_MSG("duration distribution")),
+                    firing_rules: yup.array()
+                        .of(
+                            yup.array()
+                                .of(
+                                    yup.object().shape({
+                                        attribute: yup.string().required(REQUIRED_ERROR_MSG),
+                                        comparison: yup.string().required(REQUIRED_ERROR_MSG),
+                                        value: yup.string().required(REQUIRED_ERROR_MSG)
+                                    })
+                                )
+                        )
+                })
             )
     })), []);
     
@@ -187,6 +208,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                 arrival_time_calendar: defaultArrivalCalendarArr,
                 resource_profiles: defaultResourceProfiles(defaultResourceCalendars.id),
                 event_distribution: mappedEvents,
+                batch_processing: []
             }
             setData(updData)
         }
