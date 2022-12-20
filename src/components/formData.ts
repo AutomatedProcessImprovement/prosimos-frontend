@@ -13,13 +13,13 @@ export interface BatchProcessing {
     task_id: string
     type: string
     batch_frequency: number
-    firing_rules: [FiringRule][]
+    firing_rules: FiringRule[][]
 }
 
 export interface FiringRule {
     attribute: string
     comparison: string
-    value: string
+    value: string | string[]
 }
 
 export interface GatewayBranchingProbability {

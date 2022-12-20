@@ -6,12 +6,13 @@ interface WeekdaySelectProps<FieldValues>{
     field: ControllerRenderProps<FieldValues, any>,
     label?: string
     fieldError?: FieldError
+    style?: any
 }
 
 const WeekdaySelect = <FieldValues,>(props: WeekdaySelectProps<FieldValues>) => {
     return (
         <TextField 
-            sx={{ width: "100%" }}
+            sx={props.style ? props.style : { width: "100%" }}
             {...props.field}
             error={props.fieldError !== undefined}
             helperText={props.fieldError?.message || ""}

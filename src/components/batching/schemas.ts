@@ -1,97 +1,90 @@
 export const typeOperatorMap = {
-    number: {
-      $eq: {
-        label: "Equals"
-      },
-      $ne: {
-        label: "Does Not Equal"
-      },
-      $lt: {
-        label: "< Less Than"
-      },
-      $lte: {
-        label: "<= Less Than or Equal To"
-      },
-      $gte: {
-        label: ">= Greater Than or Equal To"
-      },
-      $gt: {
-        label: "> Greater Than"
-      }
+  size: {
+    ">": {
+      label: "Greater Than"
     },
-    string: {
-      $eq: {
-        label: "Equals"
-      },
-      $in: {
-        label: "Equals Any Of",
-        multiple: true
-      },
-      $ne: {
-        label: "Does Not Equal"
-      },
-      $nin: {
-        label: "Does Not Equal Any Of",
-        multiple: true
-      }
+    ">=": {
+      label: "Greater Than or Equal To"
     },
-    date: {
-      $eq: {
-        label: "Equals"
-      },
-      $ne: {
-        label: "Not Equal"
-      },
-      $lt: {
-        label: "Is Before"
-      },
-      $lte: {
-        label: "Is Before or On"
-      },
-      $gte: {
-        label: "Is After or On"
-      },
-      $gt: {
-        label: "Is After"
-      }
+    "==": {
+      label: "Equals"
     },
-    boolean: {
-      $eq: {
-        label: "Is"
-      },
-      $ne: {
-        label: "Is Not"
-      }
+    "<": {
+      label: "Less Than"
+    },
+    "<=": {
+      label: "Less Than or Equal To"
     }
-  };
-  
-  export type QueryBuilderSchema = {
-    [key: string]: {
-      label: string;
-      type: "string" | "number" | "boolean" | "date";
-    };
-  };
-  
-  export const exampleSchema: QueryBuilderSchema = {
-    "item.path": {
-      label: "Item Path",
-      type: "string"
+  },
+  waiting_time: {
+    "<": {
+      label: "Less Than"
     },
-    weight: {
-      label: "Weight",
-      type: "number"
+    "<=": {
+      label: "Less Than or Equal To"
     },
-    cost: {
-      label: "Cost",
-      type: "number"
+    "==": {
+      label: "Equals"
     },
-    updatedAt: {
-      label: "Updated",
-      type: "date"
-    },
-    createdAt: {
-      label: "Created",
-      type: "date"
+    "between": {
+      label: "Between",
+      multiple: true
     }
+  },
+  hour: {
+    "<": {
+      label: "Less Than"
+    },
+    "<=": {
+      label: "Less Than or Equal To"
+    },
+    "==": {
+      label: "Equals"
+    },
+    ">": {
+      label: "Greater Than"
+    },
+    ">=": {
+      label: "Greater Than or Equal To"
+    },
+    "between": {
+      label: "Between",
+      multiple: true
+    },
+  },
+  weekday: {
+    "==": {
+      label: "Equals"
+    }
+  }
+};
+
+export type QueryBuilderSchema = {
+  [key: string]: {
+    label: string;
+    type: "size" | "waiting_time" | "hour" | "weekday"
   };
-  
+};
+
+export const exampleSchema: QueryBuilderSchema = {
+  size: {
+    label: "Batch size",
+    type: "size"
+  },
+  ready_wt: {
+    label: "Ready waiting time",
+    type: "waiting_time"
+  },
+  large_wt: {
+    label: "Large waiting time",
+    type: "waiting_time"
+  },
+  daily_hour: {
+    label: "Daily hour",
+    type: "hour"
+  },
+  week_day: {
+    label: "Weekday",
+    type: "weekday"
+  }
+};

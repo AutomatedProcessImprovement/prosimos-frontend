@@ -4,7 +4,6 @@ import {
     useFieldArray,
     Controller,
     get,
-    useForm,
     UseFormReturn
 } from "react-hook-form";
 
@@ -14,8 +13,6 @@ import {
     Chip,
     IconButton,
     Tooltip,
-    Button,
-    ButtonGroup,
     FormHelperText,
     Theme
 } from "@mui/material";
@@ -26,6 +23,7 @@ import QueryConditionIcon from '@mui/icons-material/FunctionsRounded';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutlineRounded';
 import { exampleSchema, typeOperatorMap, QueryBuilderSchema } from "./schemas";
 import { JsonData } from "../formData";
+import WeekdaySelect from "../calendars/WeekdaySelect";
 
 export type CondType = "number" | "string" | "array" | "boolean";
 export type CondOperator =
@@ -108,54 +106,54 @@ type Paths<T, D extends number = 10> = [D] extends [never] ? never : T extends o
 type TFormFields = Paths<FormFields>;
 
 // TODO return type
-export const parseQueryBuilderForm = (
-    query: QueryBuilderGroup | QueryBuilderCondition
-): any => {
-    if (query.type === "group") {
-        return {
-            [query.operator]: Object.values(query.items).map((item) => parseQueryBuilderForm(item))
-        } as QueryGroupType;
-    } else if (query.type === "cond") {
-        return {
-            [query.data.field!]: {
-                [query.data.operator!]: query.data.value
-            }
-        };
-    } else {
-        throw new Error("Unknown query type when parsing query builder group.");
-    }
-};
+// export const parseQueryBuilderForm = (
+//     query: QueryBuilderGroup | QueryBuilderCondition
+// ): any => {
+//     if (query.type === "group") {
+//         return {
+//             [query.operator]: Object.values(query.items).map((item) => parseQueryBuilderForm(item))
+//         } as QueryGroupType;
+//     } else if (query.type === "cond") {
+//         return {
+//             [query.data.field!]: {
+//                 [query.data.operator!]: query.data.value
+//             }
+//         };
+//     } else {
+//         throw new Error("Unknown query type when parsing query builder group.");
+//     }
+// };
 
 // TODO return type
-export const queryJsonToBuilderForm = (
-    query: QueryGroupType | QueryConditionType | null,
-    schema: QueryBuilderSchema
-): any => {
-    if (!!query?.$and || !!query?.$or) {
-        const group = query as QueryGroupType;
-        const operator = Object.keys(group)[0] as GroupOperator;
-        return {
-            type: "group",
-            operator,
-            items: group[operator]!.map((item) =>
-                queryJsonToBuilderForm(item, schema)
-            )
-        };
-    } else if (Object.keys(query || {}).length) {
-        const cond = query as QueryConditionType;
-        const field = Object.keys(cond)[0];
-        const operator = Object.keys(cond[field])[0] as CondOperator;
-        const value = cond[field][operator];
-        const type = schema[field]?.type;
+// export const queryJsonToBuilderForm = (
+//     query: QueryGroupType | QueryConditionType | null,
+//     schema: QueryBuilderSchema
+// ): any => {
+//     if (!!query?.$and || !!query?.$or) {
+//         const group = query as QueryGroupType;
+//         const operator = Object.keys(group)[0] as GroupOperator;
+//         return {
+//             type: "group",
+//             operator,
+//             items: group[operator]!.map((item) =>
+//                 queryJsonToBuilderForm(item, schema)
+//             )
+//         };
+//     } else if (Object.keys(query || {}).length) {
+//         const cond = query as QueryConditionType;
+//         const field = Object.keys(cond)[0];
+//         const operator = Object.keys(cond[field])[0] as CondOperator;
+//         const value = cond[field][operator];
+//         const type = schema[field]?.type;
 
-        // TODO consider throwing an error or returning nothing if no `type` mapped
+//         // TODO consider throwing an error or returning nothing if no `type` mapped
 
-        return {
-            type: "cond",
-            data: { field, operator, type, value }
-        };
-    }
-};
+//         return {
+//             type: "cond",
+//             data: { field, operator, type, value }
+//         };
+//     }
+// };
 
 const useQueryBuilderStyles = makeStyles(
     (theme: Theme) => ({
@@ -227,17 +225,29 @@ const useQueryBuilderStyles = makeStyles(
     }
 );
 
-const defaultValues: FormFields = {
-    query: {
-        type: "group",
-        operator: "$or",
-        items: [
+const defaultValues = {
+    // query: {
+    //     type: "group",
+    //     operator: "$or",
+    //     items: [
+    //         { type: "cond", data: { field: "", operator: undefined, value: [] } } as QueryBuilderCondition,
+    //         { type: "group", operator: "$or", items: [
+    //             { type: "cond", data: { field: "", operator: undefined, value: [] } }
+    //         ]} as QueryBuilderGroup
+    //     ] as Array<QueryBuilderGroup | QueryBuilderCondition>
+    // }
+    query: [
+        [
             { type: "cond", data: { field: "", operator: undefined, value: [] } } as QueryBuilderCondition,
-            { type: "group", operator: "$or", items: [
-                { type: "cond", data: { field: "", operator: undefined, value: [] } }
-            ]} as QueryBuilderGroup
-        ] as Array<QueryBuilderGroup | QueryBuilderCondition>
-    }
+            { type: "cond", data: { field: "", operator: undefined, value: [] } } as QueryBuilderCondition,
+        ],
+        [
+            { type: "cond", data: { field: "", operator: undefined, value: [] } } as QueryBuilderCondition,
+        ],
+        [
+            { type: "cond", data: { field: "", operator: undefined, value: [] } } as QueryBuilderCondition,
+        ]
+    ]
 };
 
 interface QueryBuilderProps {
@@ -246,19 +256,21 @@ interface QueryBuilderProps {
 }
 
 export const QueryBuilder = (props: QueryBuilderProps) => {
-    const formState = useForm({ defaultValues });
+    const { formState, taskIndex } = props 
 
     return (
-        <QueryGroup name={["query"]} formState={formState} />
+        <QueryGroup 
+            name={`batch_processing.${taskIndex}.firing_rules`}
+            formState={formState}
+        />
     );
 };
 
 interface QueryGroupProps {
-    name: Array<string | number>;
+    name: string;
     formState: any;
     depth?: number;
     onRemove?: () => any;
-    defaultValues?: any;
 }
 
 export type FieldsPath = "query.items" | `query.items.${number}.items` | `query.items.${number}.items.${number}.items`
@@ -269,17 +281,13 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
         formState,
         depth = 0,
         onRemove,
-        defaultValues = {},
         ...props
     } = allProps
     const classes = useQueryBuilderStyles();
 
-    const arrayPath = [...name, "items"].join(".") as FieldsPath;
-    const typePath = [...name, "type"].join(".") as TFormFields;
-    const operatorPath = [...name, "operator"].join(".") as TFormFields;
-
-    const { control, formState: { errors }, setError, clearErrors } = formState // useFormContext<FormFields>();
-    const { fields, append, remove } = useFieldArray<FormFields>({
+    const arrayPath = name
+    const { control, formState: { errors }, setError, clearErrors } = formState
+    const { fields, append, remove } = useFieldArray({
         control,
         name: arrayPath
     });
@@ -301,40 +309,18 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
             {...props}
         >
             <div className={classes.groupControls}>
-                <Controller
+                {/* <Controller
                     name={typePath}
                     control={control}
                     defaultValue={defaultValues.type || "unknown"}
                     render={({
                         field
                     }) => <input type="hidden" {...field} />}
-                />
+                /> */}
 
-                <Controller
-                    name={operatorPath}
-                    control={control}
-                    defaultValue={defaultValues.operator || "unknown"}
-                    render={({
-                        field: { onChange, value }
-                    }) => {
-                        return (
-                            <ButtonGroup style={{ marginRight: 32 }}>
-                                <Button
-                                    variant={value === "$and" ? "contained" : "outlined"}
-                                    onClick={() => onChange("$and")}
-                                >
-                                    And
-                                </Button>
-                                <Button
-                                    variant={value === "$or" ? "contained" : "outlined"}
-                                    onClick={() => onChange("$or")}
-                                >
-                                    Or
-                                </Button>
-                            </ButtonGroup>
-                        );
-                    }}
-                />
+                {depth === 0
+                    ? <Chip label="OR" variant="outlined" />
+                    : <Chip label="AND" variant="outlined" />}
 
                 {/* maximum group depth */}
                 {depth >= 1 ? null : (
@@ -342,13 +328,9 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
                         <IconButton
                             onClick={() => {
                                 clearErrors(arrayPath);
-                                append({
-                                    type: "group",
-                                    defaultValues: {
-                                        type: "group",
-                                        operator: "$or"
-                                    }
-                                } as QueryBuilderGroup);
+                                append([[
+                                    { attribute: "", comparison: undefined, value: [] },
+                                ]]);
                             }}
                         >
                             <QueryGroupIcon />
@@ -360,10 +342,9 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
                     <IconButton
                         onClick={() => {
                             clearErrors(arrayPath);
-                            append({
-                                type: "cond",
-                                data: { field: "", operator: undefined, value: [] }
-                            });
+                            append([
+                                { attribute: "", comparison: undefined, value: [] },
+                            ]);
                         }}
                     >
                         <QueryConditionIcon />
@@ -387,26 +368,27 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
 
             <div className={classes.nested}>
                 {fields.map((field, index) => {
-                    return field.type === "group" ? (
+                    // isMultipleStatements = True and allKeysNum = True in case we have Group
+                    // otherwise, we have only one statement in the group which equals to just condition
+                    const allKeysNum = Object.keys(field).every(v => (v === 'id') ? true : !isNaN(Number(v)))
+                    const isMultipleStatements = Object.keys(field).length > 1
+
+                    return allKeysNum && isMultipleStatements ? (
                         <QueryGroup
                             key={field.id}
                             depth={depth + 1}
-                            name={[...name, "items", index]}
+                            name={`${name}.${index}`}
                             formState={formState}
                             onRemove={() => remove(index)}
-                            defaultValues={field.defaultValues}
                         />
-                    ) : field.type === "cond" ? (
+                    ) : (
                         <QueryCondition
                             key={field.id}
                             formState={formState}
-                            name={[...name, "items", index]}
+                            name={`${name}.${index}`}
                             onRemove={() => remove(index)}
-                            defaultValues={field.data}
                         />
-                    ) : (
-                        "Unknown"
-                    );
+                    )
                 })}
             </div>
         </div>
@@ -414,26 +396,24 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
 };
 
 interface QueryConditionProps {
-    name: Array<string | number>;
+    name: string;
     formState: any;
     onRemove: () => any;
-    defaultValues: any;
 }
 
 const QueryCondition = (allProps: QueryConditionProps) => {
     const { name,
         formState,
-        defaultValues,
         onRemove,
         ...props } = allProps
     
     const { control, watch, formState: { errors } } = formState
     const classes = useQueryBuilderStyles();
 
-    const conditionDataPath = [...name, "data"];
-    const conditionFieldName = [...conditionDataPath, "field"].join(".") as TFormFields;
-    const conditionOperatorName = [...conditionDataPath, "operator"].join(".") as TFormFields;
-    const conditionValueName = [...conditionDataPath, "value"].join(".") as TFormFields;
+    // const conditionDataPath = [...name, "data"];
+    const conditionFieldName = `${name}.attribute` //[...conditionDataPath, "field"].join(".") as TFormFields;
+    const conditionOperatorName = `${name}.comparison` // [...conditionDataPath, "operator"].join(".") as TFormFields;
+    const conditionValueName = `${name}.value` // [...conditionDataPath, "value"].join(".") as TFormFields;
 
     const conditionFieldError = get(errors, conditionFieldName, null);
     const conditionOperatorError = get(errors, conditionOperatorName, null);
@@ -448,21 +428,32 @@ const QueryCondition = (allProps: QueryConditionProps) => {
     const typeOperator = (typeOperatorMap as any)[fieldTypeSchema?.type];
     const valueOpts = (typeOperator as any)?.[operatorValue];
 
+    const getHelperTextForInputValue = () => {
+        const errorMessage = conditionValueError?.message
+        if (errorMessage !== undefined) {
+            return errorMessage
+        }
+        
+        if (fieldTypeSchema.type === 'hour') {
+            return "Enter value from 0 to 24"
+        }
+    }
+    
     return (
         <div className={clsx(classes.item, classes.cond)}
             {...props}
         >
-            <Controller
+            {/* <Controller
                 control={control}
                 name={[...name, "type"].join(".") as TFormFields}
                 defaultValue="cond"
                 render={({field}) => <input type="hidden" {...field} />}
-            />
+            /> */}
 
             <Controller
                 control={control}
                 name={conditionFieldName}
-                defaultValue={defaultValues?.field ?? ""}
+                defaultValue={""}
                 rules={{ required: "Required" }}
                 render={({
                     field: { onChange, value }
@@ -497,7 +488,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                         key={typeOperator.label}
                         control={control}
                         name={conditionOperatorName}
-                        defaultValue={defaultValues?.operator ?? ""}
+                        defaultValue={""}
                         rules={{ required: "Required" }}
                         render={({
                             field: { onChange, value }
@@ -526,12 +517,28 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                         )}
                     />
 
-                    {valueOpts?.multiple ? (
+                    {fieldTypeSchema.type === 'weekday' ?
+                        <Controller
+                            // name={`${objectFieldName}.to` as Path<FieldValues>}
+                            name={conditionValueName}
+                            control={control}
+                            // rules={{ required: REQUIRED_ERROR_MSG }}
+                            render={({ field }) => (
+                                <WeekdaySelect
+                                    field={field}
+                                    label="Value"
+                                    style={{ ml: 1.875, mt: 2, flex: 1 }}
+                                    // fieldError={(currErrors as any)?.to}
+                                />
+                            )}
+                        />
+
+                    : valueOpts?.multiple ? (
                         <Controller
                             key={`${typeOperator.label}-multiple`}
                             control={control}
                             name={conditionValueName}
-                            defaultValue={defaultValues?.value ?? []}
+                            defaultValue={[]}
                             rules={{
                                 validate: {
                                     minLength: (value) =>
@@ -582,7 +589,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                             key={`${typeOperator.label}-single`}
                             control={control}
                             name={conditionValueName}
-                            defaultValue={defaultValues?.value ?? ""}
+                            defaultValue={""}
                             rules={{ required: "Required" }}
                             render={({
                                 field: { onChange, value }
@@ -598,7 +605,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                                     }}
                                     style={{ flex: 1, marginLeft: 15 }}
                                     error={!!conditionValueError}
-                                    helperText={conditionValueError?.message}
+                                    helperText={getHelperTextForInputValue()}
                                     value={value}
                                     variant="standard"
                                 />

@@ -15,12 +15,6 @@ interface TaskBatchingProps {
 const TaskBatching = (props: TaskBatchingProps) => {
     const {formState: { control: formControl }, taskIndex, field} = props
 
-    // const { fields, append, remove } = useFieldArray({
-    //     keyName: 'key',
-    //     control: formControl,
-    //     name: `.${index}`
-    // })
-    console.log(field)
     return (
         <Grid container item xs={12}>
             <Grid item xs={12}>

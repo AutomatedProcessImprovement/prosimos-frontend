@@ -23,6 +23,7 @@ const AllBatching = (props: AllBatchingProps) => {
     return <Grid container>
         {fields.map((field, index) => {
             return <TaskBatching
+                key={field.key}
                 formState={props.formState}
                 taskIndex={index}
                 field={field}
