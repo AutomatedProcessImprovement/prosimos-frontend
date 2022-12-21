@@ -14,6 +14,13 @@ export interface BatchProcessing {
     type: string
     batch_frequency: number
     firing_rules: FiringRule[][]
+    size_distrib: BatchDistrib[]
+    duration_distrib: BatchDistrib[]
+}
+
+export interface BatchDistrib {
+    key: string
+    value: number
 }
 
 export interface FiringRule {

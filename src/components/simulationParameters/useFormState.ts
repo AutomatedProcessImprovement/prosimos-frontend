@@ -136,8 +136,22 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                     task_id: yup.string().required(REQUIRED_ERROR_MSG),
                     type: yup.string().required(REQUIRED_ERROR_MSG),
                     batch_frequency: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG),
-                    size_distrib: yup.array().min(1, MIN_LENGTH_REQUIRED_MSG("size distribution")),
-                    duration_distrib: yup.array().min(1, MIN_LENGTH_REQUIRED_MSG("duration distribution")),
+                    size_distrib: yup.array()
+                        .of(
+                            yup.object().shape({
+                                key: yup.string().required(REQUIRED_ERROR_MSG),
+                                value: yup.number().required(REQUIRED_ERROR_MSG)
+                            })
+                        )
+                        .min(1, MIN_LENGTH_REQUIRED_MSG("size distribution")),
+                    duration_distrib: yup.array()
+                        .of(
+                            yup.object().shape({
+                                key: yup.string().required(REQUIRED_ERROR_MSG),
+                                value: yup.number().required(REQUIRED_ERROR_MSG)
+                            })
+                        )
+                        .min(1, MIN_LENGTH_REQUIRED_MSG("duration distribution")),
                     firing_rules: yup.array()
                         .of(
                             yup.array()
