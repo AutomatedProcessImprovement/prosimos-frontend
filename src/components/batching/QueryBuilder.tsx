@@ -292,16 +292,6 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
         name: arrayPath
     });
 
-    // custom validation on recursive nested array `items`
-    useEffect(() => {
-        if (fields.length === 0) {
-            setError(arrayPath, {
-                type: "minLength",
-                message: "Must have at least one group or condition"
-            });
-        }
-    }, [fields, setError, clearErrors, arrayPath]);
-
     const err = get(errors, arrayPath, null);
 
     return (

@@ -1,32 +1,30 @@
 import { useEffect, useState, useRef } from "react";
 import { Grid } from "@mui/material";
-import { useFieldArray } from "react-hook-form";
-import { UseFormReturn } from "react-hook-form";
+import { useFieldArray, UseFormReturn } from "react-hook-form";
 import AddButtonBase from "../toolbar/AddButtonBase";
 import { List , AutoSizer } from 'react-virtualized';
 import DistributionMappingRow from "./DistributionMappingRow";
 import { BatchDistrib, JsonData } from "../formData";
 
+type AllowedDistrParamsName = `batch_processing.${number}.duration_distrib`
+    | `batch_processing.${number}.size_distrib`
 
 interface DistributionMappingWithAddProps {
-    // fields: FieldArrayWithId<FieldValues, FieldArrayPath<FieldValues>, "key">[]
     formState: UseFormReturn<JsonData, object>
-    // objectFieldNamePart: keyof FieldValues
-    // onRowRemove: (index: number) => void
-    // onRowAdd: () => void
+    objectFieldNamePart: AllowedDistrParamsName
     taskIndex: number
+    valueLabel: string
 }
 
 const DistributionMappingWithAdd = (props: DistributionMappingWithAddProps) => {
-    // const { fields, objectFieldNamePart } = props
-    const { taskIndex, formState: { control } } = props
+    const { taskIndex, formState: { control }, objectFieldNamePart, valueLabel } = props
     const [isRowAdded, setIsRowAdded] = useState(false)
     const listRef = useRef<List>(null)
 
     const { fields, append, remove } = useFieldArray({
         keyName: 'key',
         control,
-        name: `batch_processing.${taskIndex}.size_distrib`
+        name: objectFieldNamePart
     });
 
     const onTimePeriodAdd = () => {
@@ -52,19 +50,17 @@ const DistributionMappingWithAdd = (props: DistributionMappingWithAddProps) => {
 
     const renderRow = ({ index, key, style }: any) => {
         const isWithoutDeleteButton = (fields.length === 1 && index === 0 )
-        const item = fields[index]
 
         return (
             <Grid item xs={12} key={key} style={style}> 
                 <DistributionMappingRow
                     key={`${key}-row`}
                     formState={props.formState}
-                    // objectFieldName={`batch_processing.${taskIndex}.size_distrib.${index}`}
+                    objectFieldName={`${objectFieldNamePart}.${index}`}
                     isWithDeleteButton={!isWithoutDeleteButton}
-                    timePeriodIndex={taskIndex}
+                    rowIndex={taskIndex}
                     onDelete={onRowDelete}
-                    taskIndex={taskIndex}
-                    rowIndex={index}
+                    valueLabel={valueLabel}
                 />
             </Grid>
         )
@@ -89,7 +85,7 @@ const DistributionMappingWithAdd = (props: DistributionMappingWithAddProps) => {
             </Grid>
             <Grid item xs={12}>
                 <AddButtonBase
-                    labelName="Add a time period"
+                    labelName="Add a mapping"
                     onClick={onTimePeriodAdd}
                 />
             </Grid>

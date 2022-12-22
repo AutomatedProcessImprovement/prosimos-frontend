@@ -1,5 +1,5 @@
 import { Grid, Typography } from "@mui/material";
-import { UseFormReturn, FieldArrayWithId, Controller } from "react-hook-form";
+import { UseFormReturn, FieldArrayWithId, Controller, Path } from "react-hook-form";
 import { JsonData } from "../formData";
 import BatchingTypeSelect from "./BatchingTypeSelect";
 import DistributionMappingWithAdd from "./DistributionMappingWithAdd";
@@ -35,21 +35,27 @@ const TaskBatching = (props: TaskBatchingProps) => {
                         )}
                     />
                 </Grid>
-                <Grid item xs={6}>
-                    <Typography variant="h6" align="left"> Size Distribution </Typography>
-                    <DistributionMappingWithAdd
-                        formState={props.formState}
-                        taskIndex={taskIndex}
-                    />
+                <Grid container item xs={12} sx={{ mt: 2 }}>
+                    <Grid item xs={6}>
+                        <Typography variant="h6" align="left"> Size Distribution </Typography>
+                        <DistributionMappingWithAdd
+                            formState={props.formState}
+                            taskIndex={taskIndex}
+                            objectFieldNamePart={`batch_processing.${taskIndex}.size_distrib`}
+                            valueLabel="Probability"
+                        />
+                    </Grid>
+                    <Grid item xs={6}>
+                        <Typography variant="h6" align="left"> Duration Distribution </Typography>
+                        <DistributionMappingWithAdd
+                            formState={props.formState}
+                            taskIndex={taskIndex}
+                            objectFieldNamePart={`batch_processing.${taskIndex}.duration_distrib`}
+                            valueLabel="Scale Factor"
+                        />
+                    </Grid>
                 </Grid>
-                {/* <Grid item xs={6}>
-                    <Typography variant="h6" align="left"> Size Distribution </Typography>
-                    <DistributionMappingWithAdd
-                        formState={props.formState}
-                        taskIndex={taskIndex}
-                    />
-                </Grid> */}
-                <Grid item xs={12}>
+                <Grid item xs={12} sx={{ mt: 2 }}>
                     <Typography variant="h6" align="left"> Firing Rules </Typography>
                     <QueryBuilder
                         formState={props.formState}

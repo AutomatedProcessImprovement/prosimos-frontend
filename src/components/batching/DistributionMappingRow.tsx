@@ -7,24 +7,17 @@ import { JsonData } from "../formData";
 
 interface DistributionMappingRowProps {
     formState: UseFormReturn<JsonData, object>
-    // objectFieldName: string
-    timePeriodIndex?: number
+    objectFieldName: string
     isWithDeleteButton: boolean
     onDelete?: (index: number) => void
-    taskIndex: number
-    rowIndex: number
+    rowIndex?: number
+    valueLabel: string
 }
 
 const DistributionMappingRow = (props: DistributionMappingRowProps) => {
     const { formState: { control: formControl, formState: { errors } },
-        // objectFieldName
-        timePeriodIndex, onDelete, taskIndex, rowIndex } = props
+        objectFieldName, isWithDeleteButton, onDelete, rowIndex, valueLabel } = props
     const [currErrors, setCurrErrors] = useState({})
-    const [objectFieldName, setObjectFieldName] = useState<Path<JsonData>>()
-
-    useEffect(() => {
-        setObjectFieldName(`batch_processing.${taskIndex}.size_distrib.${rowIndex}`)
-    }, [taskIndex, rowIndex])
     
     useEffect(() => {
         if ((Object.keys(errors).length !== 0) && (objectFieldName !== undefined)) {
@@ -38,8 +31,8 @@ const DistributionMappingRow = (props: DistributionMappingRowProps) => {
     }, [errors, objectFieldName])
 
     const onDeleteClicked = () => {
-        if (onDelete && timePeriodIndex !== undefined) {
-            onDelete(timePeriodIndex)
+        if (onDelete && rowIndex !== undefined) {
+            onDelete(rowIndex)
         }
     }
 
@@ -47,7 +40,7 @@ const DistributionMappingRow = (props: DistributionMappingRowProps) => {
         <Grid container spacing={2}>
             <Grid item xs={5}>
                 <Controller
-                    name={`batch_processing.${taskIndex}.size_distrib.${rowIndex}.key` as Path<JsonData>}
+                    name={`${objectFieldName}.key` as Path<JsonData>}
                     control={formControl}
                     rules={{ required: REQUIRED_ERROR_MSG }}
                     render={({ field: { ref, ...others } }) => {
@@ -68,7 +61,7 @@ const DistributionMappingRow = (props: DistributionMappingRowProps) => {
             </Grid>
             <Grid item xs={5}>
                 <Controller
-                    name={`batch_processing.${taskIndex}.size_distrib.${rowIndex}.value` as Path<JsonData>}
+                    name={`${objectFieldName}.value` as Path<JsonData>}
                     control={formControl}
                     rules={{ required: REQUIRED_ERROR_MSG }}
                     render={({ field: { ref, onChange, ...others } }) => {
@@ -84,14 +77,14 @@ const DistributionMappingRow = (props: DistributionMappingRowProps) => {
                                 error={!!(currErrors as any)?.value?.message}
                                 helperText={(currErrors as any)?.value?.message}
                                 variant="standard"
-                                label="Probability"
+                                label={valueLabel}
                                 type="number"
                             />
                         )
                     }}
                 />
             </Grid>
-            <Grid item xs={2} style={{
+            {isWithDeleteButton && <Grid item xs={2} style={{
                 textAlign: 'center',
                 display: 'flex',
                 justifyContent: 'center',
@@ -103,7 +96,7 @@ const DistributionMappingRow = (props: DistributionMappingRowProps) => {
                 >
                     <DeleteIcon />
                 </IconButton>
-            </Grid>
+            </Grid>}
         </Grid>
     )
 }
