@@ -1,39 +1,36 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Grid } from "@mui/material";
-import { useFieldArray, UseFormReturn } from "react-hook-form";
-import AddButtonBase from "../toolbar/AddButtonBase";
+import { FieldArrayWithId, UseFormReturn } from "react-hook-form";
 import { List , AutoSizer } from 'react-virtualized';
 import DistributionMappingRow from "./DistributionMappingRow";
-import { BatchDistrib, JsonData } from "../formData";
+import { JsonData } from "../formData";
+import { AllowedDistrParamsName } from "./DistributionSection"
 
-type AllowedDistrParamsName = `batch_processing.${number}.duration_distrib`
-    | `batch_processing.${number}.size_distrib`
 
 interface DistributionMappingWithAddProps {
     formState: UseFormReturn<JsonData, object>
     objectFieldNamePart: AllowedDistrParamsName
     taskIndex: number
     valueLabel: string
+    isRowAdded: boolean
+    setIsRowAdded: any
+    fields: FieldArrayWithId<JsonData, AllowedDistrParamsName, "key">[]
+    remove: any
 }
 
 const DistributionMappingWithAdd = (props: DistributionMappingWithAddProps) => {
-    const { taskIndex, formState: { control }, objectFieldNamePart, valueLabel } = props
-    const [isRowAdded, setIsRowAdded] = useState(false)
+    const { taskIndex, formState: { control }, objectFieldNamePart, valueLabel, 
+        isRowAdded, setIsRowAdded, fields, remove } = props
+    // const [isRowAdded, setIsRowAdded] = useState(false)
     const listRef = useRef<List>(null)
 
-    const { fields, append, remove } = useFieldArray({
-        keyName: 'key',
-        control,
-        name: objectFieldNamePart
-    });
+    // const { fields, append, remove } = useFieldArray({
+    //     keyName: 'key',
+    //     control,
+    //     name: objectFieldNamePart
+    // });
 
-    const onTimePeriodAdd = () => {
-        setIsRowAdded(true)
-        append({
-            key: "1",
-            value: 0.5
-        } as BatchDistrib)
-    };
+
 
     const onRowDelete = (index: number) => {
         remove(index)
@@ -42,6 +39,7 @@ const DistributionMappingWithAdd = (props: DistributionMappingWithAddProps) => {
     useEffect(() => {
         if (isRowAdded) {
             if (listRef.current) {
+                console.log("scroll")
                 listRef.current.scrollToRow(fields.length)
             }
             setIsRowAdded(false)
@@ -58,7 +56,7 @@ const DistributionMappingWithAdd = (props: DistributionMappingWithAddProps) => {
                     formState={props.formState}
                     objectFieldName={`${objectFieldNamePart}.${index}`}
                     isWithDeleteButton={!isWithoutDeleteButton}
-                    rowIndex={taskIndex}
+                    rowIndex={index}
                     onDelete={onRowDelete}
                     valueLabel={valueLabel}
                 />
@@ -68,7 +66,7 @@ const DistributionMappingWithAdd = (props: DistributionMappingWithAddProps) => {
 
     return (
         <Grid item xs={12} container spacing={2}>
-            <Grid item container xs={12} style={{ minHeight: "30vh" }}>
+            <Grid item container xs={12} style={{ minHeight: "20vh" }}>
                 <AutoSizer>
                     {({ width, height }) => {
                         return <List
@@ -83,12 +81,12 @@ const DistributionMappingWithAdd = (props: DistributionMappingWithAddProps) => {
                     }}
                 </AutoSizer>
             </Grid>
-            <Grid item xs={12}>
+            {/* <Grid item xs={12}>
                 <AddButtonBase
                     labelName="Add a mapping"
                     onClick={onTimePeriodAdd}
                 />
-            </Grid>
+            </Grid> */}
         </Grid>
     )
 }

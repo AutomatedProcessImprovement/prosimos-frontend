@@ -1,26 +1,24 @@
 import { Grid, Typography } from "@mui/material";
-import { UseFormReturn, FieldArrayWithId, Controller, Path } from "react-hook-form";
+import { UseFormReturn, Controller } from "react-hook-form";
 import { JsonData } from "../formData";
 import BatchingTypeSelect from "./BatchingTypeSelect";
-import DistributionMappingWithAdd from "./DistributionMappingWithAdd";
+import DistributionSection from "./DistributionSection";
 import { QueryBuilder } from "./QueryBuilder";
 
 interface TaskBatchingProps {
     formState: UseFormReturn<JsonData, object>
     taskIndex: number
-    field: FieldArrayWithId<JsonData, "batch_processing", "key">
 }
 
 /**
  * Component for rendering all task's details in regards to batching
  */
 const TaskBatching = (props: TaskBatchingProps) => {
-    const {formState: { control: formControl }, taskIndex, field} = props
+    const {formState: { control: formControl }, taskIndex} = props
 
     return (
         <Grid container item xs={12}>
             <Grid container item xs={12}>
-                <Typography> {field.task_id} </Typography>
                 <Grid item xs={12}>
                     <Controller
                         name={`batch_processing.${taskIndex}.type`}
@@ -36,23 +34,15 @@ const TaskBatching = (props: TaskBatchingProps) => {
                     />
                 </Grid>
                 <Grid container item xs={12} sx={{ mt: 2 }}>
-                    <Grid item xs={6}>
-                        <Typography variant="h6" align="left"> Size Distribution </Typography>
-                        <DistributionMappingWithAdd
-                            formState={props.formState}
-                            taskIndex={taskIndex}
-                            objectFieldNamePart={`batch_processing.${taskIndex}.size_distrib`}
-                            valueLabel="Probability"
-                        />
-                    </Grid>
+                    <DistributionSection
+                        formState={props.formState}
+                        taskIndex={taskIndex}
+                        objectFieldNamePart={`batch_processing.${taskIndex}.size_distrib`}
+                        valueLabel="Probability"
+                    />
                     <Grid item xs={6}>
                         <Typography variant="h6" align="left"> Duration Distribution </Typography>
-                        <DistributionMappingWithAdd
-                            formState={props.formState}
-                            taskIndex={taskIndex}
-                            objectFieldNamePart={`batch_processing.${taskIndex}.duration_distrib`}
-                            valueLabel="Scale Factor"
-                        />
+
                     </Grid>
                 </Grid>
                 <Grid item xs={12} sx={{ mt: 2 }}>
