@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import clsx from "clsx";
 import {
     useFieldArray,
@@ -17,13 +16,13 @@ import {
     Theme
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { Autocomplete } from "@mui/lab";
 import QueryGroupIcon from '@mui/icons-material/AccountTreeRounded';
 import QueryConditionIcon from '@mui/icons-material/FunctionsRounded';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutlineRounded';
-import { exampleSchema, typeOperatorMap, QueryBuilderSchema } from "./schemas";
+import { exampleSchema, typeOperatorMap } from "./schemas";
 import { JsonData } from "../formData";
 import WeekdaySelect from "../calendars/WeekdaySelect";
+import SliderWithInputs from "./SliderWithInputs";
 
 export type CondType = "number" | "string" | "array" | "boolean";
 export type CondOperator =
@@ -428,7 +427,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
             return "Enter value from 0 to 24"
         }
     }
-    
+
     return (
         <div className={clsx(classes.item, classes.cond)}
             {...props}
@@ -537,42 +536,12 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                             }}
                             render={({
                                 field: { onChange, value }
-                            }) => (
-                                <Autocomplete
-                                    freeSolo
-                                    multiple
-                                    options={[]}
-                                    onChange={(_, value) => onChange(value)}
+                            }) => {
+                                return <SliderWithInputs 
                                     value={value}
-                                    limitTags={2}
-                                    renderTags={(value, getTagProps) => {
-                                        return value.map((option, index) => (
-                                            <Chip
-                                                variant="outlined"
-                                                label={option}
-                                                size="small"
-                                                {...getTagProps({ index })}
-                                            />
-                                        ));
-                                    }}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            margin="normal"
-                                            label="Values"
-                                            style={{ flex: 1, marginLeft: 15 }}
-                                            error={!!conditionValueError}
-                                            helperText={
-                                                conditionValueError?.message ??
-                                                "Enter a value and press `Enter`"
-                                            }
-                                            variant="standard"
-                                            type="number"
-                                        />
-                                    )}
-                                    style={{ flex: 1, display: "inline-flex" }}
+                                    onChange={onChange}
                                 />
-                            )}
+                            }}
                         />
                     ) : (
                         <Controller
