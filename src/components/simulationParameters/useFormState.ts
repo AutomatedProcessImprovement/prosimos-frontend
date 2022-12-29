@@ -5,8 +5,18 @@ import { AllModelTasks, EventsFromModel, Gateways } from "../modelData";
 import { defaultTemplateSchedule, defaultArrivalTimeDistribution, defaultArrivalCalendarArr, defaultResourceProfiles } from "./defaultValues";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, SUMMATION_ONE_MSG, INVALID_TIME_FORMAT } from "./../validationMessages";
+import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, SUMMATION_ONE_MSG, INVALID_TIME_FORMAT, UNIQUE_KEYS } from "./../validationMessages";
 import { round } from "../../helpers/timeConversions";
+
+const isStrArrUnique = (wordsArr: string[]): boolean => {
+    // returns whether the provided array of string contains only unique words
+
+    const origSize = wordsArr.length
+    const set = new Set(wordsArr)
+    const uniqueSize = set.size
+
+    return uniqueSize === origSize
+}
 
 const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsFromModel?: EventsFromModel, jsonData?: JsonData) => {
     const [data, setData] = useState({})
@@ -143,7 +153,25 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                                 value: yup.number().required(REQUIRED_ERROR_MSG)
                             })
                         )
-                        .min(1, MIN_LENGTH_REQUIRED_MSG("size distribution")),
+                        .min(1, MIN_LENGTH_REQUIRED_MSG("size distribution"))
+                        .test(
+                            'sum',
+                            SUMMATION_ONE_MSG,
+                            (distrArr = []) => {
+                                const total = distrArr.reduce((acc, curr) => Number(acc) + Number(curr.value), 0)
+                                const rounded = round(total, 5)
+                                return rounded === 1;
+                            }
+                        )
+                        .test(
+                            'unique',
+                            UNIQUE_KEYS,
+                            (distrArr = []) => {
+                                const keysArr = distrArr.map(({key, _}) => key ?? "")
+                                const isUnique = isStrArrUnique(keysArr)
+                                return isUnique
+                            }
+                        ),
                     duration_distrib: yup.array()
                         .of(
                             yup.object().shape({
@@ -151,7 +179,22 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                                 value: yup.number().required(REQUIRED_ERROR_MSG)
                             })
                         )
-                        .min(1, MIN_LENGTH_REQUIRED_MSG("duration distribution")),
+                        .min(1, MIN_LENGTH_REQUIRED_MSG("duration distribution"))
+                        .test(
+                            'unique',
+                            UNIQUE_KEYS,
+                            (distrArr = []) => {
+                                const keysArr = distrArr.map(({key, value}) => key ?? "")
+                                const isUnique = isStrArrUnique(keysArr)
+                                console.log(keysArr, isUnique)
+                                return isUnique
+                                // console.log(distrArr.keys)
+                                // const keys = distrArr.
+                                // const total = distrArr.reduce((acc, curr) => Number(acc) + Number(curr.value), 0)
+                                // const rounded = round(total, 5)
+                                // return rounded === 1;
+                            }
+                        ),
                     firing_rules: yup.array()
                         .of(
                             yup.array()

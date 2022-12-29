@@ -33,17 +33,21 @@ const TaskBatching = (props: TaskBatchingProps) => {
                         )}
                     />
                 </Grid>
-                <Grid container item xs={12} sx={{ mt: 2 }}>
+                <Grid container item xs={12} sx={{ mt: 2 }} spacing={2}>
                     <DistributionSection
+                        sectionLabel="Size Distribution"
                         formState={props.formState}
                         taskIndex={taskIndex}
                         objectFieldNamePart={`batch_processing.${taskIndex}.size_distrib`}
                         valueLabel="Probability"
                     />
-                    <Grid item xs={6}>
-                        <Typography variant="h6" align="left"> Duration Distribution </Typography>
-
-                    </Grid>
+                    <DistributionSection
+                        sectionLabel="Duration Distribution"
+                        formState={props.formState}
+                        taskIndex={taskIndex}
+                        objectFieldNamePart={`batch_processing.${taskIndex}.duration_distrib`}
+                        valueLabel="Scale Factor"
+                    />
                 </Grid>
                 <Grid item xs={12} sx={{ mt: 2 }}>
                     <Typography variant="h6" align="left"> Firing Rules </Typography>

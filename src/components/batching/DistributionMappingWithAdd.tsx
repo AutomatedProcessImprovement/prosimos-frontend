@@ -54,6 +54,7 @@ const DistributionMappingWithAdd = (props: DistributionMappingWithAddProps) => {
                 <DistributionMappingRow
                     key={`${key}-row`}
                     formState={props.formState}
+                    // objectFieldNameBase={objectFieldNamePart} //{`${objectFieldNamePart}.${index}`}
                     objectFieldName={`${objectFieldNamePart}.${index}`}
                     isWithDeleteButton={!isWithoutDeleteButton}
                     rowIndex={index}
@@ -81,12 +82,6 @@ const DistributionMappingWithAdd = (props: DistributionMappingWithAddProps) => {
                     }}
                 </AutoSizer>
             </Grid>
-            {/* <Grid item xs={12}>
-                <AddButtonBase
-                    labelName="Add a mapping"
-                    onClick={onTimePeriodAdd}
-                />
-            </Grid> */}
         </Grid>
     )
 }

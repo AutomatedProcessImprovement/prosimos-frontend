@@ -9,6 +9,7 @@ export type AllowedDistrParamsName = `batch_processing.${number}.duration_distri
     | `batch_processing.${number}.size_distrib`
 
 interface DistributionSectionProps {
+    sectionLabel: string
     formState: UseFormReturn<JsonData, object>
     objectFieldNamePart: AllowedDistrParamsName
     taskIndex: number
@@ -16,7 +17,7 @@ interface DistributionSectionProps {
 }
 
 const DistributionSection = (props: DistributionSectionProps) => {
-    const { formState: { control: formControl }, taskIndex, objectFieldNamePart, valueLabel } = props
+    const { sectionLabel, formState: { control: formControl }, taskIndex, objectFieldNamePart, valueLabel } = props
     const [isRowAdded, setIsRowAdded] = useState(false)
 
     const { fields, append, remove } = useFieldArray({
@@ -37,7 +38,7 @@ const DistributionSection = (props: DistributionSectionProps) => {
         <Grid item container xs={6}>
             <Grid item container xs={12}>
                 <Grid item xs={9}>
-                    <Typography variant="h6" align="left"> Size Distribution </Typography>
+                    <Typography variant="h6" align="left"> {sectionLabel} </Typography>
                 </Grid>
                 <Grid item xs={3}>
                     <AddButtonBase

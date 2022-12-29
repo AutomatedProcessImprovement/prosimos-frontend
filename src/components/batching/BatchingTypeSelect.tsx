@@ -18,8 +18,8 @@ const BatchingTypeSelect = <FieldValues,>(props: BatchingTypeSelectProps<FieldVa
             variant="standard"
             select
         >
-            <MenuItem value="Sequential">Sequential</MenuItem>
-            <MenuItem value="Parallel">Parallel</MenuItem>
+            <MenuItem key="seq-menuitem" value="Sequential">Sequential</MenuItem>
+            <MenuItem key="parallel-menuitem" value="Parallel">Parallel</MenuItem>
         </TextField>
     )
 }

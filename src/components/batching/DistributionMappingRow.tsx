@@ -10,23 +10,39 @@ interface DistributionMappingRowProps {
     objectFieldName: string
     isWithDeleteButton: boolean
     onDelete?: (index: number) => void
-    rowIndex?: number
+    rowIndex: number
     valueLabel: string
 }
 
+const getPathWithoutSpecificAttr = (specificPath: string) => {
+    // remove the last subpath (the one after the last dot)
+    return specificPath.substr(0, specificPath.lastIndexOf("."));
+}
+
 const DistributionMappingRow = (props: DistributionMappingRowProps) => {
-    const { formState: { control: formControl, formState: { errors } },
+    const { formState: { control: formControl, formState: { errors }, trigger },
         objectFieldName, isWithDeleteButton, onDelete, rowIndex, valueLabel } = props
-    const [currErrors, setCurrErrors] = useState({})
-    
+    const [keyErrors, setKeyErrors] = useState({})
+    const [valueErrors, setValueErrors] = useState({})
+
     useEffect(() => {
         if ((Object.keys(errors).length !== 0) && (objectFieldName !== undefined)) {
-            let currErrors = errors as any
-            objectFieldName.split(".").forEach((key) => {
-                currErrors = currErrors?.[key];
+            // remove the path to the specific attribute
+            const path = getPathWithoutSpecificAttr(objectFieldName)
+
+            let currLocalErrors = errors as any
+            path.split(".").forEach((key) => {
+                currLocalErrors = currLocalErrors?.[key];
             })
-            const finalErrors = currErrors || "Something went wrong, please check the simulation scenario parameters"
-            setCurrErrors(finalErrors)
+            const finalErrors = currLocalErrors
+    
+            if (finalErrors !== undefined) {
+                if (finalErrors.type === "sum") {
+                    setValueErrors(finalErrors)
+                } else if (finalErrors.type === "unique") {
+                    setKeyErrors(finalErrors)
+                }
+            }
         }
     }, [errors, objectFieldName])
 
@@ -36,6 +52,17 @@ const DistributionMappingRow = (props: DistributionMappingRowProps) => {
         }
     }
 
+    const onTextChangeWithTrigger = (
+        event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+        onChange: any
+    ) => {
+        onChange(event.target.value)
+
+        // update the validation errors
+        const path = getPathWithoutSpecificAttr(objectFieldName)
+        trigger(path as Path<JsonData>)
+    }
+
     return (
         <Grid container spacing={2}>
             <Grid item xs={5}>
@@ -43,14 +70,15 @@ const DistributionMappingRow = (props: DistributionMappingRowProps) => {
                     name={`${objectFieldName}.key` as Path<JsonData>}
                     control={formControl}
                     rules={{ required: REQUIRED_ERROR_MSG }}
-                    render={({ field: { ref, ...others } }) => {
+                    render={({ field: { ref, onChange, ...others } }) => {
                         return (
                             <TextField
                                 {...others}
+                                onChange={(e) => onTextChangeWithTrigger(e, onChange)}
                                 inputRef={ref}
                                 style={{ width: "100%" }}
-                                error={!!(currErrors as any)?.key?.message}
-                                helperText={(currErrors as any)?.key?.message}
+                                error={!!(keyErrors as any)?.message}
+                                helperText={(keyErrors as any)?.message}
                                 variant="standard"
                                 label="Batch Size"
                                 type="number"
@@ -68,14 +96,11 @@ const DistributionMappingRow = (props: DistributionMappingRowProps) => {
                         return (
                             <TextField
                                 {...others}
-                                onChange={((event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-                                    const valueStr = event.target.value
-                                    onChange(Number(valueStr))
-                                })}
+                                onChange={(e) => onTextChangeWithTrigger(e, onChange)}
                                 inputRef={ref}
                                 style={{ width: "100%" }}
-                                error={!!(currErrors as any)?.value?.message}
-                                helperText={(currErrors as any)?.value?.message}
+                                error={!!(valueErrors as any)?.message}
+                                helperText={(valueErrors as any)?.message}
                                 variant="standard"
                                 label={valueLabel}
                                 type="number"
