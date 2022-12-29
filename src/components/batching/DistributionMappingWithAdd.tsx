@@ -39,7 +39,6 @@ const DistributionMappingWithAdd = (props: DistributionMappingWithAddProps) => {
     useEffect(() => {
         if (isRowAdded) {
             if (listRef.current) {
-                console.log("scroll")
                 listRef.current.scrollToRow(fields.length)
             }
             setIsRowAdded(false)

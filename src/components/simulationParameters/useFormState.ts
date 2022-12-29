@@ -184,15 +184,9 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                             'unique',
                             UNIQUE_KEYS,
                             (distrArr = []) => {
-                                const keysArr = distrArr.map(({key, value}) => key ?? "")
+                                const keysArr = distrArr.map(({key, _}) => key ?? "")
                                 const isUnique = isStrArrUnique(keysArr)
-                                console.log(keysArr, isUnique)
                                 return isUnique
-                                // console.log(distrArr.keys)
-                                // const keys = distrArr.
-                                // const total = distrArr.reduce((acc, curr) => Number(acc) + Number(curr.value), 0)
-                                // const rounded = round(total, 5)
-                                // return rounded === 1;
                             }
                         ),
                     firing_rules: yup.array()

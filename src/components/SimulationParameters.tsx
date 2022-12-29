@@ -33,6 +33,7 @@ import Tooltip from '@mui/material/Tooltip';
 import AllIntermediateEvents from './interEvents/AllIntermediateEvents'
 import EventIcon from '@mui/icons-material/Event';
 import AllBatching from './batching/AllBatching';
+import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
 
 const useStyles = makeStyles( (theme: Theme) => ({
     simParamsGrid: {
@@ -358,6 +359,10 @@ const SimulationParameters = () => {
                 Icon = <EventIcon style={styles}/>
                 break
             case 6:
+                currError = errors.batch_processing
+                Icon = <DynamicFeedIcon style={styles}/>
+                break
+            case 7:
                 lastStep = true
                 Icon = <BarChartIcon style={styles}/>
                 break

@@ -15,7 +15,7 @@ const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
             jsonFileReader.onload = e => {
                 if (e.target?.result && typeof e.target?.result === 'string') {
                     const rawData = JSON.parse(e.target.result)
-                    console.log(rawData)
+
                     // verify events in the config
                     // remove those that do not exist in the BPMN model
                     const mergeResults = getMergeEventsList(eventsFromModel, rawData["event_distribution"])

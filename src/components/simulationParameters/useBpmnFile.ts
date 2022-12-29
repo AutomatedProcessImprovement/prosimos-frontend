@@ -96,7 +96,6 @@ const useBpmnFile = (bpmnFile: any) => {
                 const eventsFromModel = elementRegistry
                     .filter((e: { type: string; }) => e.type === 'bpmn:IntermediateCatchEvent')
                     .reduce((acc: EventsFromModel, t: any) => {
-                        console.log(t)
                         const new_acc = {
                             ...acc,
                             [t.id]: { name: t.businessObject?.name }
