@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { AutoSizer } from "react-virtualized";
 import { VariableSizeList } from "react-window";
-import { BatchProcessing, JsonData } from "../formData";
+import { JsonData } from "../formData";
 import { AllModelTasks } from "../modelData";
 import { removeArrayElemByIndex } from "../ResourcePools";
 import AddButtonToolbar from "../toolbar/AddButtonToolbar";
@@ -26,7 +26,7 @@ interface AllBatchingProps {
 const AllBatching = (props: AllBatchingProps) => {
     const {tasksFromModel, formState: { control: formControl, trigger, setFocus }, setErrorMessage} = props
 
-    const { fields, append, prepend, remove } = useFieldArray({
+    const { fields, prepend, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: `${BATCH_PROCESSING}`
@@ -43,27 +43,40 @@ const AllBatching = (props: AllBatchingProps) => {
     
     useEffect(() => {
         if (isRowAdding) {
-            setFocus(`resource_profiles.1.name`)
+            setFocus('batch_processing.1.task_id')
             setIsRowAdding(false)
         }
       // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [fields, isRowAdding])
 
-    const onNewPoolCreation = async () => {
-        const arePrevResourcesValid = await trigger(`resource_profiles`)
+    const onNewTaskBatchCreation = async () => {
+        const arePrevResourcesValid = await trigger(`batch_processing`)
         if (!arePrevResourcesValid) {
-            setErrorMessage("Verify the correctness of all entered Resource Profiles")
+            setErrorMessage("Verify the correctness of all entered Task Batches")
             return
         }
 
         prepend({
             task_id: "",
-            type: "",
-            batch_frequency: 1.0,
-            firing_rules: [],
-            size_distrib: [],
-            duration_distrib: []
-        } as BatchProcessing)
+            type: "Parallel",
+            size_distrib: [
+                { 
+                    "key": "1",
+                    "value": 0,
+                },
+                {
+                    "key": "2",
+                    "value": 1
+                }
+            ],
+            duration_distrib: [
+                { 
+                    "key": "1",
+                    "value": 0.9,
+                }
+            ],
+            firing_rules: []
+        })
 
         setIsRowAdding(true)
 
@@ -142,7 +155,7 @@ const AllBatching = (props: AllBatchingProps) => {
     return <Grid container spacing={2}>
         <Toolbar sx={{ justifyContent: "flex-end", marginLeft: "auto" }}>
             <AddButtonToolbar
-                onClick={onNewPoolCreation}
+                onClick={onNewTaskBatchCreation}
                 labelName="Add new task batching"
             />
         </Toolbar>

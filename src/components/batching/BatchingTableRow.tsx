@@ -57,7 +57,7 @@ const BatchingTableRow = (props: BatchingTableRowProps) => {
                 </TableCell>
                 <TableCell style={{ width: "80%" }}>
                     <Controller
-                        name={`batch_processing.0.task_id`}
+                        name={`batch_processing.${taskIndex}.task_id`}
                         control={formControl}
                         render={({ field }) => (
                             <TaskSelect

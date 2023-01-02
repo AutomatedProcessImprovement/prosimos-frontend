@@ -196,7 +196,9 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                                     yup.object().shape({
                                         attribute: yup.string().required(REQUIRED_ERROR_MSG),
                                         comparison: yup.string().required(REQUIRED_ERROR_MSG),
-                                        value: yup.string().required(REQUIRED_ERROR_MSG)
+                                        value: yup.lazy(value => (
+                                            Array.isArray(value) ? yup.array().of(yup.string()) : yup.string()
+                                        ))
                                     })
                                 )
                         )
