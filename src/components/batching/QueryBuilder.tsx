@@ -357,18 +357,13 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                             control={control}
                             name={conditionValueName}
                             defaultValue={[]}
-                            rules={{
-                                validate: {
-                                    minLength: (value) =>
-                                        value.length === 0 ? "Must have at least one value." : true
-                                }
-                            }}
                             render={({
                                 field: { onChange, value }
                             }) => {
                                 return <SliderWithInputs 
                                     value={value}
                                     onChange={onChange}
+                                    conditionValueError={conditionValueError}
                                 />
                             }}
                         />

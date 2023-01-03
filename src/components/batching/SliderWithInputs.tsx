@@ -4,10 +4,11 @@ import { ChangeEvent } from "react"
 interface SliderWithInputsProps {
     value: number[]
     onChange: any
+    conditionValueError: any
 }
 
 const SliderWithInputs = (props: SliderWithInputsProps) => {
-    const {value, onChange} = props
+    const { value, onChange, conditionValueError } = props
 
     const handleInputChange = (
             event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -22,7 +23,25 @@ const SliderWithInputs = (props: SliderWithInputsProps) => {
                 : [Number(oldRange[0]), newInputValue]
 
             onChangeSlider(newBetweenValue)
+        };
+
+    const getHelperTextForInputValue = () => {
+        const errorMessage = conditionValueError?.message
+        if (errorMessage !== undefined) {
+            return errorMessage
         }
+    };
+
+    const getHelperTextForSeparateValue = (index: number) => {
+        if (!conditionValueError)
+            // no errors, so no helperText
+            return ""
+
+        const errorMessage = conditionValueError[index]
+        if (errorMessage !== undefined) {
+            return errorMessage?.message
+        }
+    };
 
     return (
         <Grid item container xs={12} sx={{ ml: 1.875, mt: 2 }}>
@@ -39,7 +58,8 @@ const SliderWithInputs = (props: SliderWithInputsProps) => {
                         min: 0,
                         max: Number.MAX_VALUE
                     }}
-                    // TODO: error and helperText
+                    error={!!conditionValueError}
+                    helperText={getHelperTextForInputValue() ?? getHelperTextForSeparateValue(0)}
                 />
             </Grid>
             <Grid item xs={7} sx={{ mx: 1 }}>
@@ -64,11 +84,11 @@ const SliderWithInputs = (props: SliderWithInputsProps) => {
                         min: 0,
                         max: Number.MAX_VALUE
                     }}
-                    // TODO: error and helperText
+                    error={!!conditionValueError}
+                    helperText={getHelperTextForInputValue() ?? getHelperTextForSeparateValue(1)}
                 />
             </Grid>
         </Grid>
-
     )
 }
 

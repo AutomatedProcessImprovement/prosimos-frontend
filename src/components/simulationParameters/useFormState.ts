@@ -196,13 +196,18 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                                     yup.object().shape({
                                         attribute: yup.string().required(REQUIRED_ERROR_MSG),
                                         comparison: yup.string().required(REQUIRED_ERROR_MSG),
-                                        value: yup.lazy(value => (
-                                            // TODO: validate that only numbers
-                                            Array.isArray(value) ? yup.array().of(yup.string()) : yup.string()
-                                        ))
+                                        value: yup
+                                            .lazy(value => {
+                                                const oneValueSchema = yup.string().integer().required(REQUIRED_ERROR_MSG)
+                                                return Array.isArray(value) 
+                                                    ? yup.array().of(oneValueSchema)
+                                                        .min(2, "Cannot be empty")
+                                                    : oneValueSchema.required(REQUIRED_ERROR_MSG)
+                                            })
                                     })
                                 )
                         )
+                        // TODO: validate that attribute is used only once inside AND rule
                 })
             )
     })), []);
