@@ -9,12 +9,12 @@ interface BatchingTypeSelectProps<FieldValues>{
     tasksFromModel: AllModelTasks
 }
 
-const BatchingTypeSelect = <FieldValues,>(props: BatchingTypeSelectProps<FieldValues>) => {
+const TaskSelect = <FieldValues,>(props: BatchingTypeSelectProps<FieldValues>) => {
     const { tasksFromModel } = props
 
     return (
         <TextField 
-            sx={{ width: "50%" }}
+            sx={{ width: "75%" }}
             {...props.field}
             error={props.fieldError !== undefined}
             helperText={props.fieldError?.message || ""}
@@ -35,4 +35,4 @@ const BatchingTypeSelect = <FieldValues,>(props: BatchingTypeSelectProps<FieldVa
     )
 }
 
-export default BatchingTypeSelect;
+export default TaskSelect;

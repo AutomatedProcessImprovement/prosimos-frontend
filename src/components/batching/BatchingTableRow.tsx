@@ -8,6 +8,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import TaskBatching from "./TaskBatching";
 import TaskSelect from "./TaskSelect";
 import { AllModelTasks } from "../modelData";
+import { colWidth } from "./AllBatching";
 
 interface BatchingTableRowProps {
     onResourcePoolDelete: (index: number) => void
@@ -46,67 +47,67 @@ const BatchingTableRow = (props: BatchingTableRowProps) => {
     return (
         <React.Fragment>
             <TableRow style={{ ...props.style }} >
-            <TableRow hover style={getHeightForRow()}>
-                <TableCell style={{ width: "10%" }}>
-                    <IconButton
-                        size="small"
-                        onClick={onOpenRow}
-                    >
-                        {props.rowOpenState ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                    </IconButton>
-                </TableCell>
-                <TableCell style={{ width: "80%" }}>
-                    <Controller
-                        name={`batch_processing.${taskIndex}.task_id`}
-                        control={formControl}
-                        render={({ field }) => (
-                            <TaskSelect
-                                field={field}
-                                tasksFromModel={tasksFromModel}
-                            />
-                        )}
-                    />
-                    {/* <Controller
-                        name={`batch_processing.${taskIndex}.task_id` as unknown as keyof JsonData}
-                        control={formControl}
-                        rules={{ required: REQUIRED_ERROR_MSG }}
-                        render={({ field: { ref, ...others } }) => {
-                            return (
-                                <TextField
-                                    {...others}
-                                    inputRef={ref}
-                                    style={{ width: "100%" }}
-                                    error={areAnyErrors}
-                                    helperText={errorMessage}
-                                    variant="standard"
-                                    placeholder="Resource pool name"
+                <TableRow hover style={getHeightForRow()}>
+                    <TableCell style={{ width: colWidth[0] }}>
+                        <IconButton
+                            size="small"
+                            onClick={onOpenRow}
+                        >
+                            {props.rowOpenState ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                        </IconButton>
+                    </TableCell>
+                    <TableCell style={{ width: colWidth[1] }}>
+                        <Controller
+                            name={`batch_processing.${taskIndex}.task_id`}
+                            control={formControl}
+                            render={({ field }) => (
+                                <TaskSelect
+                                    field={field}
+                                    tasksFromModel={tasksFromModel}
                                 />
-                            )
-                        }}
-                    /> */}
-                </TableCell>
-                <TableCell style={{ width: "10%" }}>
-                    <IconButton
-                        size="small"
-                        onClick={() => onResourcePoolDelete(taskIndex)}
-                    >
-                        <DeleteIcon />
-                    </IconButton>
-                </TableCell>
-            </TableRow>
-            <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
-                    <Collapse in={props.rowOpenState} timeout="auto" unmountOnExit>
-                        <Box margin={1} height={"45vh"}>
-                            <TaskBatching
-                                key={field.key}
-                                formState={props.formState}
-                                taskIndex={taskIndex}
-                            />
-                        </Box>
-                    </Collapse>
-                </TableCell>
-            </TableRow>
+                            )}
+                        />
+                        {/* <Controller
+                            name={`batch_processing.${taskIndex}.task_id` as unknown as keyof JsonData}
+                            control={formControl}
+                            rules={{ required: REQUIRED_ERROR_MSG }}
+                            render={({ field: { ref, ...others } }) => {
+                                return (
+                                    <TextField
+                                        {...others}
+                                        inputRef={ref}
+                                        style={{ width: "100%" }}
+                                        error={areAnyErrors}
+                                        helperText={errorMessage}
+                                        variant="standard"
+                                        placeholder="Resource pool name"
+                                    />
+                                )
+                            }}
+                        /> */}
+                    </TableCell>
+                    <TableCell style={{ width: colWidth[2] }}>
+                        <IconButton
+                            size="small"
+                            onClick={() => onResourcePoolDelete(taskIndex)}
+                        >
+                            <DeleteIcon />
+                        </IconButton>
+                    </TableCell>
+                </TableRow>
+                <TableRow>
+                    <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
+                        <Collapse in={props.rowOpenState} timeout="auto" unmountOnExit>
+                            <Box margin={1} height={"45vh"}>
+                                <TaskBatching
+                                    key={field.key}
+                                    formState={props.formState}
+                                    taskIndex={taskIndex}
+                                />
+                            </Box>
+                        </Collapse>
+                    </TableCell>
+                </TableRow>
             </TableRow>
         </React.Fragment>
     );

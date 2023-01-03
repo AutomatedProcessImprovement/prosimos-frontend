@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import moment from 'moment';
 import { useTheme } from '@material-ui/core/styles';
 import { AlertColor, Badge, Button, ButtonGroup, Grid, Step, StepButton, StepIcon, Stepper, Theme } from '@mui/material';
-import { FiringRule, JsonData, ScenarioProperties } from './formData';
+import { BatchProcessing, FiringRule, JsonData, ScenarioProperties } from './formData';
 import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
 import ResourcePools from './ResourcePools';
 import ResourceCalendars from './ResourceCalendars';
@@ -202,18 +202,21 @@ const SimulationParameters = () => {
 
     const onDownload = () => {
         const values = getValues()
-        transform_between_operations(values)
-        const blob = fromContentToBlob(values)
+        const newTransformedValues = transform_between_operations(values)
+        const blob = fromContentToBlob(newTransformedValues)
         const fileDownloadUrl = URL.createObjectURL(blob);
         setFileDownloadUrl(fileDownloadUrl)
     };
 
     const transform_between_operations = (values: JsonData) => {
         const batching_info = values.batch_processing // array per task
-        for (var task_batch_info_index in batching_info) {
-            const curr_task_batch_rules = batching_info[task_batch_info_index].firing_rules
-            _transform_between_operators_per_task(curr_task_batch_rules)
-        }
+        const newObjWithUpdBetween = JSON.parse(JSON.stringify(batching_info))
+
+        newObjWithUpdBetween.forEach((element: BatchProcessing) => {
+            _transform_between_operators_per_task(element.firing_rules)
+        })
+
+        return newObjWithUpdBetween
     };
 
     const _groupByEligibleForBetweenAndNot = (result: [FiringRule[], FiringRule[], FiringRule[]], current: FiringRule): [FiringRule[], FiringRule[], FiringRule[]] => {

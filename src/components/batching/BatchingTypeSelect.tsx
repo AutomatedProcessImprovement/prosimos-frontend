@@ -10,7 +10,7 @@ interface BatchingTypeSelectProps<FieldValues>{
 const BatchingTypeSelect = <FieldValues,>(props: BatchingTypeSelectProps<FieldValues>) => {
     return (
         <TextField 
-            sx={{ width: "50%" }}
+            sx={{ width: "75%" }}
             {...props.field}
             error={props.fieldError !== undefined}
             helperText={props.fieldError?.message || ""}

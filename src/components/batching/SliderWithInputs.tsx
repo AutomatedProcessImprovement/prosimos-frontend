@@ -42,12 +42,13 @@ const SliderWithInputs = (props: SliderWithInputsProps) => {
                     // TODO: error and helperText
                 />
             </Grid>
-            <Grid item xs={8}>
+            <Grid item xs={7} sx={{ mx: 1 }}>
                 <Slider
                     value={value}
                     onChange={onChange}
                     valueLabelDisplay="auto"
                     max={value[1] * 1.5}
+                    sx={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}
                 />
             </Grid>
             <Grid item xs={2}>

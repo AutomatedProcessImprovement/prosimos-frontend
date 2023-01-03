@@ -11,8 +11,8 @@ import AddButtonToolbar from "../toolbar/AddButtonToolbar";
 import { MIN_LENGTH_REQUIRED_MSG } from "../validationMessages";
 import BatchingTableRow from "./BatchingTableRow";
 
-
 export const BATCH_PROCESSING = "batch_processing"
+export const colWidth = [ "10%", "90%", "10%" ]
 
 const ROW_HEIGHT = 80;
 const OPEN_ROW_HEIGHT = 10 * ROW_HEIGHT;
@@ -141,7 +141,6 @@ const AllBatching = (props: AllBatchingProps) => {
                 style={{...style}}
                 onResourcePoolDelete={onResourcePoolDeletion}
                 formState={props.formState}
-                // calendars={calendars()}
                 setErrorMessage={setErrorMessage}
                 handleExpansion={handleExpansion}
                 rowOpenState={rowOpenState[index]}
@@ -164,9 +163,9 @@ const AllBatching = (props: AllBatchingProps) => {
             <Table style={{ width: "100%", height: "60vh" }}>
                 <TableHead>
                     <TableRow>
-                        <TableCell style={{ width: "10%" }}></TableCell>
-                        <TableCell style={{ width: "80%" }}>Task</TableCell>
-                        <TableCell style={{ width: "10%" }}></TableCell>
+                        <TableCell style={{ width: colWidth[0] }}></TableCell>
+                        <TableCell style={{ width: colWidth[1] }}>Task</TableCell>
+                        <TableCell style={{ width: colWidth[2] }}></TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody style={{ height: "50vh" }}>
