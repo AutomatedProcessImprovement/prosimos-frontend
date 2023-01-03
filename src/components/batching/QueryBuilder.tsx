@@ -24,136 +24,6 @@ import { JsonData } from "../formData";
 import WeekdaySelect from "../calendars/WeekdaySelect";
 import SliderWithInputs from "./SliderWithInputs";
 
-export type CondType = "number" | "string" | "array" | "boolean";
-export type CondOperator =
-    | "$gt"
-    | "$gte"
-    | "$lte"
-    | "$lt"
-    | "$eq"
-    | "$ne"
-    | "$in"
-    | "$nin";
-export type GroupOperator = "$and" | "$or";
-
-export type FormFields = {
-    query: {
-        type: string;
-        operator: string;
-        items: (QueryBuilderGroup | QueryBuilderCondition)[];
-    };
-}
-
-export type QueryBuilderConditionData = {
-    field?: string;
-    type?: CondType;
-    operator?: CondOperator;
-    value?: number | string | string[] | boolean;
-}
-export type QueryBuilderCondition = {
-    type: "cond";
-    data: QueryBuilderConditionData;
-};
-
-export type QueryBuilderGroupItems = {
-    [key: number]: Omit<QueryBuilderGroup, ''> | QueryBuilderCondition
-}
-
-export type OneQueryBuilderGroup = {
-    type: "group";
-    operator: GroupOperator;
-    items: Array<QueryBuilderCondition>;
-    defaultValues?: DefaultValues;
-};
-
-export type DefaultValues = {
-    type: "group";
-    operator: GroupOperator;
-}
-
-export type QueryBuilderGroup = {
-    type: "group";
-    operator: GroupOperator;
-    items: Array<OneQueryBuilderGroup | QueryBuilderCondition>;
-    defaultValues?: DefaultValues;
-};
-
-export type QueryGroupType = {
-    [K in GroupOperator]?: Array<QueryGroupType | QueryConditionType>;
-};
-
-export type QueryConditionType = {
-    [key: string]: {
-        [N in CondOperator]?: number | string | string[] | boolean;
-    };
-};
-
-type Prev = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-    11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-
-type Join<K, P> = K extends string | number ?
-    P extends string | number ?
-    `${K}${"" extends P ? "" : "."}${P}`
-    : never : never;
-
-type Paths<T, D extends number = 10> = [D] extends [never] ? never : T extends object ?
-    { [K in keyof T]-?: K extends string | number ?
-        `${K}` | Join<K, Paths<T[K], Prev[D]>>
-        : never
-    }[keyof T] : ""
-
-type TFormFields = Paths<FormFields>;
-
-// TODO return type
-// export const parseQueryBuilderForm = (
-//     query: QueryBuilderGroup | QueryBuilderCondition
-// ): any => {
-//     if (query.type === "group") {
-//         return {
-//             [query.operator]: Object.values(query.items).map((item) => parseQueryBuilderForm(item))
-//         } as QueryGroupType;
-//     } else if (query.type === "cond") {
-//         return {
-//             [query.data.field!]: {
-//                 [query.data.operator!]: query.data.value
-//             }
-//         };
-//     } else {
-//         throw new Error("Unknown query type when parsing query builder group.");
-//     }
-// };
-
-// TODO return type
-// export const queryJsonToBuilderForm = (
-//     query: QueryGroupType | QueryConditionType | null,
-//     schema: QueryBuilderSchema
-// ): any => {
-//     if (!!query?.$and || !!query?.$or) {
-//         const group = query as QueryGroupType;
-//         const operator = Object.keys(group)[0] as GroupOperator;
-//         return {
-//             type: "group",
-//             operator,
-//             items: group[operator]!.map((item) =>
-//                 queryJsonToBuilderForm(item, schema)
-//             )
-//         };
-//     } else if (Object.keys(query || {}).length) {
-//         const cond = query as QueryConditionType;
-//         const field = Object.keys(cond)[0];
-//         const operator = Object.keys(cond[field])[0] as CondOperator;
-//         const value = cond[field][operator];
-//         const type = schema[field]?.type;
-
-//         // TODO consider throwing an error or returning nothing if no `type` mapped
-
-//         return {
-//             type: "cond",
-//             data: { field, operator, type, value }
-//         };
-//     }
-// };
-
 const useQueryBuilderStyles = makeStyles(
     (theme: Theme) => ({
         group: {},
@@ -224,31 +94,6 @@ const useQueryBuilderStyles = makeStyles(
     }
 );
 
-const defaultValues = {
-    // query: {
-    //     type: "group",
-    //     operator: "$or",
-    //     items: [
-    //         { type: "cond", data: { field: "", operator: undefined, value: [] } } as QueryBuilderCondition,
-    //         { type: "group", operator: "$or", items: [
-    //             { type: "cond", data: { field: "", operator: undefined, value: [] } }
-    //         ]} as QueryBuilderGroup
-    //     ] as Array<QueryBuilderGroup | QueryBuilderCondition>
-    // }
-    query: [
-        [
-            { type: "cond", data: { field: "", operator: undefined, value: [] } } as QueryBuilderCondition,
-            { type: "cond", data: { field: "", operator: undefined, value: [] } } as QueryBuilderCondition,
-        ],
-        [
-            { type: "cond", data: { field: "", operator: undefined, value: [] } } as QueryBuilderCondition,
-        ],
-        [
-            { type: "cond", data: { field: "", operator: undefined, value: [] } } as QueryBuilderCondition,
-        ]
-    ]
-};
-
 interface QueryBuilderProps {
     formState: UseFormReturn<JsonData, object>
     taskIndex: number
@@ -298,47 +143,40 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
             {...props}
         >
             <div className={classes.groupControls}>
-                {/* <Controller
-                    name={typePath}
-                    control={control}
-                    defaultValue={defaultValues.type || "unknown"}
-                    render={({
-                        field
-                    }) => <input type="hidden" {...field} />}
-                /> */}
-
                 {depth === 0
                     ? <Chip label="OR" variant="outlined" />
                     : <Chip label="AND" variant="outlined" />}
 
-                {/* maximum group depth */}
-                {depth >= 1 ? null : (
-                    <Tooltip title="Add Logical Group">
+                {/* group could be added only on the very first level */}
+                {depth === 0 
+                    ? (
+                        <Tooltip title="Add Logical Group">
+                            <IconButton
+                                onClick={() => {
+                                    clearErrors(arrayPath);
+                                    append([[
+                                        { attribute: "", comparison: undefined, value: [] },
+                                    ]]);
+                                }}
+                            >
+                                <QueryGroupIcon />
+                            </IconButton>
+                        </Tooltip>
+                    )
+                    : (
+                    <Tooltip title="Add Condition">
                         <IconButton
                             onClick={() => {
                                 clearErrors(arrayPath);
-                                append([[
+                                append([
                                     { attribute: "", comparison: undefined, value: [] },
-                                ]]);
+                                ]);
                             }}
                         >
-                            <QueryGroupIcon />
+                            <QueryConditionIcon />
                         </IconButton>
                     </Tooltip>
                 )}
-
-                <Tooltip title="Add Condition">
-                    <IconButton
-                        onClick={() => {
-                            clearErrors(arrayPath);
-                            append([
-                                { attribute: "", comparison: undefined, value: [] },
-                            ]);
-                        }}
-                    >
-                        <QueryConditionIcon />
-                    </IconButton>
-                </Tooltip>
 
                 {onRemove ? (
                     <Tooltip title="Remove This Group">
@@ -399,10 +237,9 @@ const QueryCondition = (allProps: QueryConditionProps) => {
     const { control, watch, formState: { errors } } = formState
     const classes = useQueryBuilderStyles();
 
-    // const conditionDataPath = [...name, "data"];
-    const conditionFieldName = `${name}.attribute` //[...conditionDataPath, "field"].join(".") as TFormFields;
-    const conditionOperatorName = `${name}.comparison` // [...conditionDataPath, "operator"].join(".") as TFormFields;
-    const conditionValueName = `${name}.value` // [...conditionDataPath, "value"].join(".") as TFormFields;
+    const conditionFieldName = `${name}.attribute`
+    const conditionOperatorName = `${name}.comparison`
+    const conditionValueName = `${name}.value`
 
     const conditionFieldError = get(errors, conditionFieldName, null);
     const conditionOperatorError = get(errors, conditionOperatorName, null);
@@ -432,13 +269,6 @@ const QueryCondition = (allProps: QueryConditionProps) => {
         <div className={clsx(classes.item, classes.cond)}
             {...props}
         >
-            {/* <Controller
-                control={control}
-                name={[...name, "type"].join(".") as TFormFields}
-                defaultValue="cond"
-                render={({field}) => <input type="hidden" {...field} />}
-            /> */}
-
             <Controller
                 control={control}
                 name={conditionFieldName}
@@ -460,7 +290,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                     >
                         <MenuItem value="">None</MenuItem>
                         {Object.keys(exampleSchema).map((value, index, array) => {
-                            const item = (exampleSchema as any)[value]; // TODO key of product schema
+                            const item = (exampleSchema as any)[value];
                             return (
                                 <MenuItem key={value} value={value}>
                                     {item.label}
@@ -495,7 +325,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                             >
                                 <MenuItem value="">None</MenuItem>
                                 {Object.keys(typeOperator).map((value, index, array) => {
-                                    const item = (typeOperator as any)[value]; // TODO key of product schema
+                                    const item = (typeOperator as any)[value];
                                     return (
                                         <MenuItem key={value} value={value}>
                                             {item.label}
@@ -508,7 +338,6 @@ const QueryCondition = (allProps: QueryConditionProps) => {
 
                     {fieldTypeSchema.type === 'weekday' ?
                         <Controller
-                            // name={`${objectFieldName}.to` as Path<FieldValues>}
                             name={conditionValueName}
                             control={control}
                             // rules={{ required: REQUIRED_ERROR_MSG }}
