@@ -235,7 +235,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
         onRemove,
         ...props } = allProps
     
-    const { control, watch, formState: { errors }, setValue } = formState
+    const { control, watch, formState: { errors }, setValue, clearErrors } = formState
     const classes = useQueryBuilderStyles();
 
     const conditionFieldName = `${name}.attribute`
@@ -266,6 +266,11 @@ const QueryCondition = (allProps: QueryConditionProps) => {
         }
     }
 
+    const nullifyValueAndClearErrors = (pathToField: string) => {
+        setValue(pathToField, "")
+        clearErrors(pathToField)
+    }
+
     const onFieldChange = (
         event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
         onChange: any
@@ -274,8 +279,8 @@ const QueryCondition = (allProps: QueryConditionProps) => {
         onChange(event)
 
         // nullify the operator and set of values
-        setValue(conditionOperatorName, "")
-        setValue(conditionValueName, "")
+        nullifyValueAndClearErrors(conditionOperatorName)
+        nullifyValueAndClearErrors(conditionValueName)
     }
 
     return (
@@ -353,13 +358,12 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                         <Controller
                             name={conditionValueName}
                             control={control}
-                            // rules={{ required: REQUIRED_ERROR_MSG }}
                             render={({ field }) => (
                                 <WeekdaySelect
                                     field={field}
                                     label="Value"
                                     style={{ ml: 1.875, mt: 2, flex: 1 }}
-                                    // fieldError={(currErrors as any)?.to}
+                                    fieldError={conditionValueError}
                                 />
                             )}
                         />

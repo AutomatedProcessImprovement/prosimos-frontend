@@ -168,8 +168,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                             UNIQUE_KEYS,
                             (distrArr = []) => {
                                 const keysArr = distrArr.map(({key, _}) => key ?? "")
-                                const isUnique = isStrArrUnique(keysArr)
-                                return isUnique
+                                return isStrArrUnique(keysArr)
                             }
                         ),
                     duration_distrib: yup.array()
@@ -184,9 +183,8 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                             'unique',
                             UNIQUE_KEYS,
                             (distrArr = []) => {
-                                const keysArr = distrArr.map(({key, _}) => key ?? "")
-                                const isUnique = isStrArrUnique(keysArr)
-                                return isUnique
+                                const keysArr = distrArr.map(({ key }) => key ?? "")
+                                return isStrArrUnique(keysArr)
                             }
                         ),
                     firing_rules: yup.array()
@@ -198,11 +196,17 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                                         comparison: yup.string().required(REQUIRED_ERROR_MSG),
                                         value: yup
                                             .lazy(value => {
-                                                const oneValueSchema = yup.string().integer().required(REQUIRED_ERROR_MSG)
+                                                const stringOrNumber = yup.string().when("attribute", {
+                                                    is: (value: string) => value === "week_day",
+                                                    then: (schema) => schema,               // string is the only limitation (it can contain everything)
+                                                    otherwise: (schema) => schema.integer() // string can contain only digit numbers
+                                                })
+                                                const oneValueSchema = stringOrNumber.required(REQUIRED_ERROR_MSG)
+
                                                 return Array.isArray(value) 
                                                     ? yup.array().of(oneValueSchema)
                                                         .min(2, "Cannot be empty")
-                                                    : oneValueSchema.required(REQUIRED_ERROR_MSG)
+                                                    : oneValueSchema
                                             })
                                     })
                                 )
@@ -210,9 +214,8 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                                     'unique',
                                     "Fields should be unique",
                                     (andRules = []) => {
-                                        const keysArr = andRules.map(({ attribute, _ }) => attribute ?? "")
-                                        const isUnique = isStrArrUnique(keysArr)
-                                        return isUnique
+                                        const keysArr = andRules.map(({ attribute }) => attribute ?? "")
+                                        return isStrArrUnique(keysArr)
                                     }
                                 )
                         )
