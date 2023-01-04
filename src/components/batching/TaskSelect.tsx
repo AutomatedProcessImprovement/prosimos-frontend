@@ -26,7 +26,7 @@ const TaskSelect = <FieldValues,>(props: BatchingTypeSelectProps<FieldValues>) =
                 const taskId = field[0]
                 const taskDetails = field[1]
                 return (
-                    <MenuItem value={taskId}>
+                    <MenuItem key={`task-option-${taskId}`}value={taskId}>
                         {taskDetails.name}
                     </MenuItem>
                 )

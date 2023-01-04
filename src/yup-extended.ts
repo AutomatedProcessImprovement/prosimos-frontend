@@ -16,8 +16,6 @@ yup.addMethod<yup.StringSchema>(yup.string, "timeFormat", function (errorMessage
 });
 
 yup.addMethod<yup.StringSchema>(yup.string, "integer", function () {
-  console.log(this)
-  console.log(this.matches(/^\d+$/, "Only digits are allowed"))
   return this.matches(/^\d+$/, "Only digits are allowed")
 })
 

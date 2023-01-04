@@ -23,6 +23,7 @@ import { exampleSchema, typeOperatorMap } from "./schemas";
 import { JsonData } from "../formData";
 import WeekdaySelect from "../calendars/WeekdaySelect";
 import SliderWithInputs from "./SliderWithInputs";
+import { ChangeEvent } from "react";
 
 const useQueryBuilderStyles = makeStyles(
     (theme: Theme) => ({
@@ -234,7 +235,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
         onRemove,
         ...props } = allProps
     
-    const { control, watch, formState: { errors } } = formState
+    const { control, watch, formState: { errors }, setValue } = formState
     const classes = useQueryBuilderStyles();
 
     const conditionFieldName = `${name}.attribute`
@@ -265,6 +266,18 @@ const QueryCondition = (allProps: QueryConditionProps) => {
         }
     }
 
+    const onFieldChange = (
+        event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+        onChange: any
+    ) => {
+        // change the value
+        onChange(event)
+
+        // nullify the operator and set of values
+        setValue(conditionOperatorName, "")
+        setValue(conditionValueName, "")
+    }
+
     return (
         <div className={clsx(classes.item, classes.cond)}
             {...props}
@@ -284,7 +297,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                         margin="normal"
                         error={!!conditionFieldError}
                         helperText={conditionFieldError?.message}
-                        onChange={onChange}
+                        onChange={e => onFieldChange(e, onChange)}
                         value={value}
                         variant="standard"
                     >

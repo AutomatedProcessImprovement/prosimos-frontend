@@ -206,8 +206,16 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                                             })
                                     })
                                 )
+                                .test(
+                                    'unique',
+                                    "Fields should be unique",
+                                    (andRules = []) => {
+                                        const keysArr = andRules.map(({ attribute, _ }) => attribute ?? "")
+                                        const isUnique = isStrArrUnique(keysArr)
+                                        return isUnique
+                                    }
+                                )
                         )
-                        // TODO: validate that attribute is used only once inside AND rule
                 })
             )
     })), []);
