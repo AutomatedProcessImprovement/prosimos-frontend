@@ -9,6 +9,7 @@ import TaskBatching from "./TaskBatching";
 import TaskSelect from "./TaskSelect";
 import { AllModelTasks } from "../modelData";
 import { colWidth } from "./AllBatching";
+import { AutoSizer } from "react-virtualized";
 
 interface BatchingTableRowProps {
     onResourcePoolDelete: (index: number) => void
@@ -98,12 +99,20 @@ const BatchingTableRow = (props: BatchingTableRowProps) => {
                 <TableRow>
                     <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
                         <Collapse in={props.rowOpenState} timeout="auto" unmountOnExit>
-                            <Box margin={1} height={"45vh"}>
-                                <TaskBatching
-                                    key={field.key}
-                                    formState={props.formState}
-                                    taskIndex={taskIndex}
-                                />
+                            <Box margin={1} height={"400px"}>
+                                <AutoSizer>
+                                    {({ height, width }) => (
+                                        <TaskBatching
+                                            key={field.key}
+                                            formState={props.formState}
+                                            taskIndex={taskIndex}
+                                            style={{
+                                                height: height,
+                                                width: width
+                                            }}
+                                        />
+                                    )}
+                                </AutoSizer>
                             </Box>
                         </Collapse>
                     </TableCell>

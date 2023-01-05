@@ -15,7 +15,7 @@ export const BATCH_PROCESSING = "batch_processing"
 export const colWidth = [ "10%", "90%", "10%" ]
 
 const ROW_HEIGHT = 80;
-const OPEN_ROW_HEIGHT = 10 * ROW_HEIGHT;
+const OPEN_ROW_HEIGHT = 480;
 
 interface AllBatchingProps {
     tasksFromModel: AllModelTasks
