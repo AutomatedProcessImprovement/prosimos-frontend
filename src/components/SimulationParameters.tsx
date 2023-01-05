@@ -209,14 +209,14 @@ const SimulationParameters = () => {
     };
 
     const transform_between_operations = (values: JsonData) => {
-        const batching_info = values.batch_processing // array per task
-        const newObjWithUpdBetween = JSON.parse(JSON.stringify(batching_info))
+        const copiedValues = JSON.parse(JSON.stringify(values))
+        const batching_info = copiedValues.batch_processing // array per task
 
-        newObjWithUpdBetween.forEach((element: BatchProcessing) => {
+        batching_info.forEach((element: BatchProcessing) => {
             _transform_between_operators_per_task(element.firing_rules)
         })
 
-        return newObjWithUpdBetween
+        return copiedValues
     };
 
     const _groupByEligibleForBetweenAndNot = (result: [FiringRule[], FiringRule[], FiringRule[]], current: FiringRule): [FiringRule[], FiringRule[], FiringRule[]] => {
