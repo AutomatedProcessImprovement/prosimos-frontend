@@ -201,11 +201,17 @@ const SimulationParameters = () => {
     );
 
     const onDownload = () => {
+        const blob = getBlobBasedOnExistingInput()
+        const fileDownloadUrl = URL.createObjectURL(blob)
+        setFileDownloadUrl(fileDownloadUrl)
+    };
+
+    const getBlobBasedOnExistingInput = (): Blob => {
         const values = getValues()
         const newTransformedValues = transform_between_operations(values)
         const blob = fromContentToBlob(newTransformedValues)
-        const fileDownloadUrl = URL.createObjectURL(blob);
-        setFileDownloadUrl(fileDownloadUrl)
+
+        return blob
     };
 
     const transform_between_operations = (values: JsonData) => {
@@ -412,12 +418,10 @@ const SimulationParameters = () => {
             return;
         }
 
-        const values = getValues()
-        transform_between_operations(values)
-        const newJsonFile = fromContentToBlob(values)
+        const newBlob = getBlobBasedOnExistingInput()
         const { num_processes: numProcesses, start_date: startDate } = getScenarioValues()
 
-        simulate(startDate, numProcesses, newJsonFile, bpmnFile)
+        simulate(startDate, numProcesses, newBlob, bpmnFile)
             .then(((result: any) => {
                 const dataJson = result.data
                 setPendingTaskId(dataJson.TaskId)
