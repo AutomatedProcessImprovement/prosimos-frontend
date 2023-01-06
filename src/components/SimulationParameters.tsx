@@ -47,6 +47,17 @@ const useStyles = makeStyles( (theme: Theme) => ({
     }
 }));
 
+const enum TABS {
+    CASE_CREATION,
+    RESOURCE_CALENDARS,
+    RESOURCES,
+    RESOURCE_ALLOCATION,
+    BRANCHING_PROB,
+    INTERMEDIATE_EVENTS,
+    BATCHING,
+    SIMULATION_RESULTS
+}
+
 const tabs_name : { [key: string]: string } = {
     CASE_CREATION: "Case Creation",
     RESOURCE_CALENDARS: "Resource Calendars",
@@ -142,11 +153,7 @@ const SimulationParameters = () => {
         if (missedElemNum > 0) {
             setInfoMessage(`${missedElemNum} elements from config were ignored due to its absence in the BPMN model.`)
         }
-    }, [missedElemNum])
-
-    const handleStep = (index: number) => () => {
-        setActiveStep(index)
-    };
+    }, [missedElemNum]);
 
     const setErrorMessage = (value: string) => {
         setSnackColor("error")
@@ -176,7 +183,7 @@ const SimulationParameters = () => {
                         setCurrSimulatedOutput(dataJson.TaskResponse )
                         
                         // redirect to results step
-                        setActiveStep(5)
+                        setActiveStep(TABS.SIMULATION_RESULTS)
 
                         // hide info message
                         onSnackbarClose()
@@ -285,47 +292,47 @@ const SimulationParameters = () => {
         setErrorMessage("")
     };
 
-    const getStepContent = (index: number) => {
+    const getStepContent = (index: TABS) => {
         switch (index) {
-            case 0:
+            case TABS.CASE_CREATION:
                 return <CaseCreation
                     scenarioFormState={scenarioState}
                     jsonFormState={formState}
                     setErrorMessage={setErrorMessage}
                 />
-            case 1:
+            case TABS.RESOURCE_CALENDARS:
                 return <ResourceCalendars
                     formState={formState}
                     setErrorMessage={setErrorMessage}
                 />
-            case 2:
+            case TABS.RESOURCES:
                 return <ResourcePools
                     formState={formState}
                     setErrorMessage={setErrorMessage}
                 />
-            case 3:
+            case TABS.RESOURCE_ALLOCATION:
                 return <ResourceAllocation
                     tasksFromModel={tasksFromModel}
                     formState={formState}
                     setErrorMessage={setErrorMessage}
                 />
-            case 4:
+            case TABS.BRANCHING_PROB:
                 return <AllGatewaysProbabilities
                     formState={formState}
                     gateways={gateways}
                 />
-            case 5:
+            case TABS.INTERMEDIATE_EVENTS:
                 return <AllIntermediateEvents
                     formState={formState}
                     setErrorMessage={setErrorMessage}
                     eventsFromModel={eventsFromModel}
                 />
-            case 6:
+            case TABS.BATCHING:
                 return <AllBatching
                     tasksFromModel={tasksFromModel}
                     formState={formState}
                     setErrorMessage={setErrorMessage} />
-            case 7:
+            case TABS.SIMULATION_RESULTS:
                 if (!!currSimulatedOutput)
                     return <SimulationResults
                         output={currSimulatedOutput}
@@ -335,7 +342,7 @@ const SimulationParameters = () => {
         }
     };
     
-    const getStepIcon = (index: number): React.ReactNode => {
+    const getStepIcon = (index: TABS): React.ReactNode => {
         const isActiveStep = activeStep === index
         const styles = isActiveStep ? { color: activeColor } : {}
 
@@ -343,35 +350,35 @@ const SimulationParameters = () => {
         let currError: any
         let lastStep = false
         switch (index) {
-            case 0:
+            case TABS.CASE_CREATION:
                 currError = errors.arrival_time_calendar || errors.arrival_time_distribution || scenarioErrors
                 Icon = <SettingsIcon style={styles}/>
                 break
-            case 1:
+            case TABS.RESOURCE_CALENDARS:
                 currError = errors.resource_calendars
                 Icon = <DateRangeIcon style={styles}/> 
                 break
-            case 2:
+            case TABS.RESOURCES:
                 currError = errors.resource_profiles
                 Icon =  <GroupsIcon style={styles}/>
                 break
-            case 3:
+            case TABS.RESOURCE_ALLOCATION:
                 currError = errors.task_resource_distribution
                 Icon = <AssignmentIndIcon style={styles}/>
                 break
-            case 4:
+            case TABS.BRANCHING_PROB:
                 currError = errors.gateway_branching_probabilities
                 Icon = <CallSplitIcon style={styles}/>
                 break
-            case 5:
+            case TABS.INTERMEDIATE_EVENTS:
                 currError = errors.event_distribution
                 Icon = <EventIcon style={styles}/>
                 break
-            case 6:
+            case TABS.BATCHING:
                 currError = errors.batch_processing
                 Icon = <DynamicFeedIcon style={styles}/>
                 break
-            case 7:
+            case TABS.SIMULATION_RESULTS:
                 lastStep = true
                 Icon = <BarChartIcon style={styles}/>
                 break
@@ -485,7 +492,7 @@ const SimulationParameters = () => {
 
                                 return <Step key={label}>
                                     <Tooltip title={tooltip_desc[key]}>
-                                        <StepButton color="inherit" onClick={handleStep(indexNum)} icon={getStepIcon(indexNum)}>
+                                        <StepButton color="inherit" onClick={() => setActiveStep(indexNum)} icon={getStepIcon(indexNum)}>
                                             {label}
                                         </StepButton>
                                     </Tooltip>
