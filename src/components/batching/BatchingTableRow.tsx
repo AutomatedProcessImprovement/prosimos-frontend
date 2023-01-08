@@ -28,10 +28,9 @@ const BatchingTableRow = (props: BatchingTableRowProps) => {
     const { field, taskIndex, tasksFromModel } = props
     const { onResourcePoolDelete, formState: { control: formControl, formState: { errors } } } = props
 
-    const { resource_profiles: resourceProfilesErrors } = errors as any
-    const resourceListErrors = resourceProfilesErrors?.[taskIndex]
-    const areAnyErrors = resourceListErrors?.name !== undefined || resourceListErrors?.resource_list !== undefined
-    const errorMessage = resourceListErrors?.name?.message || resourceListErrors?.resource_list?.message
+    const { batch_processing : batchProcessingErrors } = errors as any
+    const specificTaskBatchProcessing = batchProcessingErrors?.[taskIndex]
+    const anyErrors = batchProcessingErrors || specificTaskBatchProcessing
 
     const onOpenRow = () => {
         props.handleExpansion(
@@ -65,27 +64,10 @@ const BatchingTableRow = (props: BatchingTableRowProps) => {
                                 <TaskSelect
                                     field={field}
                                     tasksFromModel={tasksFromModel}
+                                    fieldError={anyErrors}
                                 />
                             )}
                         />
-                        {/* <Controller
-                            name={`batch_processing.${taskIndex}.task_id` as unknown as keyof JsonData}
-                            control={formControl}
-                            rules={{ required: REQUIRED_ERROR_MSG }}
-                            render={({ field: { ref, ...others } }) => {
-                                return (
-                                    <TextField
-                                        {...others}
-                                        inputRef={ref}
-                                        style={{ width: "100%" }}
-                                        error={areAnyErrors}
-                                        helperText={errorMessage}
-                                        variant="standard"
-                                        placeholder="Resource pool name"
-                                    />
-                                )
-                            }}
-                        /> */}
                     </TableCell>
                     <TableCell style={{ width: colWidth[2] }}>
                         <IconButton
