@@ -5,18 +5,8 @@ import { AllModelTasks, EventsFromModel, Gateways } from "../modelData";
 import { defaultTemplateSchedule, defaultArrivalTimeDistribution, defaultArrivalCalendarArr, defaultResourceProfiles } from "./defaultValues";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, SUMMATION_ONE_MSG, INVALID_TIME_FORMAT, UNIQUE_KEYS } from "./../validationMessages";
+import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, SUMMATION_ONE_MSG, INVALID_TIME_FORMAT } from "./../validationMessages";
 import { round } from "../../helpers/timeConversions";
-
-const isStrArrUnique = (wordsArr: string[]): boolean => {
-    // returns whether the provided array of string contains only unique words
-
-    const origSize = wordsArr.length
-    const set = new Set(wordsArr)
-    const uniqueSize = set.size
-
-    return uniqueSize === origSize
-}
 
 const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsFromModel?: EventsFromModel, jsonData?: JsonData) => {
     const [data, setData] = useState({})
@@ -56,11 +46,11 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
         arrival_time_calendar: yup.array()
             .of(
                 yup.object().shape({
-                from: yup.string().required(REQUIRED_ERROR_MSG),
-                to: yup.string().required(REQUIRED_ERROR_MSG),
-                beginTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
-                endTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
-            })
+                    from: yup.string().required(REQUIRED_ERROR_MSG),
+                    to: yup.string().required(REQUIRED_ERROR_MSG),
+                    beginTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
+                    endTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
+                })
             )
             .required()
             .min(1, MIN_LENGTH_REQUIRED_MSG("arrival calendar")),
@@ -102,7 +92,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                                             value: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG)
                                         })
                                     )
-                                    // .min(2, "At least two required parameters should be provided")
+                                // .min(2, "At least two required parameters should be provided")
                             })
                         )
                         .min(1, MIN_LENGTH_REQUIRED_MSG("allocated resource"))
@@ -163,14 +153,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                                 return rounded === 1;
                             }
                         )
-                        .test(
-                            'unique',
-                            UNIQUE_KEYS,
-                            (distrArr = []) => {
-                                const keysArr = distrArr.map(({key, _}) => key ?? "")
-                                return isStrArrUnique(keysArr)
-                            }
-                        ),
+                        .uniqueKeyDistr(),
                     duration_distrib: yup.array()
                         .of(
                             yup.object().shape({
@@ -179,50 +162,37 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                             })
                         )
                         .min(1, MIN_LENGTH_REQUIRED_MSG("duration distribution"))
-                        .test(
-                            'unique',
-                            UNIQUE_KEYS,
-                            (distrArr = []) => {
-                                const keysArr = distrArr.map(({ key }) => key ?? "")
-                                return isStrArrUnique(keysArr)
-                            }
-                        ),
+                        .uniqueKeyDistr(),
                     firing_rules: yup.array()
                         .of(
                             yup.array()
-                                .of(
+                                .of((
                                     yup.object().shape({
                                         attribute: yup.string().required(REQUIRED_ERROR_MSG),
                                         comparison: yup.string().required(REQUIRED_ERROR_MSG),
-                                        value: yup
-                                            .lazy(value => {
-                                                const stringOrNumber = yup.string().when("attribute", {
-                                                    is: (value: string) => value === "week_day",
-                                                    then: (schema) => schema,               // string is the only limitation (it can contain everything)
-                                                    otherwise: (schema) => schema.integer() // string can contain only digit numbers
-                                                })
-                                                const oneValueSchema = stringOrNumber.required(REQUIRED_ERROR_MSG)
-
-                                                return Array.isArray(value) 
-                                                    ? yup.array().of(oneValueSchema)
-                                                        .min(2, "Cannot be empty")
-                                                    : oneValueSchema
+                                        // string for weekday and numeric string for all others
+                                        value: yup.lazy(value => {
+                                            const stringOrNumber = yup.string().when("attribute", {
+                                                is: (value: string) => value === "week_day",
+                                                then: (schema) => schema,               // string is the only limitation (it can contain everything)
+                                                otherwise: (schema) => schema.integer() // string can contain only digit numbers
                                             })
+                                            const oneValueSchema = stringOrNumber.required(REQUIRED_ERROR_MSG)
+
+                                            return Array.isArray(value)
+                                                ? yup.array().of(oneValueSchema)
+                                                    .min(2, "Cannot be empty")
+                                                : oneValueSchema
+                                        })
                                     })
-                                )
-                                .test(
-                                    'unique',
-                                    "Fields should be unique",
-                                    (andRules = []) => {
-                                        const keysArr = andRules.map(({ attribute }) => attribute ?? "")
-                                        return isStrArrUnique(keysArr)
-                                    }
-                                )
+                                ) as any)
+                                .uniqueAttributes()
                         )
                 })
             )
+            .uniqueTaskBatching()
     })), []);
-    
+
     const formState = useForm<JsonData>({
         resolver: yupResolver(taskValidationSchema),
         mode: "onBlur" // validate on blur
@@ -269,7 +239,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
             }
 
             const defaultResourceCalendars = defaultTemplateSchedule(false)
-            
+
             const updData = {
                 task_resource_distribution: mappedTasksFromModel,
                 resource_calendars: [defaultResourceCalendars],
