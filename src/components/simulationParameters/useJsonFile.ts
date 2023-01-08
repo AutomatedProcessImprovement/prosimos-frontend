@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { JsonData } from "../formData";
+import { FiringRule, JsonData } from "../formData";
 import { EventsFromModel } from "../modelData";
 
 
@@ -21,7 +21,8 @@ const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
                     const mergeResults = getMergeEventsList(eventsFromModel, rawData["event_distribution"])
                     const [missedNum, finalEvents] = mergeResults
                     rawData["event_distribution"] = finalEvents
-
+                    
+                    updateRangesForBatchingRulesIfAny(rawData)
                     setJsonData(rawData)
                     setMissedElemNum(missedNum)
                 }
@@ -63,6 +64,97 @@ const getMergeEventsList = (eventsFromModel: EventsFromModel, eventsConfig: any)
     const missedNum = difference.length
 
     return [missedNum, finalEvents] as const
+};
+
+const updateRangesForBatchingRulesIfAny = (rawData: JsonData) => {
+    const batching_info = rawData.batch_processing // array per task
+    for (var task_batch_info_index in batching_info) {
+        const curr_task_batch_rules = batching_info[task_batch_info_index].firing_rules
+        _transform_between_operators(curr_task_batch_rules)
+    }
+};
+
+export const _groupByEligibleForBetweenAndNot = (result: [FiringRule[], FiringRule[], FiringRule[]], current: FiringRule): [FiringRule[], FiringRule[], FiringRule[]] => {
+    const [ready_res, large_res, others] = result
+    if (current.attribute === "ready_wt") {
+        ready_res.push(current)
+    }
+    else if (current.attribute === "ready_wt") {
+        large_res.push(current)
+    }
+    else {
+        others.push(current)
+    }
+
+    return [ready_res, large_res, others]
+}
+
+const _transform_between_operators = (firing_rules: FiringRule[][]) => {
+    for (var or_rule_index in firing_rules) {
+        const curr_and_rules = firing_rules[or_rule_index]
+        const [ready_wt_rules, large_wt_rules, others] = curr_and_rules.reduce(_groupByEligibleForBetweenAndNot, [[], [], []] as [FiringRule[], FiringRule[], FiringRule[]])
+
+        let ready_wt_new_rule = undefined
+        let large_wt_new_rule = undefined
+        if (ready_wt_rules.length >= 2) {
+            const result = _get_min_and_max_rules(ready_wt_rules)
+            if (result === undefined) {
+                console.log(`Invalid setup for ready_wt rules ${ready_wt_rules}`)
+            }
+            
+            ready_wt_new_rule = [{
+                attribute: "ready_wt",
+                comparison: "between",
+                value: result!
+            }]
+        }
+
+        if (large_wt_rules.length >= 2) {
+            const result = _get_min_and_max_rules(ready_wt_rules)
+            if (result === undefined) {
+                console.log(`Invalid setup for ready_wt rules ${ready_wt_rules}`)
+            }
+            
+            large_wt_new_rule = [{
+                attribute: "large_wt",
+                comparison: "between",
+                value: result!
+            }]
+        }
+
+        const new_and_rule = [
+            ...others,
+            ...(ready_wt_new_rule ? ready_wt_new_rule : []),
+            ...(large_wt_new_rule ? large_wt_new_rule : [])
+        ]
+
+        // assign a new set of rules as the final one
+        firing_rules[or_rule_index] = new_and_rule
+    }
+
+    return true
+}
+
+const _get_min_and_max_rules = (rules: FiringRule[]): [string, string] | undefined  => {
+    const minValue = rules.find((v: FiringRule) => _is_equal_any(v.comparison, ['>', '>=']))?.value
+    const maxValue = rules.find((v: FiringRule) => _is_equal_any(v.comparison, ['<', '<=']))?.value
+
+    if (minValue === undefined || maxValue === undefined)
+        return undefined
+    
+    return [minValue as string, maxValue as string]
+}
+
+const _is_equal_any = (value: string, possible_options: string[]) => {
+    for (const option_index in possible_options) {
+        const curr_res = value === possible_options[option_index]
+
+        if (curr_res) {
+            return curr_res
+        }
+    }
+    
+    return false
 }
 
 export default useJsonFile;

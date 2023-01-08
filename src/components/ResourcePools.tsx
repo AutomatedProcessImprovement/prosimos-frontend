@@ -20,7 +20,7 @@ const OPEN_ROW_HEIGHT = 5.5 * ROW_HEIGHT;
 
 const colWidth = [ "10%", "70%", "20%", "10%"]
 
-const removeArrayElemByIndex = (index: number, arr: any []) => {
+export const removeArrayElemByIndex = (index: number, arr: any []) => {
     const copyArray = [...arr]
     for (var i = 0; i < copyArray.length; i++) { 
         if (i === index) { 

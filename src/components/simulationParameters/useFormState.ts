@@ -46,11 +46,11 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
         arrival_time_calendar: yup.array()
             .of(
                 yup.object().shape({
-                from: yup.string().required(REQUIRED_ERROR_MSG),
-                to: yup.string().required(REQUIRED_ERROR_MSG),
-                beginTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
-                endTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
-            })
+                    from: yup.string().required(REQUIRED_ERROR_MSG),
+                    to: yup.string().required(REQUIRED_ERROR_MSG),
+                    beginTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
+                    endTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
+                })
             )
             .required()
             .min(1, MIN_LENGTH_REQUIRED_MSG("arrival calendar")),
@@ -92,7 +92,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                                             value: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG)
                                         })
                                     )
-                                    // .min(2, "At least two required parameters should be provided")
+                                // .min(2, "At least two required parameters should be provided")
                             })
                         )
                         .min(1, MIN_LENGTH_REQUIRED_MSG("allocated resource"))
@@ -129,9 +129,70 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                             })
                         )
                 })
+            ),
+        batch_processing: yup.array()
+            .of(
+                yup.object().shape({
+                    task_id: yup.string().required(REQUIRED_ERROR_MSG),
+                    type: yup.string().required(REQUIRED_ERROR_MSG),
+                    batch_frequency: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG),
+                    size_distrib: yup.array()
+                        .of(
+                            yup.object().shape({
+                                key: yup.string().required(REQUIRED_ERROR_MSG),
+                                value: yup.number().required(REQUIRED_ERROR_MSG)
+                            })
+                        )
+                        .min(1, MIN_LENGTH_REQUIRED_MSG("size distribution"))
+                        .test(
+                            'sum',
+                            SUMMATION_ONE_MSG,
+                            (distrArr = []) => {
+                                const total = distrArr.reduce((acc, curr) => Number(acc) + Number(curr.value), 0)
+                                const rounded = round(total, 5)
+                                return rounded === 1;
+                            }
+                        )
+                        .uniqueKeyDistr(),
+                    duration_distrib: yup.array()
+                        .of(
+                            yup.object().shape({
+                                key: yup.string().required(REQUIRED_ERROR_MSG),
+                                value: yup.number().required(REQUIRED_ERROR_MSG)
+                            })
+                        )
+                        .min(1, MIN_LENGTH_REQUIRED_MSG("duration distribution"))
+                        .uniqueKeyDistr(),
+                    firing_rules: yup.array()
+                        .of(
+                            yup.array()
+                                .of((
+                                    yup.object().shape({
+                                        attribute: yup.string().required(REQUIRED_ERROR_MSG),
+                                        comparison: yup.string().required(REQUIRED_ERROR_MSG),
+                                        // string for weekday and numeric string for all others
+                                        value: yup.lazy(value => {
+                                            const stringOrNumber = yup.string().when("attribute", {
+                                                is: (value: string) => value === "week_day",
+                                                then: (schema) => schema,               // string is the only limitation (it can contain everything)
+                                                otherwise: (schema) => schema.integer() // string can contain only digit numbers
+                                            })
+                                            const oneValueSchema = stringOrNumber.required(REQUIRED_ERROR_MSG)
+
+                                            return Array.isArray(value)
+                                                ? yup.array().of(oneValueSchema)
+                                                    .min(2, "Cannot be empty")
+                                                : oneValueSchema
+                                        })
+                                    })
+                                ) as any)
+                                .uniqueAttributes()
+                        )
+                })
             )
+            .uniqueTaskBatching()
     })), []);
-    
+
     const formState = useForm<JsonData>({
         resolver: yupResolver(taskValidationSchema),
         mode: "onBlur" // validate on blur
@@ -178,7 +239,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
             }
 
             const defaultResourceCalendars = defaultTemplateSchedule(false)
-            
+
             const updData = {
                 task_resource_distribution: mappedTasksFromModel,
                 resource_calendars: [defaultResourceCalendars],
@@ -187,6 +248,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                 arrival_time_calendar: defaultArrivalCalendarArr,
                 resource_profiles: defaultResourceProfiles(defaultResourceCalendars.id),
                 event_distribution: mappedEvents,
+                batch_processing: []
             }
             setData(updData)
         }

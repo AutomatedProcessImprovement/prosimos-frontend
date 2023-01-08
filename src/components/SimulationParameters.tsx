@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import moment from 'moment';
 import { useTheme } from '@material-ui/core/styles';
 import { AlertColor, Badge, Button, ButtonGroup, Grid, Step, StepButton, StepIcon, Stepper, Theme } from '@mui/material';
-import { ScenarioProperties } from './formData';
+import { BatchProcessing, FiringRule, JsonData, ScenarioProperties } from './formData';
 import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
 import ResourcePools from './ResourcePools';
 import ResourceCalendars from './ResourceCalendars';
@@ -32,6 +32,8 @@ import { useInterval } from 'usehooks-ts'
 import Tooltip from '@mui/material/Tooltip';
 import AllIntermediateEvents from './interEvents/AllIntermediateEvents'
 import EventIcon from '@mui/icons-material/Event';
+import AllBatching from './batching/AllBatching';
+import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
 
 const useStyles = makeStyles( (theme: Theme) => ({
     simParamsGrid: {
@@ -45,6 +47,17 @@ const useStyles = makeStyles( (theme: Theme) => ({
     }
 }));
 
+const enum TABS {
+    CASE_CREATION,
+    RESOURCE_CALENDARS,
+    RESOURCES,
+    RESOURCE_ALLOCATION,
+    BRANCHING_PROB,
+    INTERMEDIATE_EVENTS,
+    BATCHING,
+    SIMULATION_RESULTS
+}
+
 const tabs_name : { [key: string]: string } = {
     CASE_CREATION: "Case Creation",
     RESOURCE_CALENDARS: "Resource Calendars",
@@ -52,6 +65,7 @@ const tabs_name : { [key: string]: string } = {
     RESOURCE_ALLOCATION: "Resource Allocation",
     BRANCHING_PROB: "Branching Probabilities",
     INTERMEDIATE_EVENTS: "Intermediate Events",
+    BATCHING: "Batching",
     SIMULATION_RESULTS: "Simulation Results"
 };
 
@@ -68,6 +82,8 @@ const tooltip_desc: { [key: string]: string } = {
         "Represents the probability for the process execution to move towards any outgoing flow of each split (inclusive or exclusive) gateway in the process model",
     INTERMEDIATE_EVENTS:
         "Represents the probability for intermediate events present in the business process model",
+    BATCHING:
+        "Represents the setup needed in order to execute the task in a batched way",
     SIMULATION_RESULTS: "",
 }
 
@@ -137,11 +153,7 @@ const SimulationParameters = () => {
         if (missedElemNum > 0) {
             setInfoMessage(`${missedElemNum} elements from config were ignored due to its absence in the BPMN model.`)
         }
-    }, [missedElemNum])
-
-    const handleStep = (index: number) => () => {
-        setActiveStep(index)
-    };
+    }, [missedElemNum]);
 
     const setErrorMessage = (value: string) => {
         setSnackColor("error")
@@ -171,7 +183,7 @@ const SimulationParameters = () => {
                         setCurrSimulatedOutput(dataJson.TaskResponse )
                         
                         // redirect to results step
-                        setActiveStep(5)
+                        setActiveStep(TABS.SIMULATION_RESULTS)
 
                         // hide info message
                         onSnackbarClose()
@@ -196,51 +208,131 @@ const SimulationParameters = () => {
     );
 
     const onDownload = () => {
-        const blob = fromContentToBlob(getValues())
-        const fileDownloadUrl = URL.createObjectURL(blob);
+        const blob = getBlobBasedOnExistingInput()
+        const fileDownloadUrl = URL.createObjectURL(blob)
         setFileDownloadUrl(fileDownloadUrl)
+    };
+
+    const getBlobBasedOnExistingInput = (): Blob => {
+        const values = getValues()
+        const newTransformedValues = transform_between_operations(values)
+        const blob = fromContentToBlob(newTransformedValues)
+
+        return blob
+    };
+
+    const transform_between_operations = (values: JsonData) => {
+        const copiedValues = JSON.parse(JSON.stringify(values))
+        const batching_info = copiedValues.batch_processing // array per task
+
+        batching_info.forEach((element: BatchProcessing) => {
+            _transform_between_operators_per_task(element.firing_rules)
+        })
+
+        return copiedValues
+    };
+
+    const _groupByEligibleForBetweenAndNot = (result: [FiringRule[], FiringRule[], FiringRule[]], current: FiringRule): [FiringRule[], FiringRule[], FiringRule[]] => {
+        const [ready_res, large_res, others] = result
+        if (current.comparison === "between") {
+            if (current.attribute === "ready_wt") {
+                ready_res.push(current)
+            }
+            else if (current.attribute === "ready_wt") {
+                large_res.push(current)
+            }
+        } else {
+            others.push(current)
+        }
+    
+        return [ready_res, large_res, others]
+    }
+
+    const _transform_between_operators_per_task = (curr_task_batch_rules: FiringRule[][]) => {
+        for (var or_rule_index in curr_task_batch_rules) {
+            const curr_and_rules = curr_task_batch_rules[or_rule_index]
+            const [ready_wt_rules, large_wt_rules, others] = curr_and_rules.reduce(_groupByEligibleForBetweenAndNot, [[], [], []] as [FiringRule[], FiringRule[], FiringRule[]])
+            let new_ready_rules : FiringRule[] | undefined = undefined
+            let new_large_rules : FiringRule[] | undefined = undefined
+            if (ready_wt_rules.length > 0) {
+                // expect one BETWEEN rule
+                const values = (ready_wt_rules[0]!.value as string[]).map(x =>  Number(x))
+
+                const min_value = Math.min(...values)
+                const max_value = Math.max(...values)
+                const attr = ready_wt_rules[0].attribute
+                
+                new_ready_rules = [
+                    { attribute: attr, comparison: ">=", value: String(min_value) } as FiringRule, 
+                    { attribute: attr, comparison: "<=", value: String(max_value) } as FiringRule
+                ]
+            }
+            else if (large_wt_rules.length > 0) {
+                // expect two AND rules here
+                const values = ready_wt_rules.map(x =>  Number(x.value))
+                const min_value = Math.min(...values)
+                const max_value = Math.max(...values)
+                const attr = ready_wt_rules[0].attribute
+                
+                new_ready_rules = [
+                    { attribute: attr, comparison: ">=", value: String(min_value) } as FiringRule, 
+                    { attribute: attr, comparison: "<=", value: String(max_value) } as FiringRule
+                ]
+            }
+
+            curr_task_batch_rules[or_rule_index] = [
+                ...others,
+                ...(new_ready_rules ? new_ready_rules : []),
+                ...(new_large_rules ? new_large_rules : [])
+            ]
+        }
     };
 
     const onSnackbarClose = () => {
         setErrorMessage("")
     };
 
-    const getStepContent = (index: number) => {
+    const getStepContent = (index: TABS) => {
         switch (index) {
-            case 0:
+            case TABS.CASE_CREATION:
                 return <CaseCreation
                     scenarioFormState={scenarioState}
                     jsonFormState={formState}
                     setErrorMessage={setErrorMessage}
                 />
-            case 1:
+            case TABS.RESOURCE_CALENDARS:
                 return <ResourceCalendars
                     formState={formState}
                     setErrorMessage={setErrorMessage}
                 />
-            case 2:
+            case TABS.RESOURCES:
                 return <ResourcePools
                     formState={formState}
                     setErrorMessage={setErrorMessage}
                 />
-            case 3:
+            case TABS.RESOURCE_ALLOCATION:
                 return <ResourceAllocation
                     tasksFromModel={tasksFromModel}
                     formState={formState}
                     setErrorMessage={setErrorMessage}
                 />
-            case 4:
+            case TABS.BRANCHING_PROB:
                 return <AllGatewaysProbabilities
                     formState={formState}
                     gateways={gateways}
                 />
-            case 5:
+            case TABS.INTERMEDIATE_EVENTS:
                 return <AllIntermediateEvents
                     formState={formState}
                     setErrorMessage={setErrorMessage}
                     eventsFromModel={eventsFromModel}
                 />
-            case 6:
+            case TABS.BATCHING:
+                return <AllBatching
+                    tasksFromModel={tasksFromModel}
+                    formState={formState}
+                    setErrorMessage={setErrorMessage} />
+            case TABS.SIMULATION_RESULTS:
                 if (!!currSimulatedOutput)
                     return <SimulationResults
                         output={currSimulatedOutput}
@@ -250,7 +342,7 @@ const SimulationParameters = () => {
         }
     };
     
-    const getStepIcon = (index: number): React.ReactNode => {
+    const getStepIcon = (index: TABS): React.ReactNode => {
         const isActiveStep = activeStep === index
         const styles = isActiveStep ? { color: activeColor } : {}
 
@@ -258,31 +350,35 @@ const SimulationParameters = () => {
         let currError: any
         let lastStep = false
         switch (index) {
-            case 0:
+            case TABS.CASE_CREATION:
                 currError = errors.arrival_time_calendar || errors.arrival_time_distribution || scenarioErrors
                 Icon = <SettingsIcon style={styles}/>
                 break
-            case 1:
+            case TABS.RESOURCE_CALENDARS:
                 currError = errors.resource_calendars
                 Icon = <DateRangeIcon style={styles}/> 
                 break
-            case 2:
+            case TABS.RESOURCES:
                 currError = errors.resource_profiles
                 Icon =  <GroupsIcon style={styles}/>
                 break
-            case 3:
+            case TABS.RESOURCE_ALLOCATION:
                 currError = errors.task_resource_distribution
                 Icon = <AssignmentIndIcon style={styles}/>
                 break
-            case 4:
+            case TABS.BRANCHING_PROB:
                 currError = errors.gateway_branching_probabilities
                 Icon = <CallSplitIcon style={styles}/>
                 break
-            case 5:
+            case TABS.INTERMEDIATE_EVENTS:
                 currError = errors.event_distribution
                 Icon = <EventIcon style={styles}/>
                 break
-            case 6:
+            case TABS.BATCHING:
+                currError = errors.batch_processing
+                Icon = <DynamicFeedIcon style={styles}/>
+                break
+            case TABS.SIMULATION_RESULTS:
                 lastStep = true
                 Icon = <BarChartIcon style={styles}/>
                 break
@@ -329,10 +425,10 @@ const SimulationParameters = () => {
             return;
         }
 
-        const newJsonFile = fromContentToBlob(getValues())
+        const newBlob = getBlobBasedOnExistingInput()
         const { num_processes: numProcesses, start_date: startDate } = getScenarioValues()
 
-        simulate(startDate, numProcesses, newJsonFile, bpmnFile)
+        simulate(startDate, numProcesses, newBlob, bpmnFile)
             .then(((result: any) => {
                 const dataJson = result.data
                 setPendingTaskId(dataJson.TaskId)
@@ -396,7 +492,7 @@ const SimulationParameters = () => {
 
                                 return <Step key={label}>
                                     <Tooltip title={tooltip_desc[key]}>
-                                        <StepButton color="inherit" onClick={handleStep(indexNum)} icon={getStepIcon(indexNum)}>
+                                        <StepButton color="inherit" onClick={() => setActiveStep(indexNum)} icon={getStepIcon(indexNum)}>
                                             {label}
                                         </StepButton>
                                     </Tooltip>

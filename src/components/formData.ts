@@ -6,6 +6,27 @@ export interface JsonData {
     task_resource_distribution: TaskResourceDistribution[]
     resource_calendars: ResourceCalendar[]
     event_distribution: EventDistribution[]
+    batch_processing: BatchProcessing[]
+}
+
+export interface BatchProcessing {
+    task_id: string
+    type: string
+    batch_frequency: number
+    firing_rules: FiringRule[][]
+    size_distrib: BatchDistrib[]
+    duration_distrib: BatchDistrib[]
+}
+
+export interface BatchDistrib {
+    key: string
+    value: number
+}
+
+export interface FiringRule {
+    attribute: string
+    comparison: string
+    value: string | string[]
 }
 
 export interface GatewayBranchingProbability {
