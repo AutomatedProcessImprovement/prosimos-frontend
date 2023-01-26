@@ -43,11 +43,11 @@ const EventCard = (props: EventCardProps) => {
     }, [currentField, eventIdKey])
 
     useEffect(() => {
-        if (eventsFromModel && Object.keys(eventsFromModel).includes(eventIdKey)) {
+        if (eventsFromModel && eventsFromModel.isKeyExisting(eventIdKey)) {
             // checking the edge case
             // double verifying that event with this id exists in the model
             // if yes, update the state with event label
-            setEventLabel(eventsFromModel[eventIdKey].name)
+            setEventLabel(eventsFromModel.getNameByKey(eventIdKey))
         }
     }, [eventsFromModel, eventIdKey])
 

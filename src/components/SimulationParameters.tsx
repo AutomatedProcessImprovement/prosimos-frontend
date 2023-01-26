@@ -34,6 +34,7 @@ import AllIntermediateEvents from './interEvents/AllIntermediateEvents'
 import EventIcon from '@mui/icons-material/Event';
 import AllBatching from './batching/AllBatching';
 import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
+import { Dictionary } from './modelData';
 
 const useStyles = makeStyles( (theme: Theme) => ({
     simParamsGrid: {
@@ -47,7 +48,7 @@ const useStyles = makeStyles( (theme: Theme) => ({
     }
 }));
 
-const enum TABS {
+enum TABS {
     CASE_CREATION,
     RESOURCE_CALENDARS,
     RESOURCES,
@@ -135,7 +136,41 @@ const SimulationParameters = () => {
     const { formState: { errors, isValid, isSubmitted, submitCount }, getValues, handleSubmit } = formState
     const [ isScenarioParamsValid, setIsScenarioParamsValid ] = useState(true)
 
+    const [ visibleTabs, setVisibleTabs ] = useState(new Dictionary<string>())
+    const [ isEventsTabHidden, setIsEventsTabHidden ] = useState<boolean | undefined>(undefined)
+
     const { onUploadNewModel } = useNewModel()
+
+    useEffect(() => {
+        if (eventsFromModel === undefined)
+            return
+
+        const areEventsEmpty = eventsFromModel.isEmpty()
+        if (areEventsEmpty !== isEventsTabHidden) {
+            setIsEventsTabHidden(areEventsEmpty)
+        }
+    }, [eventsFromModel])
+
+    useEffect(() => {
+        if (isEventsTabHidden === undefined || !visibleTabs.isEmpty()) {
+            // skip initialization if
+            // 1) no information yet loaded
+            // 2) we already have a final array
+            return 
+        }
+
+        const newVisibleTabs = Object.entries(tabs_name).reduce((acc: Dictionary<string>, [key, value]: any) => {
+            if (key === TABS[TABS.INTERMEDIATE_EVENTS] && isEventsTabHidden) {
+                // section is hidden, we don't add it to the general list
+                return acc
+            }
+
+            acc.add(key, value)
+            return acc
+        }, new Dictionary<string>())
+
+        setVisibleTabs(newVisibleTabs)
+    }, [isEventsTabHidden, visibleTabs])
 
     // validate both forms: scenatio params and json fields
     useEffect(() => {
@@ -215,18 +250,18 @@ const SimulationParameters = () => {
 
     const getBlobBasedOnExistingInput = (): Blob => {
         const values = getValues()
-        const newTransformedValues = transform_between_operations(values)
+        const newTransformedValues = transformBetweenOperations(values)
         const blob = fromContentToBlob(newTransformedValues)
 
         return blob
     };
 
-    const transform_between_operations = (values: JsonData) => {
+    const transformBetweenOperations = (values: JsonData) => {
         const copiedValues = JSON.parse(JSON.stringify(values))
         const batching_info = copiedValues.batch_processing // array per task
 
         batching_info.forEach((element: BatchProcessing) => {
-            _transform_between_operators_per_task(element.firing_rules)
+            _transformBetweenOperatorsPerTask(element.firing_rules)
         })
 
         return copiedValues
@@ -248,7 +283,7 @@ const SimulationParameters = () => {
         return [ready_res, large_res, others]
     }
 
-    const _transform_between_operators_per_task = (curr_task_batch_rules: FiringRule[][]) => {
+    const _transformBetweenOperatorsPerTask = (curr_task_batch_rules: FiringRule[][]) => {
         for (var or_rule_index in curr_task_batch_rules) {
             const curr_and_rules = curr_task_batch_rules[or_rule_index]
             const [ready_wt_rules, large_wt_rules, others] = curr_and_rules.reduce(_groupByEligibleForBetweenAndNot, [[], [], []] as [FiringRule[], FiringRule[], FiringRule[]])
@@ -487,7 +522,7 @@ const SimulationParameters = () => {
                     </Grid>
                     <Grid item container xs={12} className={classes.stepperGrid} alignItems="center" justifyContent="center" >
                         <Stepper className={classes.stepper} nonLinear alternativeLabel activeStep={activeStep} connector={<></>}>
-                            {Object.entries(Object.entries(tabs_name)).map(([indexStr, [key, label]]) => {
+                            {Object.entries(Object.entries(visibleTabs.getAllItems())).map(([indexStr, [key, label]]) => {
                                 const indexNum = Number(indexStr)
 
                                 return <Step key={label}>

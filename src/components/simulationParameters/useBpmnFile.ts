@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import BpmnModdle from "bpmn-moddle";
 import BpmnModeler from "bpmn-js/lib/Modeler";
-import { AllModelTasks, EventsFromModel, Gateways, SequenceElements } from '../modelData';
+import { AllModelTasks, EventsFromModel, Gateways, SequenceElements, EventDetails } from '../modelData';
 
 const useBpmnFile = (bpmnFile: any) => {
     const [xmlData, setXmlData] = useState<string>("")
@@ -92,17 +92,13 @@ const useBpmnFile = (bpmnFile: any) => {
                         }
                     }, {} as Gateways)
                 setGateways(gateways)
-                
+
                 const eventsFromModel = elementRegistry
                     .filter((e: { type: string; }) => e.type === 'bpmn:IntermediateCatchEvent')
                     .reduce((acc: EventsFromModel, t: any) => {
-                        const new_acc = {
-                            ...acc,
-                            [t.id]: { name: t.businessObject?.name }
-                        } as EventsFromModel
-
-                        return new_acc
-                    }, {} as EventsFromModel)
+                        acc.add(t.id, new EventDetails({ name: t.businessObject?.name ?? ""}))
+                        return acc
+                    }, new EventsFromModel())
                 
                 setEventsFromModel(eventsFromModel)
             }

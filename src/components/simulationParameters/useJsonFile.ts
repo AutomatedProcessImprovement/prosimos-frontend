@@ -40,7 +40,7 @@ const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
  * If an event exists in json but not in BPMN   - we ignore it and show the warning.
  */
 const getMergeEventsList = (eventsFromModel: EventsFromModel, eventsConfig: any) => {
-    const eventsArr = Object.keys(eventsFromModel)
+    const eventsArr = eventsFromModel.getAllKeys()
     if (eventsArr.length === 0) {
         // no events in the BPMN model
         const events_config_num = eventsConfig ? eventsConfig.length : 0
