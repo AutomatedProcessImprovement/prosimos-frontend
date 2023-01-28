@@ -468,8 +468,9 @@ const SimulationParameters = () => {
                     </Grid>
                     <Grid item container xs={12} className={classes.stepperGrid} alignItems="center" justifyContent="center" >
                         <Stepper className={classes.stepper} nonLinear alternativeLabel activeStep={activeStep} connector={<></>}>
-                            {Object.entries(Object.entries(visibleTabs.getAllItems())).map(([indexStr, [key, label]]) => {
-                                const indexNum = Number(indexStr)
+                            {Object.entries(visibleTabs.getAllItems()).map(([key, label]: [string, string]) => {
+                                const keyEnum = key as keyof typeof TABS
+                                const indexNum = TABS[keyEnum]
 
                                 return <Step key={label}>
                                     <Tooltip title={tooltip_desc[key]}>
