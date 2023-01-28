@@ -1,7 +1,7 @@
 import * as yup from "yup";
 import { AnyObject, Maybe } from "yup/lib/types";
 import moment from "moment";
-import { UNIQUE_KEYS } from "./components/validationMessages";
+import { REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, UNIQUE_KEYS } from "./components/validationMessages";
 
 const isStrArrUnique = (wordsArr: string[] | undefined): boolean => {
   // returns whether the provided array of string contains only unique words
@@ -75,6 +75,18 @@ yup.addMethod(yup.array, "uniqueKeyDistr", function () {
     )
   });
 });
+
+export const distributionValidation = {
+  distribution_name: yup.string().required(REQUIRED_ERROR_MSG),
+  distribution_params: yup.array()
+      .of(
+          yup.object().shape({
+              value: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG)
+          })
+      )
+      .required()
+      .min(2, "At least two required parameters should be provided")
+}
 
 declare module "yup" {
   interface StringSchema<

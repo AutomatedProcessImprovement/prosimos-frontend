@@ -7,6 +7,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, SUMMATION_ONE_MSG, INVALID_TIME_FORMAT } from "./../validationMessages";
 import { round } from "../../helpers/timeConversions";
+import { distributionValidation } from "../../yup-extended";
 
 const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsFromModel?: EventsFromModel, jsonData?: JsonData) => {
     const [data, setData] = useState({})
@@ -32,17 +33,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                 })
             )
             .min(1, MIN_LENGTH_REQUIRED_MSG("resource profile")),
-        arrival_time_distribution: yup.object().shape({
-            distribution_name: yup.string().required(REQUIRED_ERROR_MSG),
-            distribution_params: yup.array()
-                .of(
-                    yup.object().shape({
-                        value: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG)
-                    })
-                )
-                .required()
-                .min(2, "At least two required parameters should be provided")
-        }),
+        arrival_time_distribution: yup.object().shape(distributionValidation),
         arrival_time_calendar: yup.array()
             .of(
                 yup.object().shape({
@@ -85,14 +76,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                         .of(
                             yup.object().shape({
                                 resource_id: yup.string().required(REQUIRED_ERROR_MSG),
-                                distribution_name: yup.string().required(REQUIRED_ERROR_MSG),
-                                distribution_params: yup.array()
-                                    .of(
-                                        yup.object().shape({
-                                            value: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG)
-                                        })
-                                    )
-                                // .min(2, "At least two required parameters should be provided")
+                                ...distributionValidation
                             })
                         )
                         .min(1, MIN_LENGTH_REQUIRED_MSG("allocated resource"))
@@ -121,13 +105,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
             .of(
                 yup.object().shape({
                     event_id: yup.string().required(REQUIRED_ERROR_MSG),
-                    distribution_name: yup.string().required(REQUIRED_ERROR_MSG),
-                    distribution_params: yup.array()
-                        .of(
-                            yup.object().shape({
-                                value: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG)
-                            })
-                        )
+                    ...distributionValidation
                 })
             ),
         batch_processing: yup.array()
@@ -190,7 +168,31 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                         )
                 })
             )
-            .uniqueTaskBatching()
+            .uniqueTaskBatching(),
+        case_attributes: yup.array()
+            .of(
+                yup.object().shape({
+                    name: yup.string().required(REQUIRED_ERROR_MSG),
+                    type: yup.string().required(REQUIRED_ERROR_MSG),
+                    values: yup.mixed().when('type', (type, schema) => {
+                        console.log(type, schema)
+                        switch(type) {
+                            case "discrete":
+                                schema = yup.object().shape(distributionValidation)
+                                break
+                            case "continuous":
+                                schema = yup.array().of(
+                                    yup.object().shape({
+                                        key: yup.string().required(REQUIRED_ERROR_MSG),
+                                        value: yup.number().required(REQUIRED_ERROR_MSG)
+                                    })
+                                )
+                                break
+                        }
+                        return schema
+                    })
+                })
+            )
     })), []);
 
     const formState = useForm<JsonData>({
