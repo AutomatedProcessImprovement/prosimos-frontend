@@ -229,7 +229,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
 
             let mappedEvents: EventDistribution[] = []
             if (eventsFromModel !== undefined) {
-                const eventIdsArr = Object.keys(eventsFromModel)
+                const eventIdsArr = eventsFromModel.getAllKeys()
                 mappedEvents = eventIdsArr.map((eventId) => {
                     return {
                         event_id: eventId,

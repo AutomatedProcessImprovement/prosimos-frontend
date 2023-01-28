@@ -34,6 +34,7 @@ import AllIntermediateEvents from './interEvents/AllIntermediateEvents'
 import EventIcon from '@mui/icons-material/Event';
 import AllBatching from './batching/AllBatching';
 import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
+import useTabVisibility, {TABS} from './simulationParameters/useTabVisibility';
 
 const useStyles = makeStyles( (theme: Theme) => ({
     simParamsGrid: {
@@ -46,28 +47,6 @@ const useStyles = makeStyles( (theme: Theme) => ({
         "& .Mui-active": { color: theme.palette.info.dark }
     }
 }));
-
-const enum TABS {
-    CASE_CREATION,
-    RESOURCE_CALENDARS,
-    RESOURCES,
-    RESOURCE_ALLOCATION,
-    BRANCHING_PROB,
-    INTERMEDIATE_EVENTS,
-    BATCHING,
-    SIMULATION_RESULTS
-}
-
-const tabs_name : { [key: string]: string } = {
-    CASE_CREATION: "Case Creation",
-    RESOURCE_CALENDARS: "Resource Calendars",
-    RESOURCES: "Resources",
-    RESOURCE_ALLOCATION: "Resource Allocation",
-    BRANCHING_PROB: "Branching Probabilities",
-    INTERMEDIATE_EVENTS: "Intermediate Events",
-    BATCHING: "Batching",
-    SIMULATION_RESULTS: "Simulation Results"
-};
 
 const tooltip_desc: { [key: string]: string } = {
     CASE_CREATION: 
@@ -134,6 +113,8 @@ const SimulationParameters = () => {
     const { formState } = useFormState(tasksFromModel, gateways, eventsFromModel, jsonData)
     const { formState: { errors, isValid, isSubmitted, submitCount }, getValues, handleSubmit } = formState
     const [ isScenarioParamsValid, setIsScenarioParamsValid ] = useState(true)
+
+    const { visibleTabs } = useTabVisibility(eventsFromModel)
 
     const { onUploadNewModel } = useNewModel()
 
@@ -215,18 +196,18 @@ const SimulationParameters = () => {
 
     const getBlobBasedOnExistingInput = (): Blob => {
         const values = getValues()
-        const newTransformedValues = transform_between_operations(values)
+        const newTransformedValues = transformBetweenOperations(values)
         const blob = fromContentToBlob(newTransformedValues)
 
         return blob
     };
 
-    const transform_between_operations = (values: JsonData) => {
+    const transformBetweenOperations = (values: JsonData) => {
         const copiedValues = JSON.parse(JSON.stringify(values))
         const batching_info = copiedValues.batch_processing // array per task
 
         batching_info.forEach((element: BatchProcessing) => {
-            _transform_between_operators_per_task(element.firing_rules)
+            _transformBetweenOperatorsPerTask(element.firing_rules)
         })
 
         return copiedValues
@@ -248,7 +229,7 @@ const SimulationParameters = () => {
         return [ready_res, large_res, others]
     }
 
-    const _transform_between_operators_per_task = (curr_task_batch_rules: FiringRule[][]) => {
+    const _transformBetweenOperatorsPerTask = (curr_task_batch_rules: FiringRule[][]) => {
         for (var or_rule_index in curr_task_batch_rules) {
             const curr_and_rules = curr_task_batch_rules[or_rule_index]
             const [ready_wt_rules, large_wt_rules, others] = curr_and_rules.reduce(_groupByEligibleForBetweenAndNot, [[], [], []] as [FiringRule[], FiringRule[], FiringRule[]])
@@ -487,7 +468,7 @@ const SimulationParameters = () => {
                     </Grid>
                     <Grid item container xs={12} className={classes.stepperGrid} alignItems="center" justifyContent="center" >
                         <Stepper className={classes.stepper} nonLinear alternativeLabel activeStep={activeStep} connector={<></>}>
-                            {Object.entries(Object.entries(tabs_name)).map(([indexStr, [key, label]]) => {
+                            {Object.entries(Object.entries(visibleTabs.getAllItems())).map(([indexStr, [key, label]]) => {
                                 const indexNum = Number(indexStr)
 
                                 return <Step key={label}>
