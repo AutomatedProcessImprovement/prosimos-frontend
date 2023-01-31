@@ -9,6 +9,7 @@ export enum TABS {
     BRANCHING_PROB,
     INTERMEDIATE_EVENTS,
     BATCHING,
+    CASE_ATTRIBUTES,
     SIMULATION_RESULTS
 }
 
@@ -20,6 +21,7 @@ const tabsName : { [key: string]: string } = {
     BRANCHING_PROB: "Branching Probabilities",
     INTERMEDIATE_EVENTS: "Intermediate Events",
     BATCHING: "Batching",
+    CASE_ATTRIBUTES: "Case Attributes",
     SIMULATION_RESULTS: "Simulation Results"
 };
 
