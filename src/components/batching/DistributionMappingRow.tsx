@@ -12,6 +12,7 @@ interface DistributionMappingRowProps {
     onDelete?: (index: number) => void
     rowIndex: number
     valueLabel: string
+    keyTextFieldProps: { label: string, type: string }
 }
 
 const getPathWithoutSpecificAttr = (specificPath: string) => {
@@ -35,12 +36,18 @@ const DistributionMappingRow = (props: DistributionMappingRowProps) => {
                 currLocalErrors = currLocalErrors?.[key];
             })
             const finalErrors = currLocalErrors
-    
+
             if (finalErrors !== undefined) {
                 if (finalErrors.type === "sum") {
                     setValueErrors(finalErrors)
                 } else if (finalErrors.type === "unique") {
                     setKeyErrors(finalErrors)
+                } else {
+                    // empty key field
+                    const keySpecificError = (((finalErrors || {})[rowIndex] || {})["key"] || {})
+                    if (keySpecificError?.message) {
+                        setKeyErrors(keySpecificError)
+                    }
                 }
             }
         }
@@ -80,8 +87,7 @@ const DistributionMappingRow = (props: DistributionMappingRowProps) => {
                                 error={!!(keyErrors as any)?.message}
                                 helperText={(keyErrors as any)?.message}
                                 variant="standard"
-                                label="Batch Size"
-                                type="number"
+                                {...props.keyTextFieldProps}
                             />
                         )
                     }}

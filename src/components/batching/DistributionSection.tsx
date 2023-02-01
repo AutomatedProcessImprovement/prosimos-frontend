@@ -33,7 +33,7 @@ const DistributionSection = (props: DistributionSectionProps) => {
             value: 0.5
         } as BatchDistrib)
     };
-    
+
     return (
         <Grid item container xs={6}>
             <Grid item container xs={12}>
@@ -49,13 +49,16 @@ const DistributionSection = (props: DistributionSectionProps) => {
             </Grid>
             <DistributionMappingWithAdd
                 formState={props.formState}
-                taskIndex={taskIndex}
                 objectFieldNamePart={objectFieldNamePart}
                 valueLabel={valueLabel}
                 isRowAdded={isRowAdded}
                 setIsRowAdded={setIsRowAdded}
                 fields={fields}
                 remove={remove}
+                keyTextFieldProps={{
+                    label: "Batch Size",
+                    type: "number"
+                }}
             />
         </Grid>
     );
