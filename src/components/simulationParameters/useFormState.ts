@@ -175,18 +175,27 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                     name: yup.string().required(REQUIRED_ERROR_MSG),
                     type: yup.string().required(REQUIRED_ERROR_MSG),
                     values: yup.mixed().when('type', (type, schema) => {
-                        console.log(type, schema)
-                        switch(type) {
-                            case "discrete":
+                        switch (type) {
+                            case "continuous":
                                 schema = yup.object().shape(distributionValidation)
                                 break
-                            case "continuous":
+                            case "discrete":
                                 schema = yup.array().of(
                                     yup.object().shape({
                                         key: yup.string().required(REQUIRED_ERROR_MSG),
                                         value: yup.number().required(REQUIRED_ERROR_MSG)
                                     })
                                 )
+                                    .test(
+                                        'sum',
+                                        SUMMATION_ONE_MSG,
+                                        (probs = []) => {
+                                            const total = probs.reduce((acc, curr) => Number(acc) + Number(curr.value), 0)
+                                            const rounded = round(total, 5)
+                                            console.log(total)
+                                            return rounded === 1;
+                                        }
+                                    )
                                 break
                         }
                         return schema

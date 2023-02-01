@@ -1,24 +1,20 @@
 import { Grid, Typography } from "@mui/material";
 import { useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
-import { BatchDistrib, JsonData } from "../formData";
+import DistributionMappingWithAdd from "../batching/DistributionMappingWithAdd";
+import { AllowedDistrParamsName } from "../batching/DistributionSection";
+import { JsonData } from "../formData";
 import AddButtonBase from "../toolbar/AddButtonBase";
-import DistributionMappingWithAdd from "./DistributionMappingWithAdd";
 
-export type AllowedDistrParamsName = `batch_processing.${number}.duration_distrib`
-    | `batch_processing.${number}.size_distrib`
-    | `case_attributes.${number}.values`
-
-interface DistributionSectionProps {
-    sectionLabel: string
+interface DiscreteValueOptionsProps {
     formState: UseFormReturn<JsonData, object>
-    objectFieldNamePart: AllowedDistrParamsName
-    taskIndex: number
-    valueLabel: string
+    // setErrorMessage: (value: string) => void
+    itemIndex: number
 }
 
-const DistributionSection = (props: DistributionSectionProps) => {
-    const { sectionLabel, formState: { control: formControl }, taskIndex, objectFieldNamePart, valueLabel } = props
+const DiscreteValueOptions = (props: DiscreteValueOptionsProps) => {
+    const { formState: { control: formControl }, itemIndex } = props
+    const objectFieldNamePart = `case_attributes.${itemIndex}.values` as AllowedDistrParamsName
     const [isRowAdded, setIsRowAdded] = useState(false)
 
     const { fields, append, remove } = useFieldArray({
@@ -30,16 +26,16 @@ const DistributionSection = (props: DistributionSectionProps) => {
     const onTimePeriodAdd = () => {
         setIsRowAdded(true)
         append({
-            key: "1",
+            key: "Option's Name",
             value: 0.5
-        } as BatchDistrib)
+        })
     };
 
     return (
-        <Grid item container xs={6}>
+        <Grid item container xs={12}>
             <Grid item container xs={12}>
                 <Grid item xs={9}>
-                    <Typography variant="h6" align="left"> {sectionLabel} </Typography>
+                    <Typography variant="subtitle2" align="left"> Option List </Typography>
                 </Grid>
                 <Grid item xs={3}>
                     <AddButtonBase
@@ -51,18 +47,18 @@ const DistributionSection = (props: DistributionSectionProps) => {
             <DistributionMappingWithAdd
                 formState={props.formState}
                 objectFieldNamePart={objectFieldNamePart}
-                valueLabel={valueLabel}
+                valueLabel="Probability"
                 isRowAdded={isRowAdded}
                 setIsRowAdded={setIsRowAdded}
                 fields={fields}
                 remove={remove}
                 keyTextFieldProps={{
-                    label: "Batch Size",
-                    type: "number"
+                    label: "Value",
+                    type: "text"
                 }}
             />
         </Grid>
-    );
-};
+    )
+}
 
-export default DistributionSection;
+export default DiscreteValueOptions;

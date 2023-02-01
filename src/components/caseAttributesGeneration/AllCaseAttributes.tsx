@@ -1,8 +1,8 @@
 import { Grid } from "@mui/material"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { JsonData } from "../formData"
-import ContinuousCaseAttr from "./ContinuosCaseAttr"
 import DiscreteCaseAttr from "./DiscreteCaseAttr"
+import ContinuousCaseAttr from "./ContinuousCaseAttr"
 
 const CASE_ATTRIBUTES_PATH = "case_attributes"
 
@@ -21,24 +21,20 @@ const AllCaseAttributes = (props: AllCaseAttributesProps) => {
         name: `${CASE_ATTRIBUTES_PATH}`
     })
 
-    console.log(fields)
-
     const getCaseAttrComponent = (itemType: string, itemIndex: number): JSX.Element => {
-        let componentToReturn = <></>
-        switch(itemType) {
-            case "discrete":
-                componentToReturn = <DiscreteCaseAttr
-                    formState={props.formState}
-                    setErrorMessage={props.setErrorMessage}
-                    itemIndex={itemIndex}
-                />
-                break
-            case "continuous":
-                componentToReturn = <ContinuousCaseAttr/>
-                break
+        const ComponentToReturn = (({ "discrete": DiscreteCaseAttr, "continuous": ContinuousCaseAttr })[itemType] ?? undefined)
+
+        if (ComponentToReturn === undefined) {
+            return <div>Invalid type of a case attribute</div>
         }
 
-        return componentToReturn
+        return (
+            <ComponentToReturn
+                formState={props.formState}
+                setErrorMessage={props.setErrorMessage}
+                itemIndex={itemIndex}
+            />
+        )
     }
 
     return <Grid container item xs={12}>{

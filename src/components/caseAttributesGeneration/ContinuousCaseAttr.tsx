@@ -1,18 +1,17 @@
 import { Card, Grid, TextField, Typography } from "@mui/material";
-import { UseFormReturn, Controller, useFieldArray } from "react-hook-form";
+import { Controller, UseFormReturn } from "react-hook-form";
+import TimeDistribution from "../distributions/TimeDistribution";
 import { JsonData } from "../formData";
 import { REQUIRED_ERROR_MSG } from "../validationMessages";
-import DiscreteValueOptions from "./DiscreteValueOptions";
 
-interface DiscreteCaseAttrProps {
+interface ContinuousCaseAttrProps {
     formState: UseFormReturn<JsonData, object>
     setErrorMessage: (value: string) => void
     itemIndex: number
 }
 
-const DiscreteCaseAttr = (props: DiscreteCaseAttrProps) => {
-    const { formState, formState: { control: formControl }, setErrorMessage, itemIndex } = props
-
+const ContinuousCaseAttr = (props: ContinuousCaseAttrProps) => {
+    const { formState, formState: {control: formControl }, setErrorMessage, itemIndex } = props
     return (
         <Card elevation={5} sx={{ m: 1, p: 1, minHeight: "215px" }}>
             <Grid container item xs={12} sx={{ p: 1 }}>
@@ -38,15 +37,19 @@ const DiscreteCaseAttr = (props: DiscreteCaseAttrProps) => {
                     />
                 </Grid>
                 <Grid item xs={12} sx={{ mt: 2 }}>
-                    <DiscreteValueOptions
+                    <Typography variant="subtitle2" align="left">
+                        Value Distribution
+                    </Typography>
+                    <TimeDistribution
                         formState={formState}
-                        itemIndex={itemIndex}
+                        objectNamePath={`case_attributes.${itemIndex}.values`}
+                        // errors={currentErrors}
+                        setErrorMessage={setErrorMessage}
                     />
-
                 </Grid>
             </Grid>
         </Card>
     )
 }
 
-export default DiscreteCaseAttr;
+export default ContinuousCaseAttr;
