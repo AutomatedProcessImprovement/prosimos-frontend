@@ -12,7 +12,7 @@ const useBpmnFile = (bpmnFile: any) => {
     const getTargetTaskNameForGateway = (item: any, elementRegistry: any) => {
         let taskName = ""
         if (item.name === undefined) {
-            const flowObjId = item.targetRef.id
+            const flowObjId = (item.targetRef !== undefined) ? item.targetRef.id : item.target.id
             const el = elementRegistry._elements[flowObjId]?.element
             if (el?.type === "bpmn:Task") {
                 taskName = el.businessObject.name
@@ -53,27 +53,27 @@ const useBpmnFile = (bpmnFile: any) => {
 
                         return {
                             ...acc,
-                            [t.id]: { 
+                            [t.id]: {
                                 name: t.businessObject.name,
                                 resource: resourceName
-                            } 
+                            }
                         }
                     }, {})
                 setTasksFromModel(tasks)
-                
+
                 const gateways = elementRegistry
-                    .filter((e: { type: string; }) => 
+                    .filter((e: { type: string; }) =>
                         e.type === "bpmn:ExclusiveGateway" ||
                         e.type === "bpmn:InclusiveGateway"
                     )
-                    .reduce((acc: any, current: { id: any; businessObject: any, type: any }) => {
+                    .reduce((acc: any, current: { id: any; businessObject: any, type: any, outgoing?: any }) => {
                         const bObj = current.businessObject
                         if (bObj.gatewayDirection in ["Unspecified", "Converging"]) {
                             // ignore gateways with "Unspecified", "Converging" direction type
                             return acc
                         }
-
-                        const childs = bObj.outgoing.reduce((acc: {}, item: any) => {
+                        const outgoingPathes = (bObj.outgoing !== undefined) ? bObj.outgoing : current.outgoing
+                        const childs = outgoingPathes.reduce((acc: {}, item: any) => {
                             return {
                                 ...acc,
                                 [item.id]: {
@@ -96,10 +96,10 @@ const useBpmnFile = (bpmnFile: any) => {
                 const eventsFromModel = elementRegistry
                     .filter((e: { type: string; }) => e.type === 'bpmn:IntermediateCatchEvent')
                     .reduce((acc: EventsFromModel, t: any) => {
-                        acc.add(t.id, new EventDetails({ name: t.businessObject?.name ?? ""}))
+                        acc.add(t.id, new EventDetails({ name: t.businessObject?.name ?? "" }))
                         return acc
                     }, new EventsFromModel())
-                
+
                 setEventsFromModel(eventsFromModel)
             }
 
