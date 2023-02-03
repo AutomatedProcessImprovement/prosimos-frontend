@@ -206,9 +206,11 @@ const SimulationParameters = () => {
         const copiedValues = JSON.parse(JSON.stringify(values))
         const batching_info = copiedValues.batch_processing // array per task
 
-        batching_info.forEach((element: BatchProcessing) => {
-            _transformBetweenOperatorsPerTask(element.firing_rules)
-        })
+        if (batching_info !== undefined) {
+            batching_info.forEach((element: BatchProcessing) => {
+                _transformBetweenOperatorsPerTask(element.firing_rules)
+            })
+        }
 
         return copiedValues
     };
