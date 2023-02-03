@@ -6,11 +6,11 @@ import { REQUIRED_ERROR_MSG } from "../validationMessages";
 import DistrFuncSelect from "./DistrFuncSelect";
 import { DISTR_FUNC } from "./DistrFuncSelect"
 
-type AllowedObjectName = "arrival_time_distribution" 
+type AllowedObjectName = "arrival_time_distribution"
     | `task_resource_distribution.${number}.resources.${number}`
     | `event_distribution.${number}`
 
-type AllowedDistrParamsName = "arrival_time_distribution.distribution_params" 
+type AllowedDistrParamsName = "arrival_time_distribution.distribution_params"
     | `task_resource_distribution.${number}.resources.${number}.distribution_params`
     | `event_distribution.${number}.distribution_params`
 
@@ -25,15 +25,15 @@ interface TimeDistributionProps {
     funcLabel?: string
 }
 
-const distrFuncWithNumOfParams: { [key in DISTR_FUNC]: any [] } = {
-    [DISTR_FUNC.fix]: [0,0,1],
-    [DISTR_FUNC.norm]: new Array(2+2).fill(0),
-    [DISTR_FUNC.expon]: new Array(2+2).fill(0),
-    [DISTR_FUNC.exponnorm]: new Array(3+2).fill(0),
-    [DISTR_FUNC.uniform]: new Array(2+2).fill(0),
-    [DISTR_FUNC.gamma]: new Array(3+2).fill(0),
-    [DISTR_FUNC.triang]: new Array(3+2).fill(0),
-    [DISTR_FUNC.lognorm]: new Array(3+2).fill(0)
+const distrFuncWithNumOfParams: { [key in DISTR_FUNC]: any[] } = {
+    [DISTR_FUNC.fix]: [0, 0, 1],
+    [DISTR_FUNC.norm]: new Array(2 + 2).fill(0),
+    [DISTR_FUNC.expon]: new Array(2 + 2).fill(0),
+    [DISTR_FUNC.exponnorm]: new Array(3 + 2).fill(0),
+    [DISTR_FUNC.uniform]: new Array(2 + 2).fill(0),
+    [DISTR_FUNC.gamma]: new Array(3 + 2).fill(0),
+    [DISTR_FUNC.triang]: new Array(3 + 2).fill(0),
+    [DISTR_FUNC.lognorm]: new Array(3 + 2).fill(0)
 }
 
 const TimeDistribution = (props: TimeDistributionProps) => {
@@ -78,17 +78,17 @@ const TimeDistribution = (props: TimeDistributionProps) => {
         }
 
         const distrFunc = currSelectedFunc ?? newDistrFunc
-        
+
         if (distrFunc === DISTR_FUNC.triang && label === "Param 1") {
             if (num < 0 || num > 1)
                 setErrorMessage("Parameter 1 (shape parameter) should be in the range [0, 1]")
-            else 
+            else
                 onChange(num)
         } else {
             onChange(num)
         }
     };
-    
+
     return (
         <Grid container spacing={2}>
             <Grid container item xs={4}>
@@ -115,10 +115,10 @@ const TimeDistribution = (props: TimeDistributionProps) => {
                     const length = fields.length
                     switch (paramIndex) {
                         // give the name starting from the last element in the array
-                        case (length - 1): labelName = "Max"; break
-                        case (length - 2): labelName = "Min"; break
-                        case (length - 3): labelName = "Scale"; break
-                        case (length - 4): labelName = "Loc"; break
+                        case (length - 1): labelName = "Max (sec)"; break
+                        case (length - 2): labelName = "Min (sec)"; break
+                        case (length - 3): labelName = "Scale (sec)"; break
+                        case (length - 4): labelName = "Loc (sec)"; break
                     }
 
                     return (
@@ -127,10 +127,10 @@ const TimeDistribution = (props: TimeDistributionProps) => {
                                 name={`${objectNamePath}.distribution_params.${paramIndex}.value` as unknown as keyof JsonData}
                                 control={formControl}
                                 rules={{ required: REQUIRED_ERROR_MSG }}
-                                render={({ 
+                                render={({
                                     field: { onChange, value }
-                                 }) => {
-                                    const label = labelName || `Param ${paramIndex+1}`
+                                }) => {
+                                    const label = labelName || `Param ${paramIndex + 1}`
                                     return <TextField
                                         type="number"
                                         value={value}
