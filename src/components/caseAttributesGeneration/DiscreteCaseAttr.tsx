@@ -1,6 +1,8 @@
-import { Card, Grid, TextField, Typography } from "@mui/material";
-import { UseFormReturn, Controller, useFieldArray } from "react-hook-form";
+import { Card, Grid, TextField } from "@mui/material";
+import { UseFormReturn, Controller } from "react-hook-form";
 import { JsonData } from "../formData";
+import { useSharedStyles } from "../sharedHooks/useSharedStyles";
+import DeleteButtonToolbar from "../toolbar/DeleteButtonToolbar";
 import { REQUIRED_ERROR_MSG } from "../validationMessages";
 import DiscreteValueOptions from "./DiscreteValueOptions";
 
@@ -8,15 +10,21 @@ interface DiscreteCaseAttrProps {
     formState: UseFormReturn<JsonData, object>
     setErrorMessage: (value: string) => void
     itemIndex: number
+    remove: (index?: number | number[] | undefined) => void
 }
 
 const DiscreteCaseAttr = (props: DiscreteCaseAttrProps) => {
-    const { formState, formState: { control: formControl }, setErrorMessage, itemIndex } = props
+    const { formState, formState: { control: formControl }, setErrorMessage, itemIndex, remove } = props
+    const classes = useSharedStyles()
+
+    const onDiscreteCaseAttrDelete = () => {
+        remove(itemIndex)
+    }
 
     return (
         <Card elevation={5} sx={{ m: 1, p: 1, minHeight: "215px" }}>
             <Grid container item xs={12} sx={{ p: 1 }}>
-                <Grid item xs={12}>
+                <Grid item xs={10}>
                     <Controller
                         name={`case_attributes.${itemIndex}.name`}
                         control={formControl}
@@ -35,6 +43,13 @@ const DiscreteCaseAttr = (props: DiscreteCaseAttrProps) => {
                                 />
                             )
                         }}
+                    />
+                </Grid>
+                <Grid item xs={2} className={classes.centeredGrid}>
+                    <DeleteButtonToolbar
+                        onClick={onDiscreteCaseAttrDelete}
+                        labelName="Delete"
+                        tooltipText={"Delete the case attribute"}
                     />
                 </Grid>
                 <Grid item xs={12} sx={{ mt: 2 }}>

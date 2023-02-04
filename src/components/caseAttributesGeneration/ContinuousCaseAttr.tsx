@@ -3,19 +3,28 @@ import { Controller, UseFormReturn } from "react-hook-form";
 import TimeDistribution from "../distributions/TimeDistribution";
 import { JsonData } from "../formData";
 import { REQUIRED_ERROR_MSG } from "../validationMessages";
+import DeleteButtonToolbar from "../toolbar/DeleteButtonToolbar";
+import { useSharedStyles } from "../sharedHooks/useSharedStyles";
 
 interface ContinuousCaseAttrProps {
     formState: UseFormReturn<JsonData, object>
     setErrorMessage: (value: string) => void
     itemIndex: number
+    remove: (index?: number | number[] | undefined) => void
 }
 
 const ContinuousCaseAttr = (props: ContinuousCaseAttrProps) => {
-    const { formState, formState: {control: formControl }, setErrorMessage, itemIndex } = props
+    const { formState, formState: { control: formControl }, setErrorMessage, itemIndex, remove } = props
+    const classes = useSharedStyles()
+
+    const onContinuousCaseAttrDelete = () => {
+        remove(itemIndex)
+    }
+
     return (
         <Card elevation={5} sx={{ m: 1, p: 1, minHeight: "215px" }}>
             <Grid container item xs={12} sx={{ p: 1 }}>
-                <Grid item xs={12}>
+                <Grid item xs={10}>
                     <Controller
                         name={`case_attributes.${itemIndex}.name`}
                         control={formControl}
@@ -34,6 +43,13 @@ const ContinuousCaseAttr = (props: ContinuousCaseAttrProps) => {
                                 />
                             )
                         }}
+                    />
+                </Grid>
+                <Grid item xs={2} className={classes.centeredGrid}>
+                    <DeleteButtonToolbar
+                        onClick={onContinuousCaseAttrDelete}
+                        labelName="Delete"
+                        tooltipText={"Delete the case attribute"}
                     />
                 </Grid>
                 <Grid item xs={12} sx={{ mt: 2 }}>

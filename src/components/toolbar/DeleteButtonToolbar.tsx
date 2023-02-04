@@ -4,6 +4,7 @@ import ButtonToolbarBase from "./ButtonToolbarBase";
 interface DeleteButtonToolbarProps {
     onClick: () => void
     labelName: string
+    tooltipText?: string
 }
 
 const DeleteButtonToolbar = (props: DeleteButtonToolbarProps) => {
@@ -13,6 +14,7 @@ const DeleteButtonToolbar = (props: DeleteButtonToolbarProps) => {
             labelName={props.labelName}
             startIcon={<DeleteIcon />}
             variant="text"
+            tooltipText={props.tooltipText}
         />
     )
 }
