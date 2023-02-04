@@ -34,10 +34,10 @@ import AllIntermediateEvents from './interEvents/AllIntermediateEvents'
 import EventIcon from '@mui/icons-material/Event';
 import AllBatching from './batching/AllBatching';
 import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
-import useTabVisibility, {TABS} from './simulationParameters/useTabVisibility';
+import useTabVisibility, { TABS } from './simulationParameters/useTabVisibility';
 import AllCaseAttributes from './caseAttributesGeneration/AllCaseAttributes';
 
-const useStyles = makeStyles( (theme: Theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     simParamsGrid: {
         marginTop: "2vh!important"
     },
@@ -50,15 +50,15 @@ const useStyles = makeStyles( (theme: Theme) => ({
 }));
 
 const tooltip_desc: { [key: string]: string } = {
-    CASE_CREATION: 
+    CASE_CREATION:
         "Describes when (arrival time calendar) and how (arrival time distribution) new process cases can be started",
-    RESOURCE_CALENDARS: 
+    RESOURCE_CALENDARS:
         "Lists the time intervals in which a resource is available to perform a task on a weekly calendar basis",
     RESOURCES:
         "Describes the resources grouped into pools. Specifically, it includes a set of resource pools",
     RESOURCE_ALLOCATION:
         "Maps each task in the process model and the list of resources that can perform it",
-    BRANCHING_PROB: 
+    BRANCHING_PROB:
         "Represents the probability for the process execution to move towards any outgoing flow of each split (inclusive or exclusive) gateway in the process model",
     INTERMEDIATE_EVENTS:
         "Represents the probability for intermediate events present in the business process model",
@@ -91,7 +91,7 @@ const SimulationParameters = () => {
     const { state } = useLocation()
     const { bpmnFile, jsonFile } = state as LocationState
 
-    const [activeStep, setActiveStep] = useState(0)
+    const [activeStep, setActiveStep] = useState<TABS>(TABS.CASE_CREATION)
     const [fileDownloadUrl, setFileDownloadUrl] = useState("")
     const [snackMessage, setSnackMessage] = useState("")
     const [snackColor, setSnackColor] = useState<AlertColor | undefined>(undefined)
@@ -106,7 +106,7 @@ const SimulationParameters = () => {
             start_date: moment().format("YYYY-MM-DDTHH:mm:ss.sssZ")
         }
     })
-    const { getValues: getScenarioValues, trigger: triggerScenario, formState: { errors: scenarioErrors} } = scenarioState
+    const { getValues: getScenarioValues, trigger: triggerScenario, formState: { errors: scenarioErrors } } = scenarioState
 
     const linkDownloadRef = useRef<HTMLAnchorElement>(null)
 
@@ -115,9 +115,9 @@ const SimulationParameters = () => {
 
     const { formState } = useFormState(tasksFromModel, gateways, eventsFromModel, jsonData)
     const { formState: { errors, isValid, isSubmitted, submitCount }, getValues, handleSubmit } = formState
-    const [ isScenarioParamsValid, setIsScenarioParamsValid ] = useState(true)
+    const [isScenarioParamsValid, setIsScenarioParamsValid] = useState(true)
 
-    const { visibleTabs } = useTabVisibility(eventsFromModel)
+    const { visibleTabs, getIndexOfTab } = useTabVisibility(eventsFromModel)
 
     const { onUploadNewModel } = useNewModel()
 
@@ -130,7 +130,7 @@ const SimulationParameters = () => {
             console.log(errors)
             setErrorMessage("There are validation errors")
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isSubmitted, submitCount]);
 
     useEffect(() => {
@@ -164,8 +164,8 @@ const SimulationParameters = () => {
 
                     if (dataJson.TaskStatus === "SUCCESS") {
                         setIsPollingEnabled(false)
-                        setCurrSimulatedOutput(dataJson.TaskResponse )
-                        
+                        setCurrSimulatedOutput(dataJson.TaskResponse)
+
                         // redirect to results step
                         setActiveStep(TABS.SIMULATION_RESULTS)
 
@@ -209,9 +209,11 @@ const SimulationParameters = () => {
         const copiedValues = JSON.parse(JSON.stringify(values))
         const batching_info = copiedValues.batch_processing // array per task
 
-        batching_info.forEach((element: BatchProcessing) => {
-            _transformBetweenOperatorsPerTask(element.firing_rules)
-        })
+        if (batching_info !== undefined) {
+            batching_info.forEach((element: BatchProcessing) => {
+                _transformBetweenOperatorsPerTask(element.firing_rules)
+            })
+        }
 
         return copiedValues
     };
@@ -228,7 +230,7 @@ const SimulationParameters = () => {
         } else {
             others.push(current)
         }
-    
+
         return [ready_res, large_res, others]
     }
 
@@ -236,30 +238,30 @@ const SimulationParameters = () => {
         for (var or_rule_index in curr_task_batch_rules) {
             const curr_and_rules = curr_task_batch_rules[or_rule_index]
             const [ready_wt_rules, large_wt_rules, others] = curr_and_rules.reduce(_groupByEligibleForBetweenAndNot, [[], [], []] as [FiringRule[], FiringRule[], FiringRule[]])
-            let new_ready_rules : FiringRule[] | undefined = undefined
-            let new_large_rules : FiringRule[] | undefined = undefined
+            let new_ready_rules: FiringRule[] | undefined = undefined
+            let new_large_rules: FiringRule[] | undefined = undefined
             if (ready_wt_rules.length > 0) {
                 // expect one BETWEEN rule
-                const values = (ready_wt_rules[0]!.value as string[]).map(x =>  Number(x))
+                const values = (ready_wt_rules[0]!.value as string[]).map(x => Number(x))
 
                 const min_value = Math.min(...values)
                 const max_value = Math.max(...values)
                 const attr = ready_wt_rules[0].attribute
-                
+
                 new_ready_rules = [
-                    { attribute: attr, comparison: ">=", value: String(min_value) } as FiringRule, 
+                    { attribute: attr, comparison: ">=", value: String(min_value) } as FiringRule,
                     { attribute: attr, comparison: "<=", value: String(max_value) } as FiringRule
                 ]
             }
             else if (large_wt_rules.length > 0) {
                 // expect two AND rules here
-                const values = ready_wt_rules.map(x =>  Number(x.value))
+                const values = ready_wt_rules.map(x => Number(x.value))
                 const min_value = Math.min(...values)
                 const max_value = Math.max(...values)
                 const attr = ready_wt_rules[0].attribute
-                
+
                 new_ready_rules = [
-                    { attribute: attr, comparison: ">=", value: String(min_value) } as FiringRule, 
+                    { attribute: attr, comparison: ">=", value: String(min_value) } as FiringRule,
                     { attribute: attr, comparison: "<=", value: String(max_value) } as FiringRule
                 ]
             }
@@ -330,51 +332,51 @@ const SimulationParameters = () => {
                 return <></>
         }
     };
-    
-    const getStepIcon = (index: TABS): React.ReactNode => {
-        const isActiveStep = activeStep === index
+
+    const getStepIcon = (currentTab: TABS): React.ReactNode => {
+        const isActiveStep = activeStep === currentTab
         const styles = isActiveStep ? { color: activeColor } : {}
 
         let Icon: React.ReactNode
         let currError: any
         let lastStep = false
-        switch (index) {
+        switch (currentTab) {
             case TABS.CASE_CREATION:
                 currError = errors.arrival_time_calendar || errors.arrival_time_distribution || scenarioErrors
-                Icon = <SettingsIcon style={styles}/>
+                Icon = <SettingsIcon style={styles} />
                 break
             case TABS.RESOURCE_CALENDARS:
                 currError = errors.resource_calendars
-                Icon = <DateRangeIcon style={styles}/> 
+                Icon = <DateRangeIcon style={styles} />
                 break
             case TABS.RESOURCES:
                 currError = errors.resource_profiles
-                Icon =  <GroupsIcon style={styles}/>
+                Icon = <GroupsIcon style={styles} />
                 break
             case TABS.RESOURCE_ALLOCATION:
                 currError = errors.task_resource_distribution
-                Icon = <AssignmentIndIcon style={styles}/>
+                Icon = <AssignmentIndIcon style={styles} />
                 break
             case TABS.BRANCHING_PROB:
                 currError = errors.gateway_branching_probabilities
-                Icon = <CallSplitIcon style={styles}/>
+                Icon = <CallSplitIcon style={styles} />
                 break
             case TABS.INTERMEDIATE_EVENTS:
                 currError = errors.event_distribution
-                Icon = <EventIcon style={styles}/>
+                Icon = <EventIcon style={styles} />
                 break
             case TABS.BATCHING:
                 currError = errors.batch_processing
-                Icon = <DynamicFeedIcon style={styles}/>
+                Icon = <DynamicFeedIcon style={styles} />
                 break
             case TABS.CASE_ATTRIBUTES:
                 currError = errors.case_attributes
                 // TODO: find appropriate icon
-                Icon = <DynamicFeedIcon style={styles}/>
+                Icon = <DynamicFeedIcon style={styles} />
                 break
             case TABS.SIMULATION_RESULTS:
                 lastStep = true
-                Icon = <BarChartIcon style={styles}/>
+                Icon = <BarChartIcon style={styles} />
                 break
             default:
                 return <></>
@@ -390,21 +392,21 @@ const SimulationParameters = () => {
                 color = successColor
             }
 
-            return (<BadgeIcon style={{ marginRight: "-9px", color: color}} />)
+            return (<BadgeIcon style={{ marginRight: "-9px", color: color }} />)
         }
 
         const areAnyErrors = currError && (currError.length > 0 || Object.keys(currError)?.length > 0)
-        const finalIcon = 
+        const finalIcon =
             (isSubmitted && !lastStep)
-            ? ( <Badge 
+                ? (<Badge
                     badgeContent={getBadgeContent(areAnyErrors)}
-                    overlap="circular"> {Icon} 
+                    overlap="circular"> {Icon}
                 </Badge>
-            )
-            : Icon
+                )
+                : Icon
 
         return <StepIcon
-            active={activeStep === index}
+            active={isActiveStep}
             icon={finalIcon}
         />
     };
@@ -426,7 +428,7 @@ const SimulationParameters = () => {
             .then(((result: any) => {
                 const dataJson = result.data
                 setPendingTaskId(dataJson.TaskId)
-                setIsPollingEnabled(true) 
+                setIsPollingEnabled(true)
             }))
             .catch((error: any) => {
                 console.log(error.response)
@@ -480,14 +482,14 @@ const SimulationParameters = () => {
                         </Grid>
                     </Grid>
                     <Grid item container xs={12} className={classes.stepperGrid} alignItems="center" justifyContent="center" >
-                        <Stepper className={classes.stepper} nonLinear alternativeLabel activeStep={activeStep} connector={<></>}>
+                        <Stepper className={classes.stepper} nonLinear alternativeLabel activeStep={getIndexOfTab(activeStep)} connector={<></>}>
                             {Object.entries(visibleTabs.getAllItems()).map(([key, label]: [string, string]) => {
-                                const keyEnum = key as keyof typeof TABS
-                                const indexNum = TABS[keyEnum]
+                                const keyTab = key as keyof typeof TABS
+                                const valueTab: TABS = TABS[keyTab]
 
                                 return <Step key={label}>
                                     <Tooltip title={tooltip_desc[key]}>
-                                        <StepButton color="inherit" onClick={() => setActiveStep(indexNum)} icon={getStepIcon(indexNum)}>
+                                        <StepButton color="inherit" onClick={() => setActiveStep(valueTab)} icon={getStepIcon(valueTab)}>
                                             {label}
                                         </StepButton>
                                     </Tooltip>
@@ -500,12 +502,14 @@ const SimulationParameters = () => {
                     </Grid>
                 </Grid>
             </Grid>
-            {snackMessage && <CustomizedSnackbar
-                message={snackMessage}
-                severityLevel={snackColor}
-                onSnackbarClose={onSnackbarClose}
-            />}
-        </form>
+            {
+                snackMessage && <CustomizedSnackbar
+                    message={snackMessage}
+                    severityLevel={snackColor}
+                    onSnackbarClose={onSnackbarClose}
+                />
+            }
+        </form >
     );
 }
 

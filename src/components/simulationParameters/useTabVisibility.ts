@@ -13,7 +13,7 @@ export enum TABS {
     SIMULATION_RESULTS
 }
 
-const tabsName : { [key: string]: string } = {
+const tabsName: { [key: string]: string } = {
     CASE_CREATION: "Case Creation",
     RESOURCE_CALENDARS: "Resource Calendars",
     RESOURCES: "Resources",
@@ -26,8 +26,8 @@ const tabsName : { [key: string]: string } = {
 };
 
 const useTabVisibility = (eventsFromModel?: EventsFromModel) => {
-    const [ visibleTabs, setVisibleTabs ] = useState(new Dictionary<string>())
-    const [ isEventsTabHidden, setIsEventsTabHidden ] = useState<boolean | undefined>(undefined)
+    const [visibleTabs, setVisibleTabs] = useState(new Dictionary<string>())
+    const [isEventsTabHidden, setIsEventsTabHidden] = useState<boolean | undefined>(undefined)
 
     useEffect(() => {
         if (eventsFromModel === undefined)
@@ -44,7 +44,7 @@ const useTabVisibility = (eventsFromModel?: EventsFromModel) => {
             // skip initialization if
             // 1) no information yet loaded
             // 2) we already have a final array
-            return 
+            return
         }
 
         const newVisibleTabs = Object.entries(tabsName).reduce((acc: Dictionary<string>, [key, value]: any) => {
@@ -60,7 +60,11 @@ const useTabVisibility = (eventsFromModel?: EventsFromModel) => {
         setVisibleTabs(newVisibleTabs)
     }, [isEventsTabHidden, visibleTabs])
 
-    return {visibleTabs}
+    const getIndexOfTab = (value: TABS): number => {
+        return visibleTabs.getAllKeys().indexOf(TABS[value])
+    }
+
+    return { visibleTabs, getIndexOfTab }
 }
 
 export default useTabVisibility;

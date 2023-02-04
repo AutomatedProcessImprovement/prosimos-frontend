@@ -7,7 +7,7 @@ const isStrArrUnique = (wordsArr: string[] | undefined): boolean => {
   // returns whether the provided array of string contains only unique words
   const origSize = wordsArr?.length
 
-  if (!origSize && origSize === 0) {
+  if (!origSize || origSize === 0) {
     return true
   }
 
