@@ -10,7 +10,7 @@ interface ButtonToolbarBaseProps {
 
 const ButtonToolbarBase = (props: ButtonToolbarBaseProps) => {
     const { variant, startIcon, onClick, labelName, tooltipText } = props
-    console.log(tooltipText)
+
     const getButtonBase = (): JSX.Element => {
         return (
             <Button

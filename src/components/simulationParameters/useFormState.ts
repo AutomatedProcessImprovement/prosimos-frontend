@@ -172,7 +172,10 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
         case_attributes: yup.array()
             .of(
                 yup.object().shape({
-                    name: yup.string().required(REQUIRED_ERROR_MSG),
+                    name: yup.string()
+                        .trim()
+                        .matches(/^[a-zA-Z0-9-_,.`':]+$/g, "Invalid name, allowed characters: a-z A-Z 0-9 _ , . - : ` ' ")
+                        .required(REQUIRED_ERROR_MSG),
                     type: yup.string().required(REQUIRED_ERROR_MSG),
                     values: yup.mixed().when('type', (type, schema) => {
                         switch (type) {
@@ -186,13 +189,14 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                                         value: yup.number().required(REQUIRED_ERROR_MSG)
                                     })
                                 )
+                                    .min(1, MIN_LENGTH_REQUIRED_MSG("option"))
+                                    .uniqueKeyDistr()
                                     .test(
                                         'sum',
                                         SUMMATION_ONE_MSG,
                                         (probs = []) => {
                                             const total = probs.reduce((acc, curr) => Number(acc) + Number(curr.value), 0)
                                             const rounded = round(total, 5)
-                                            console.log(total)
                                             return rounded === 1;
                                         }
                                     )

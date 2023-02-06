@@ -141,7 +141,8 @@ const TimeDistribution = (props: TimeDistributionProps) => {
                                             onNumberFieldChange(Number(e.target.value), label, onChange)
                                         }}
                                         inputProps={{
-                                            step: "any"
+                                            step: "any",
+                                            min: 0
                                         }}
                                         error={errors?.value !== undefined}
                                         helperText={errors?.value?.message || ""}

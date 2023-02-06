@@ -110,6 +110,10 @@ const DistributionMappingRow = (props: DistributionMappingRowProps) => {
                                 variant="standard"
                                 label={valueLabel}
                                 type="number"
+                                inputProps={{
+                                    min: 0,
+                                    step: "0.1"
+                                }}
                             />
                         )
                     }}

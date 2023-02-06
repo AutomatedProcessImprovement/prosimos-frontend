@@ -77,7 +77,7 @@ const AllCaseAttributes = (props: AllCaseAttributesProps) => {
         </Toolbar>
         <Grid container item xs={12}>{
             fields.map((item, itemIndex) => (
-                <Grid item xs={12}>
+                <Grid item xs={12} key={item.key}>
                     {getCaseAttrComponent(item.type, itemIndex)}
                 </Grid>
             ))

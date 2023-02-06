@@ -14,12 +14,14 @@ interface ContinuousCaseAttrProps {
 }
 
 const ContinuousCaseAttr = (props: ContinuousCaseAttrProps) => {
-    const { formState, formState: { control: formControl }, setErrorMessage, itemIndex, remove } = props
+    const { formState, formState: { control: formControl, formState: { errors } }, setErrorMessage, itemIndex, remove } = props
     const classes = useSharedStyles()
-
     const onContinuousCaseAttrDelete = () => {
         remove(itemIndex)
     }
+
+    const { case_attributes: caseAttributesErrors } = errors as any
+    const currentCaseAttributeErrors = caseAttributesErrors?.[itemIndex]
 
     return (
         <Card elevation={5} sx={{ m: 1, p: 1, minHeight: "215px" }}>
@@ -35,8 +37,8 @@ const ContinuousCaseAttr = (props: ContinuousCaseAttrProps) => {
                                     {...others}
                                     inputRef={ref}
                                     style={{ width: "100%" }}
-                                    // error={areAnyErrors}
-                                    // helperText={errorMessage}
+                                    error={currentCaseAttributeErrors?.name !== undefined}
+                                    helperText={currentCaseAttributeErrors?.name?.message || ""}
                                     variant="standard"
                                     placeholder="Resource pool name"
                                     label={"Case Attribute's Name"}
@@ -59,7 +61,7 @@ const ContinuousCaseAttr = (props: ContinuousCaseAttrProps) => {
                     <TimeDistribution
                         formState={formState}
                         objectNamePath={`case_attributes.${itemIndex}.values`}
-                        // errors={currentErrors}
+                        errors={currentCaseAttributeErrors?.values}
                         setErrorMessage={setErrorMessage}
                     />
                 </Grid>
