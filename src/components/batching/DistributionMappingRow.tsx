@@ -27,7 +27,8 @@ const DistributionMappingRow = (props: DistributionMappingRowProps) => {
     const [valueErrors, setValueErrors] = useState({})
 
     useEffect(() => {
-        if ((Object.keys(errors).length !== 0) && (objectFieldName !== undefined)) {
+        const isErrorsEmpty = Object.keys(errors).length !== 0
+        if (isErrorsEmpty && (objectFieldName !== undefined)) {
             // remove the path to the specific attribute
             const path = getPathWithoutSpecificAttr(objectFieldName)
 
@@ -35,23 +36,50 @@ const DistributionMappingRow = (props: DistributionMappingRowProps) => {
             path.split(".").forEach((key) => {
                 currLocalErrors = currLocalErrors?.[key];
             })
+
             const finalErrors = currLocalErrors
+
+            verify_no_errors(finalErrors)
 
             if (finalErrors !== undefined) {
                 if (finalErrors.type === "sum") {
                     setValueErrors(finalErrors)
                 } else if (finalErrors.type === "unique") {
                     setKeyErrors(finalErrors)
-                } else {
-                    // empty key field
-                    const keySpecificError = (((finalErrors || {})[rowIndex] || {})["key"] || {})
-                    if (keySpecificError?.message) {
-                        setKeyErrors(keySpecificError)
-                    }
                 }
             }
+
+            // in case of empty key field
+            const keySpecificError = getKeySpecificError(finalErrors, rowIndex)
+            if (keySpecificError?.message) {
+                setKeyErrors(keySpecificError)
+            }
+        } else if (!isErrorsEmpty) {
+            verify_no_errors(errors)
         }
-    }, [errors, objectFieldName])
+
+    }, [JSON.stringify(errors), objectFieldName])
+
+    const verify_no_errors = (finalErrors: any) => {
+        // in case of no errors - we set error's state as empty
+        if (finalErrors?.type !== "sum") {
+            setValueErrors("")
+        }
+
+        if (finalErrors?.type !== "unique") {
+            setKeyErrors("")
+        }
+
+        // empty key field
+        const keySpecificError = getKeySpecificError(finalErrors, rowIndex)
+        if (!(keySpecificError || keySpecificError?.message)) {
+            setKeyErrors("")
+        }
+    }
+
+    const getKeySpecificError = (finalErrors: any, rowIndex: number) => {
+        return (((finalErrors || {})[rowIndex] || {})["key"] || {})
+    }
 
     const onDeleteClicked = () => {
         if (onDelete && rowIndex !== undefined) {
