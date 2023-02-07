@@ -39,7 +39,7 @@ const DiscreteValueOptions = (props: DiscreteValueOptionsProps) => {
                 </Grid>
                 <Grid item xs={3}>
                     <AddButtonBase
-                        labelName="Add a mapping"
+                        labelName="Add an option"
                         onClick={onTimePeriodAdd}
                     />
                 </Grid>

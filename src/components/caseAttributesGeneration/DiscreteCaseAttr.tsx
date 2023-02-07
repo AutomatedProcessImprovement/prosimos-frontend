@@ -14,12 +14,15 @@ interface DiscreteCaseAttrProps {
 }
 
 const DiscreteCaseAttr = (props: DiscreteCaseAttrProps) => {
-    const { formState, formState: { control: formControl }, setErrorMessage, itemIndex, remove } = props
+    const { formState, formState: { control: formControl, formState: { errors } }, setErrorMessage, itemIndex, remove } = props
     const classes = useSharedStyles()
 
     const onDiscreteCaseAttrDelete = () => {
         remove(itemIndex)
     }
+
+    const { case_attributes: caseAttributesErrors } = errors as any
+    const currentCaseAttributeErrors = caseAttributesErrors?.[itemIndex]
 
     return (
         <Card elevation={5} sx={{ m: 1, p: 1, minHeight: "215px" }}>
@@ -35,8 +38,8 @@ const DiscreteCaseAttr = (props: DiscreteCaseAttrProps) => {
                                     {...others}
                                     inputRef={ref}
                                     style={{ width: "100%" }}
-                                    // error={areAnyErrors}
-                                    // helperText={errorMessage}
+                                    error={currentCaseAttributeErrors?.name !== undefined}
+                                    helperText={currentCaseAttributeErrors?.name?.message || ""}
                                     variant="standard"
                                     placeholder="Resource pool name"
                                     label={"Case Attribute's Name"}
