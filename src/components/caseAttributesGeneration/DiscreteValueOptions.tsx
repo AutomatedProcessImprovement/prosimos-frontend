@@ -4,6 +4,7 @@ import { useFieldArray, UseFormReturn } from "react-hook-form";
 import DistributionMappingWithAdd from "../batching/DistributionMappingWithAdd";
 import { AllowedDistrParamsName } from "../batching/DistributionSection";
 import { JsonData } from "../formData";
+import { useSharedStyles } from "../sharedHooks/useSharedStyles";
 import AddButtonBase from "../toolbar/AddButtonBase";
 
 interface DiscreteValueOptionsProps {
@@ -14,8 +15,9 @@ interface DiscreteValueOptionsProps {
 
 const DiscreteValueOptions = (props: DiscreteValueOptionsProps) => {
     const { formState: { control: formControl }, itemIndex } = props
-    const objectFieldNamePart = `case_attributes.${itemIndex}.values` as AllowedDistrParamsName
     const [isRowAdded, setIsRowAdded] = useState(false)
+    const classes = useSharedStyles()
+    const objectFieldNamePart = `case_attributes.${itemIndex}.values` as AllowedDistrParamsName
 
     const { fields, append, remove } = useFieldArray({
         keyName: 'key',
@@ -34,10 +36,10 @@ const DiscreteValueOptions = (props: DiscreteValueOptionsProps) => {
     return (
         <Grid item container xs={12}>
             <Grid item container xs={12}>
-                <Grid item xs={9}>
+                <Grid item xs={10}>
                     <Typography variant="subtitle2" align="left"> Option List </Typography>
                 </Grid>
-                <Grid item xs={3}>
+                <Grid item xs={2} className={classes.centeredGrid}>
                     <AddButtonBase
                         labelName="Add an option"
                         onClick={onTimePeriodAdd}

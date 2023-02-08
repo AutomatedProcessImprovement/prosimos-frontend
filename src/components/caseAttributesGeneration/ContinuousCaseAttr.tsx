@@ -24,7 +24,7 @@ const ContinuousCaseAttr = (props: ContinuousCaseAttrProps) => {
     const currentCaseAttributeErrors = caseAttributesErrors?.[itemIndex]
 
     return (
-        <Card elevation={5} sx={{ m: 1, p: 1, minHeight: "215px" }}>
+        <Card elevation={5} sx={{ m: 1, p: 1, minHeight: "262.5px" }}>
             <Grid container item xs={12} sx={{ p: 1 }}>
                 <Grid item xs={10}>
                     <Controller

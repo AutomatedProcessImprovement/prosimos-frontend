@@ -3,7 +3,9 @@ import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { JsonData } from "../formData"
 import DiscreteCaseAttr from "./DiscreteCaseAttr"
 import ContinuousCaseAttr from "./ContinuousCaseAttr"
-import { defaultArrivalTimeDistribution } from "../simulationParameters/defaultValues"
+import { defaultDiscreteCaseAttr, defaultContinuousCaseAttr } from "../simulationParameters/defaultValues"
+import { AutoSizer, List } from "react-virtualized"
+import { useRef } from "react"
 
 const CASE_ATTRIBUTES_PATH = "case_attributes"
 
@@ -15,6 +17,7 @@ interface AllCaseAttributesProps {
 
 const AllCaseAttributes = (props: AllCaseAttributesProps) => {
     const { formState: { control: formControl }, setErrorMessage } = props
+    const listRef = useRef<List>(null)
 
     const { fields, prepend, remove } = useFieldArray({
         keyName: 'key',
@@ -41,25 +44,20 @@ const AllCaseAttributes = (props: AllCaseAttributesProps) => {
 
     const onAddNew = (type: "discrete" | "continuous") => {
         const itemToAdd = (type === "discrete")
-            ? {
-                name: "name",
-                type: "discrete",
-                values: [
-                    {
-                        key: "option name",
-                        value: 1
-                    }
-                ]
-            }
-            : {
-                name: "name",
-                type: "continuous",
-                values: {
-                    ...defaultArrivalTimeDistribution
-                }
-            }
+            ? defaultDiscreteCaseAttr
+            : defaultContinuousCaseAttr
 
         prepend(itemToAdd)
+    }
+
+    const renderRow = ({ index, key, style }: any) => {
+        const currCaseAttr = fields[index]
+
+        return (
+            <Grid item xs={12} style={{ ...style }} key={currCaseAttr.key}>
+                {getCaseAttrComponent(currCaseAttr.type, index)}
+            </Grid>
+        )
     }
 
     return <Grid container item xs={12} spacing={2}>
@@ -75,13 +73,21 @@ const AllCaseAttributes = (props: AllCaseAttributesProps) => {
                 </Button>
             </ButtonGroup>
         </Toolbar>
-        <Grid container item xs={12}>{
-            fields.map((item, itemIndex) => (
-                <Grid item xs={12} key={item.key}>
-                    {getCaseAttrComponent(item.type, itemIndex)}
-                </Grid>
-            ))
-        }</Grid>
+        <Grid item xs={12} style={{ minHeight: "56vh" }}>
+            <AutoSizer>
+                {({ width, height }) => {
+                    return <List
+                        ref={listRef}
+                        width={width}
+                        height={height}
+                        rowHeight={300}
+                        rowRenderer={renderRow}
+                        rowCount={fields.length}
+                        overscanRowCount={2}
+                    />
+                }}
+            </AutoSizer>
+        </Grid>
     </Grid>
 }
 
