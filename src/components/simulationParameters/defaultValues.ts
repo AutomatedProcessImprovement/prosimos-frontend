@@ -22,7 +22,7 @@ export const defaultTemplateSchedule = (withWeekends: boolean, userDefinedName?:
         })
     }
 
-    const name = (typeof userDefinedName !== 'undefined') 
+    const name = (typeof userDefinedName !== 'undefined')
         ? userDefinedName
         : DEFAULT_SCHEDULE_NAME
 
@@ -72,3 +72,22 @@ export const defaultResourceAllocationDist = {
     ...defaultArrivalTimeDistribution,
     resource_id: ""
 } as ProbabilityDistributionForResource
+
+export const defaultDiscreteCaseAttr = {
+    name: "name",
+    type: "discrete",
+    values: [
+        {
+            key: "option name",
+            value: 1
+        }
+    ]
+}
+
+export const defaultContinuousCaseAttr = {
+    name: "name",
+    type: "continuous",
+    values: {
+        ...defaultArrivalTimeDistribution
+    }
+}

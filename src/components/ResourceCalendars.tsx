@@ -1,4 +1,4 @@
-import { Grid, MenuItem, TextField, Typography, Theme} from "@mui/material"
+import { Grid, MenuItem, TextField, Typography } from "@mui/material"
 import { useState, useEffect } from "react"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
 import TimePeriodGridItemsWithAdd from "./calendars/TimePeriodGridItemsWithAdd"
@@ -8,16 +8,9 @@ import { MIN_LENGTH_REQUIRED_MSG } from './validationMessages'
 import { defaultWorkWeekTimePeriod } from "./simulationParameters/defaultValues";
 import DeleteButtonToolbar from "./toolbar/DeleteButtonToolbar"
 import AddButtonToolbar from "./toolbar/AddButtonToolbar"
-import { makeStyles } from "@material-ui/core/styles";
 import CalendarNameDialog from "./profiles/CalendarNameDialog"
+import { useSharedStyles } from "./sharedHooks/useSharedStyles"
 
-const useStyles = makeStyles( (theme: Theme) => ({
-    centeredGrid: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center" 
-    }
-}));
 
 interface ResourceCalendarsProps {
     formState: UseFormReturn<JsonData, object>
@@ -25,8 +18,8 @@ interface ResourceCalendarsProps {
 }
 
 const ResourceCalendars = (props: ResourceCalendarsProps) => {
-    const { formState } = props 
-    const classes = useStyles()
+    const { formState } = props
+    const classes = useSharedStyles()
     const { control: formControl } = formState
     const { setErrorMessage } = props
     const [currCalendarIndex, setCurrCalendarIndex] = useState<number>()
@@ -99,7 +92,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
                             select
                         >
                             {allCalendars.map((item, index) => {
-                                const {key} = item
+                                const { key } = item
                                 return <MenuItem
                                     key={`calendar_select_${key}`}
                                     value={index}
@@ -125,7 +118,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
                 </Grid>
             </Grid>
             {(currCalendarIndex === undefined)
-                ? <Grid xs={12} className={classes.centeredGrid} sx={{ p: 2 }}> 
+                ? <Grid xs={12} className={classes.centeredGrid} sx={{ p: 2 }}>
                     <Typography>
                         Please select the calendar to see its time periods
                     </Typography>
@@ -151,7 +144,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
     )
 }
 
-interface TimePeriodListProps extends ResourceCalendarsProps{
+interface TimePeriodListProps extends ResourceCalendarsProps {
     calendarIndex: number
     calendarKey: string
 }

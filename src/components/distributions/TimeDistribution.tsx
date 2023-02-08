@@ -9,10 +9,12 @@ import { DISTR_FUNC } from "./DistrFuncSelect"
 type AllowedObjectName = "arrival_time_distribution"
     | `task_resource_distribution.${number}.resources.${number}`
     | `event_distribution.${number}`
+    | `case_attributes.${number}.values`
 
 type AllowedDistrParamsName = "arrival_time_distribution.distribution_params"
     | `task_resource_distribution.${number}.resources.${number}.distribution_params`
     | `event_distribution.${number}.distribution_params`
+    | `case_attributes.${number}.values.distribution_params`
 
 interface TimeDistributionProps {
     formState: UseFormReturn<JsonData, object>
@@ -139,7 +141,8 @@ const TimeDistribution = (props: TimeDistributionProps) => {
                                             onNumberFieldChange(Number(e.target.value), label, onChange)
                                         }}
                                         inputProps={{
-                                            step: "any"
+                                            step: "any",
+                                            min: 0
                                         }}
                                         error={errors?.value !== undefined}
                                         helperText={errors?.value?.message || ""}

@@ -1,60 +1,67 @@
+const GREATER_THAN = "Greater Than"
+const GREATER_THAN_OR_EQUALS = "Greater Than or Equal To"
+const EQUALS = "Equals"
+const LESS_THAN = "Less Than"
+const LESS_THAN_OR_EQUALS = "Less Than or Equal To"
+const BETWEEN = "Between"
+
 export const typeOperatorMap = {
   size: {
     ">": {
-      label: "Greater Than"
+      label: GREATER_THAN
     },
     ">=": {
-      label: "Greater Than or Equal To"
+      label: GREATER_THAN_OR_EQUALS
     },
-    "==": {
-      label: "Equals"
+    "=": {
+      label: EQUALS
     },
     "<": {
-      label: "Less Than"
+      label: LESS_THAN
     },
     "<=": {
-      label: "Less Than or Equal To"
+      label: LESS_THAN_OR_EQUALS
     }
   },
   waiting_time: {
     "<": {
-      label: "Less Than"
+      label: LESS_THAN
     },
     "<=": {
-      label: "Less Than or Equal To"
+      label: LESS_THAN_OR_EQUALS
     },
-    "==": {
-      label: "Equals"
+    "=": {
+      label: EQUALS
     },
     "between": {
-      label: "Between",
+      label: BETWEEN,
       multiple: true
     }
   },
   hour: {
     "<": {
-      label: "Less Than"
+      label: LESS_THAN
     },
     "<=": {
-      label: "Less Than or Equal To"
+      label: LESS_THAN_OR_EQUALS
     },
-    "==": {
-      label: "Equals"
+    "=": {
+      label: EQUALS
     },
     ">": {
-      label: "Greater Than"
+      label: GREATER_THAN
     },
     ">=": {
-      label: "Greater Than or Equal To"
+      label: GREATER_THAN_OR_EQUALS
     },
     "between": {
-      label: "Between",
+      label: BETWEEN,
       multiple: true
     },
   },
   weekday: {
-    "==": {
-      label: "Equals"
+    "=": {
+      label: EQUALS
     }
   }
 };

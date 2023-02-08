@@ -7,6 +7,7 @@ export interface JsonData {
     resource_calendars: ResourceCalendar[]
     event_distribution: EventDistribution[]
     batch_processing: BatchProcessing[]
+    case_attributes: CaseAttributeDefinition[]
 }
 
 export interface BatchProcessing {
@@ -98,4 +99,10 @@ export interface ScenarioProperties {
 
 export interface EventDistribution extends ProbabilityDistribution {
     event_id: string
+}
+
+export interface CaseAttributeDefinition {
+    name: string
+    type: string
+    values: any
 }

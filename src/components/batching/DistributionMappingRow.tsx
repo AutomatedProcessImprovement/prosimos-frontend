@@ -12,6 +12,7 @@ interface DistributionMappingRowProps {
     onDelete?: (index: number) => void
     rowIndex: number
     valueLabel: string
+    keyTextFieldProps: { label: string, type: string }
 }
 
 const getPathWithoutSpecificAttr = (specificPath: string) => {
@@ -26,7 +27,8 @@ const DistributionMappingRow = (props: DistributionMappingRowProps) => {
     const [valueErrors, setValueErrors] = useState({})
 
     useEffect(() => {
-        if ((Object.keys(errors).length !== 0) && (objectFieldName !== undefined)) {
+        const isErrorsEmpty = Object.keys(errors).length !== 0
+        if (isErrorsEmpty && (objectFieldName !== undefined)) {
             // remove the path to the specific attribute
             const path = getPathWithoutSpecificAttr(objectFieldName)
 
@@ -34,8 +36,11 @@ const DistributionMappingRow = (props: DistributionMappingRowProps) => {
             path.split(".").forEach((key) => {
                 currLocalErrors = currLocalErrors?.[key];
             })
+
             const finalErrors = currLocalErrors
-    
+
+            verify_no_errors(finalErrors)
+
             if (finalErrors !== undefined) {
                 if (finalErrors.type === "sum") {
                     setValueErrors(finalErrors)
@@ -43,8 +48,38 @@ const DistributionMappingRow = (props: DistributionMappingRowProps) => {
                     setKeyErrors(finalErrors)
                 }
             }
+
+            // in case of empty key field
+            const keySpecificError = getKeySpecificError(finalErrors, rowIndex)
+            if (keySpecificError?.message) {
+                setKeyErrors(keySpecificError)
+            }
+        } else if (!isErrorsEmpty) {
+            verify_no_errors(errors)
         }
-    }, [errors, objectFieldName])
+
+    }, [JSON.stringify(errors), objectFieldName])
+
+    const verify_no_errors = (finalErrors: any) => {
+        // in case of no errors - we set error's state as empty
+        if (finalErrors?.type !== "sum") {
+            setValueErrors("")
+        }
+
+        if (finalErrors?.type !== "unique") {
+            setKeyErrors("")
+        }
+
+        // empty key field
+        const keySpecificError = getKeySpecificError(finalErrors, rowIndex)
+        if (!(keySpecificError || keySpecificError?.message)) {
+            setKeyErrors("")
+        }
+    }
+
+    const getKeySpecificError = (finalErrors: any, rowIndex: number) => {
+        return (((finalErrors || {})[rowIndex] || {})["key"] || {})
+    }
 
     const onDeleteClicked = () => {
         if (onDelete && rowIndex !== undefined) {
@@ -80,8 +115,7 @@ const DistributionMappingRow = (props: DistributionMappingRowProps) => {
                                 error={!!(keyErrors as any)?.message}
                                 helperText={(keyErrors as any)?.message}
                                 variant="standard"
-                                label="Batch Size"
-                                type="number"
+                                {...props.keyTextFieldProps}
                             />
                         )
                     }}
@@ -104,6 +138,10 @@ const DistributionMappingRow = (props: DistributionMappingRowProps) => {
                                 variant="standard"
                                 label={valueLabel}
                                 type="number"
+                                inputProps={{
+                                    min: 0,
+                                    step: "0.1"
+                                }}
                             />
                         )
                     }}

@@ -35,6 +35,7 @@ import EventIcon from '@mui/icons-material/Event';
 import AllBatching from './batching/AllBatching';
 import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
 import useTabVisibility, { TABS } from './simulationParameters/useTabVisibility';
+import AllCaseAttributes from './caseAttributesGeneration/AllCaseAttributes';
 
 const useStyles = makeStyles((theme: Theme) => ({
     simParamsGrid: {
@@ -63,6 +64,8 @@ const tooltip_desc: { [key: string]: string } = {
         "Represents the probability for intermediate events present in the business process model",
     BATCHING:
         "Represents the setup needed in order to execute the task in a batched way",
+    CASE_ATTRIBUTES:
+        "Represents the setup on how case attributes need to be generated",
     SIMULATION_RESULTS: "",
 }
 
@@ -315,6 +318,11 @@ const SimulationParameters = () => {
                     tasksFromModel={tasksFromModel}
                     formState={formState}
                     setErrorMessage={setErrorMessage} />
+            case TABS.CASE_ATTRIBUTES:
+                return <AllCaseAttributes
+                    formState={formState}
+                    setErrorMessage={setErrorMessage}
+                />
             case TABS.SIMULATION_RESULTS:
                 if (!!currSimulatedOutput)
                     return <SimulationResults
@@ -359,6 +367,11 @@ const SimulationParameters = () => {
                 break
             case TABS.BATCHING:
                 currError = errors.batch_processing
+                Icon = <DynamicFeedIcon style={styles} />
+                break
+            case TABS.CASE_ATTRIBUTES:
+                currError = errors.case_attributes
+                // TODO: find appropriate icon
                 Icon = <DynamicFeedIcon style={styles} />
                 break
             case TABS.SIMULATION_RESULTS:
@@ -489,12 +502,14 @@ const SimulationParameters = () => {
                     </Grid>
                 </Grid>
             </Grid>
-            {snackMessage && <CustomizedSnackbar
-                message={snackMessage}
-                severityLevel={snackColor}
-                onSnackbarClose={onSnackbarClose}
-            />}
-        </form>
+            {
+                snackMessage && <CustomizedSnackbar
+                    message={snackMessage}
+                    severityLevel={snackColor}
+                    onSnackbarClose={onSnackbarClose}
+                />
+            }
+        </form >
     );
 }
 
