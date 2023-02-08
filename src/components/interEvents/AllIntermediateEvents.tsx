@@ -6,7 +6,7 @@ import { AutoSizer, List } from "react-virtualized";
 import { JsonData } from "../formData";
 import { EventsFromModel } from "../modelData";
 import EventCard from "./EventCard";
-import NoEventsCard from "./NoEventsCard";
+import NoItemsCard from "../emptyComponents/NoItemsCard";
 
 
 interface AllIntermediateEventsProps {
@@ -17,7 +17,7 @@ interface AllIntermediateEventsProps {
 
 const AllIntermediateEvents = (props: AllIntermediateEventsProps) => {
     const [isAnyEvents, setIsAnyEvents] = useState(false)
-    const { formState: { control: formControl }, 
+    const { formState: { control: formControl },
         setErrorMessage, eventsFromModel } = props
 
     const { fields } = useFieldArray({
@@ -26,15 +26,15 @@ const AllIntermediateEvents = (props: AllIntermediateEventsProps) => {
         name: 'event_distribution'
     })
 
-    useEffect(()=>{
+    useEffect(() => {
         const isAny = fields.length > 0
         if (isAny !== isAnyEvents) {
             setIsAnyEvents(isAny)
         }
     }, [fields])
-    
+
     const renderRow = ({ index, key, style }: any) => {
-        return ( 
+        return (
             <EventCard
                 formState={props.formState}
                 setErrorMessage={setErrorMessage}
@@ -43,11 +43,13 @@ const AllIntermediateEvents = (props: AllIntermediateEventsProps) => {
                 key={key}
                 style={style}
                 fields={fields}
-        />)
+            />)
     }
 
-    return ( !isAnyEvents 
-        ? <NoEventsCard/>
+    return (!isAnyEvents
+        ? <NoItemsCard
+            noItemsTitle={"No intermediate events defined in the BPMN model"}
+        />
         : <Grid item xs={12} container spacing={2}>
             <Grid item container xs={12} style={{ minHeight: "60vh" }}>
                 <AutoSizer>

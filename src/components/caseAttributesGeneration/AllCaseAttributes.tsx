@@ -5,7 +5,8 @@ import DiscreteCaseAttr from "./DiscreteCaseAttr"
 import ContinuousCaseAttr from "./ContinuousCaseAttr"
 import { defaultDiscreteCaseAttr, defaultContinuousCaseAttr } from "../simulationParameters/defaultValues"
 import { AutoSizer, List } from "react-virtualized"
-import { useRef } from "react"
+import { useEffect, useRef, useState } from "react"
+import NoItemsCard from "../emptyComponents/NoItemsCard"
 
 const CASE_ATTRIBUTES_PATH = "case_attributes"
 
@@ -18,12 +19,20 @@ interface AllCaseAttributesProps {
 const AllCaseAttributes = (props: AllCaseAttributesProps) => {
     const { formState: { control: formControl }, setErrorMessage } = props
     const listRef = useRef<List>(null)
+    const [isAnyCaseAttrs, setIsAnyCaseAttrs] = useState(false)
 
     const { fields, prepend, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: `${CASE_ATTRIBUTES_PATH}`
     })
+
+    useEffect(() => {
+        const isAny = fields.length > 0
+        if (isAny !== isAnyCaseAttrs) {
+            setIsAnyCaseAttrs(isAny)
+        }
+    }, [fields])
 
     const getCaseAttrComponent = (itemType: string, itemIndex: number): JSX.Element => {
         const ComponentToReturn = (({ "discrete": DiscreteCaseAttr, "continuous": ContinuousCaseAttr })[itemType] ?? undefined)
@@ -60,6 +69,32 @@ const AllCaseAttributes = (props: AllCaseAttributesProps) => {
         )
     }
 
+    const getItemListOrEmptyCard = () => {
+        return (
+            (!isAnyCaseAttrs)
+                ? <NoItemsCard
+                    noItemsTitle={"No case attributes defined"}
+                />
+                : (
+                    <Grid item xs={12} style={{ minHeight: "56vh" }}>
+                        <AutoSizer>
+                            {({ width, height }) => {
+                                return <List
+                                    ref={listRef}
+                                    width={width}
+                                    height={height}
+                                    rowHeight={300}
+                                    rowRenderer={renderRow}
+                                    rowCount={fields.length}
+                                    overscanRowCount={2}
+                                />
+                            }}
+                        </AutoSizer>
+                    </Grid>
+                )
+        )
+    }
+
     return <Grid container item xs={12} spacing={2}>
         <Toolbar sx={{ justifyContent: "flex-end", marginLeft: "auto" }}>
             <ButtonGroup>
@@ -73,21 +108,7 @@ const AllCaseAttributes = (props: AllCaseAttributesProps) => {
                 </Button>
             </ButtonGroup>
         </Toolbar>
-        <Grid item xs={12} style={{ minHeight: "56vh" }}>
-            <AutoSizer>
-                {({ width, height }) => {
-                    return <List
-                        ref={listRef}
-                        width={width}
-                        height={height}
-                        rowHeight={300}
-                        rowRenderer={renderRow}
-                        rowCount={fields.length}
-                        overscanRowCount={2}
-                    />
-                }}
-            </AutoSizer>
-        </Grid>
+        {getItemListOrEmptyCard()}
     </Grid>
 }
 
