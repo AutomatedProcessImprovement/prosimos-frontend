@@ -66,6 +66,8 @@ const tooltip_desc: { [key: string]: string } = {
         "Represents the setup needed in order to execute the task in a batched way",
     CASE_ATTRIBUTES:
         "Represents the setup on how case attributes need to be generated",
+    CASE_BASED_PRIORITISATION:
+        "Represents the case-based prioritisation by defining rules and its appropriate priority level",
     SIMULATION_RESULTS: "",
 }
 
@@ -323,6 +325,8 @@ const SimulationParameters = () => {
                     formState={formState}
                     setErrorMessage={setErrorMessage}
                 />
+            case TABS.CASE_BASED_PRIORITISATION:
+                return <div>Case Based prioritisation</div>
             case TABS.SIMULATION_RESULTS:
                 if (!!currSimulatedOutput)
                     return <SimulationResults
@@ -371,6 +375,11 @@ const SimulationParameters = () => {
                 break
             case TABS.CASE_ATTRIBUTES:
                 currError = errors.case_attributes
+                // TODO: find appropriate icon
+                Icon = <DynamicFeedIcon style={styles} />
+                break
+            case TABS.CASE_BASED_PRIORITISATION:
+                currError = errors.prioritisation_rules
                 // TODO: find appropriate icon
                 Icon = <DynamicFeedIcon style={styles} />
                 break

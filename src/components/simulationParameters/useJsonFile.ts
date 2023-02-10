@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { FiringRule, JsonData } from "../formData";
+import { CaseBasedRule, FiringRule, JsonData, PriorityRule } from "../formData";
 import { EventsFromModel } from "../modelData";
 
 
 const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
     const [missedElemNum, setMissedElemNum] = useState(0)   // shows num of elements that were present in the config
-                                                            // but were absent in BPMN model
+    // but were absent in BPMN model
     const [jsonData, setJsonData] = useState<JsonData>()
 
     useEffect(() => {
@@ -21,7 +21,9 @@ const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
                     const mergeResults = getMergeEventsList(eventsFromModel, rawData["event_distribution"])
                     const [missedNum, finalEvents] = mergeResults
                     rawData["event_distribution"] = finalEvents
-                    
+
+                    parseAndUpdatePrioritisationRules(rawData)
+
                     updateRangesForBatchingRulesIfAny(rawData)
                     setJsonData(rawData)
                     setMissedElemNum(missedNum)
@@ -31,6 +33,64 @@ const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
     }, [jsonFile, eventsFromModel]);
 
     return { jsonData, missedElemNum }
+}
+
+const parseAndUpdatePrioritisationRules = (rawData: any) => {
+    const prioritisationRulesArr: [] = rawData["prioritisation_rules"]
+    console.log(prioritisationRulesArr)
+    if (prioritisationRulesArr === undefined || prioritisationRulesArr.length === 0) {
+        // nothing to do, array is empty
+        return
+    }
+    const parsePrioritisationRules: PriorityRule[] = []
+
+    for (let orRule of prioritisationRulesArr) {
+        const parsedRule: CaseBasedRule[][] = []
+
+        for (let andRule of (orRule as any)["rules"]) {
+            const parsedAndRules: CaseBasedRule[] = []
+
+            for (let simpleRule of andRule) {
+                console.log(simpleRule)
+                const condition: string = simpleRule["condition"]
+
+                if (condition === "in") {
+                    const [minValue, maxValue] = simpleRule["value"]
+                    if (minValue !== 0) {
+                        parsedAndRules.push({
+                            attributeName: simpleRule["attribute"],
+                            operator: ">=",
+                            value: minValue
+                        } as CaseBasedRule)
+                    }
+                    if (maxValue !== "inf") {
+                        parsedAndRules.push({
+                            attributeName: simpleRule["attribute"],
+                            operator: "<=",
+                            value: maxValue
+                        } as CaseBasedRule)
+                    }
+                }
+                else {
+                    parsedAndRules.push({
+                        attributeName: simpleRule["attribute"],
+                        operator: simpleRule["condition"],
+                        value: simpleRule["value"]
+                    } as CaseBasedRule)
+                }
+            }
+            console.log(parsedAndRules)
+            parsedRule.push(parsedAndRules)
+        }
+
+        parsePrioritisationRules.push({
+            priority_level: orRule["priority_level"],
+            rule: parsedRule
+        })
+    }
+
+    console.log(parsePrioritisationRules)
+    rawData["prioritisation_rules"] = parsePrioritisationRules
 }
 
 /**
@@ -101,7 +161,7 @@ const _transform_between_operators = (firing_rules: FiringRule[][]) => {
             if (result === undefined) {
                 console.log(`Invalid setup for ready_wt rules ${ready_wt_rules}`)
             }
-            
+
             ready_wt_new_rule = [{
                 attribute: "ready_wt",
                 comparison: "between",
@@ -114,7 +174,7 @@ const _transform_between_operators = (firing_rules: FiringRule[][]) => {
             if (result === undefined) {
                 console.log(`Invalid setup for ready_wt rules ${ready_wt_rules}`)
             }
-            
+
             large_wt_new_rule = [{
                 attribute: "large_wt",
                 comparison: "between",
@@ -135,13 +195,13 @@ const _transform_between_operators = (firing_rules: FiringRule[][]) => {
     return true
 }
 
-const _get_min_and_max_rules = (rules: FiringRule[]): [string, string] | undefined  => {
+const _get_min_and_max_rules = (rules: FiringRule[]): [string, string] | undefined => {
     const minValue = rules.find((v: FiringRule) => _is_equal_any(v.comparison, ['>', '>=']))?.value
     const maxValue = rules.find((v: FiringRule) => _is_equal_any(v.comparison, ['<', '<=']))?.value
 
     if (minValue === undefined || maxValue === undefined)
         return undefined
-    
+
     return [minValue as string, maxValue as string]
 }
 
@@ -153,7 +213,7 @@ const _is_equal_any = (value: string, possible_options: string[]) => {
             return curr_res
         }
     }
-    
+
     return false
 }
 
