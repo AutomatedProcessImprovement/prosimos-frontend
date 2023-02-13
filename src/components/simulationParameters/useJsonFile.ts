@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { CaseBasedRule, FiringRule, JsonData, PriorityRule } from "../formData";
+import { CaseAttributeDefinition, CaseBasedRule, FiringRule, JsonData, PriorityRule } from "../formData";
 import { EventsFromModel } from "../modelData";
 
 
 const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
     const [missedElemNum, setMissedElemNum] = useState(0)   // shows num of elements that were present in the config
+    const [allCaseAttr, setAllCaseAttr] = useState<string[]>([]) // all defined case attributes
     // but were absent in BPMN model
     const [jsonData, setJsonData] = useState<JsonData>()
 
@@ -25,6 +26,8 @@ const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
                     parseAndUpdatePrioritisationRules(rawData)
 
                     updateRangesForBatchingRulesIfAny(rawData)
+                    collectAndSetAllCaseAttr(rawData["case_attributes"])
+
                     setJsonData(rawData)
                     setMissedElemNum(missedNum)
                 }
@@ -32,12 +35,18 @@ const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
         }
     }, [jsonFile, eventsFromModel]);
 
-    return { jsonData, missedElemNum }
+
+    const collectAndSetAllCaseAttr = (jsonCase: CaseAttributeDefinition[]) => {
+        const allItems = jsonCase?.map(({ name }) => name) ?? []
+        setAllCaseAttr(allItems)
+    }
+
+    return { jsonData, missedElemNum, allCaseAttr }
 }
 
 const parseAndUpdatePrioritisationRules = (rawData: any) => {
     const prioritisationRulesArr: [] = rawData["prioritisation_rules"]
-    console.log(prioritisationRulesArr)
+
     if (prioritisationRulesArr === undefined || prioritisationRulesArr.length === 0) {
         // nothing to do, array is empty
         return
@@ -51,35 +60,45 @@ const parseAndUpdatePrioritisationRules = (rawData: any) => {
             const parsedAndRules: CaseBasedRule[] = []
 
             for (let simpleRule of andRule) {
-                console.log(simpleRule)
                 const condition: string = simpleRule["condition"]
 
+                const [minValue, maxValue] = simpleRule["value"]
                 if (condition === "in") {
-                    const [minValue, maxValue] = simpleRule["value"]
-                    if (minValue !== 0) {
+                    // TODO: add validation when the infinite range is provided
+                    if (minValue === 0) {
+                        // no lower boundary, so we transform the rule to <=
                         parsedAndRules.push({
-                            attributeName: simpleRule["attribute"],
-                            operator: ">=",
+                            attribute: simpleRule["attribute"],
+                            comparison: "<=",
+                            value: maxValue
+                        } as CaseBasedRule)
+                    }
+                    else if (maxValue === "inf") {
+                        // no lower boundary, so we transform the rule to >=
+                        parsedAndRules.push({
+                            attribute: simpleRule["attribute"],
+                            comparison: ">=",
                             value: minValue
                         } as CaseBasedRule)
                     }
-                    if (maxValue !== "inf") {
+                    else {
+                        // both boundaries exist, so it is a range
                         parsedAndRules.push({
-                            attributeName: simpleRule["attribute"],
-                            operator: "<=",
-                            value: maxValue
+                            attribute: simpleRule["attribute"],
+                            comparison: simpleRule["condition"],
+                            value: simpleRule["value"]
                         } as CaseBasedRule)
                     }
                 }
                 else {
                     parsedAndRules.push({
-                        attributeName: simpleRule["attribute"],
-                        operator: simpleRule["condition"],
+                        attribute: simpleRule["attribute"],
+                        comparison: simpleRule["condition"],
                         value: simpleRule["value"]
                     } as CaseBasedRule)
                 }
             }
-            console.log(parsedAndRules)
+
             parsedRule.push(parsedAndRules)
         }
 
@@ -89,7 +108,6 @@ const parseAndUpdatePrioritisationRules = (rawData: any) => {
         })
     }
 
-    console.log(parsePrioritisationRules)
     rawData["prioritisation_rules"] = parsePrioritisationRules
 }
 

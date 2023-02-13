@@ -36,6 +36,8 @@ import AllBatching from './batching/AllBatching';
 import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
 import useTabVisibility, { TABS } from './simulationParameters/useTabVisibility';
 import AllCaseAttributes from './caseAttributesGeneration/AllCaseAttributes';
+import AllPrioritisationItems from './prioritisation/AllPrioritisationItems';
+import { transformPrioritisationRules } from './prioritisation/prioritisationRulesTransformer';
 
 const useStyles = makeStyles((theme: Theme) => ({
     simParamsGrid: {
@@ -113,7 +115,7 @@ const SimulationParameters = () => {
     const linkDownloadRef = useRef<HTMLAnchorElement>(null)
 
     const { tasksFromModel, gateways, eventsFromModel } = useBpmnFile(bpmnFile)
-    const { jsonData, missedElemNum } = useJsonFile(jsonFile, eventsFromModel)
+    const { jsonData, missedElemNum, allCaseAttr } = useJsonFile(jsonFile, eventsFromModel)
 
     const { formState } = useFormState(tasksFromModel, gateways, eventsFromModel, jsonData)
     const { formState: { errors, isValid, isSubmitted, submitCount }, getValues, handleSubmit } = formState
@@ -200,9 +202,10 @@ const SimulationParameters = () => {
     };
 
     const getBlobBasedOnExistingInput = (): Blob => {
-        const values = getValues()
-        const newTransformedValues = transformBetweenOperations(values)
-        const blob = fromContentToBlob(newTransformedValues)
+        const values = getValues() as JsonData
+        const newTransformedValuesAfterBatching = transformBetweenOperations(values)
+        const newTransformedValuesAfterPrioritisation = transformPrioritisationRules(newTransformedValuesAfterBatching)
+        const blob = fromContentToBlob(newTransformedValuesAfterPrioritisation)
 
         return blob
     };
@@ -326,7 +329,10 @@ const SimulationParameters = () => {
                     setErrorMessage={setErrorMessage}
                 />
             case TABS.CASE_BASED_PRIORITISATION:
-                return <div>Case Based prioritisation</div>
+                return <AllPrioritisationItems
+                    formState={formState}
+                    allCaseAttr={allCaseAttr}
+                />
             case TABS.SIMULATION_RESULTS:
                 if (!!currSimulatedOutput)
                     return <SimulationResults

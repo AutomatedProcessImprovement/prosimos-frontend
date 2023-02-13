@@ -13,7 +13,6 @@ const CASE_ATTRIBUTES_PATH = "case_attributes"
 interface AllCaseAttributesProps {
     formState: UseFormReturn<JsonData, object>
     setErrorMessage: (value: string) => void
-
 }
 
 const AllCaseAttributes = (props: AllCaseAttributesProps) => {

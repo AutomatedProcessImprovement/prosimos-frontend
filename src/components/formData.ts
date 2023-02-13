@@ -18,9 +18,9 @@ export interface PriorityRule {
 }
 
 export interface CaseBasedRule {
-    attributeName: string
-    operator: string
-    value: number | [number]
+    attribute: string
+    comparison: string
+    value: number | (number | string)[]
 }
 
 export interface BatchProcessing {
