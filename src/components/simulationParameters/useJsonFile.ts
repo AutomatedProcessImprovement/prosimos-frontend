@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { CaseAttributeDefinition, CaseBasedRule, FiringRule, JsonData, PriorityRule } from "../formData";
+import { PrioritisationBuilderSchema } from "../batching/schemas";
+import { CaseBasedRule, FiringRule, JsonData, PriorityRule } from "../formData";
 import { EventsFromModel } from "../modelData";
+import { collectAndSetAllCaseAttr } from "./caseAttributesCollectorAndTransformer";
 
 
 const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
     const [missedElemNum, setMissedElemNum] = useState(0)   // shows num of elements that were present in the config
-    const [allCaseAttr, setAllCaseAttr] = useState<string[]>([]) // all defined case attributes
+    const [builderSchema, setBuilderSchema] = useState<PrioritisationBuilderSchema>({}) // all defined case attributes
     // but were absent in BPMN model
     const [jsonData, setJsonData] = useState<JsonData>()
 
@@ -26,7 +28,8 @@ const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
                     parseAndUpdatePrioritisationRules(rawData)
 
                     updateRangesForBatchingRulesIfAny(rawData)
-                    collectAndSetAllCaseAttr(rawData["case_attributes"])
+                    const items = collectAndSetAllCaseAttr(rawData["case_attributes"])
+                    setBuilderSchema(items)
 
                     setJsonData(rawData)
                     setMissedElemNum(missedNum)
@@ -36,12 +39,7 @@ const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
     }, [jsonFile, eventsFromModel]);
 
 
-    const collectAndSetAllCaseAttr = (jsonCase: CaseAttributeDefinition[]) => {
-        const allItems = jsonCase?.map(({ name }) => name) ?? []
-        setAllCaseAttr(allItems)
-    }
-
-    return { jsonData, missedElemNum, allCaseAttr }
+    return { jsonData, missedElemNum, builderSchema }
 }
 
 const parseAndUpdatePrioritisationRules = (rawData: any) => {

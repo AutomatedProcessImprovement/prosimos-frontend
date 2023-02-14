@@ -1,15 +1,16 @@
 import { Grid, Typography } from "@mui/material";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { QueryBuilder } from "../batching/QueryBuilder";
+import { PrioritisationBuilderSchema } from "../batching/schemas";
 import { JsonData } from "../formData";
 
 interface AllPrioritisationItemsProps {
     formState: UseFormReturn<JsonData, object>
-    allCaseAttr: string[]
+    queryBuilderSchema: PrioritisationBuilderSchema
 }
 
 const AllPrioritisationItems = (props: AllPrioritisationItemsProps) => {
-    const { formState: { control: formControl }, allCaseAttr } = props
+    const { formState: { control: formControl }, queryBuilderSchema } = props
 
     const { fields } = useFieldArray({
         keyName: 'key',
@@ -26,7 +27,7 @@ const AllPrioritisationItems = (props: AllPrioritisationItemsProps) => {
                     <QueryBuilder
                         formState={props.formState}
                         name={`prioritisation_rules.${index}.rule`}
-                        possibleOptions={allCaseAttr}
+                        possibleOptions={queryBuilderSchema}
                     />
                 </Grid>
             })}

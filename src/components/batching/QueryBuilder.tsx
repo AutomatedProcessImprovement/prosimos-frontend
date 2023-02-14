@@ -99,7 +99,7 @@ const useQueryBuilderStyles = makeStyles(
 interface QueryBuilderProps {
     formState: UseFormReturn<JsonData, object>;
     name: string;
-    possibleOptions?: string[];
+    possibleOptions?: PrioritisationBuilderSchema;
 }
 
 type EligibleBuilderSchemas = BatchingBuilderSchema | PrioritisationBuilderSchema
@@ -109,27 +109,15 @@ export const QueryBuilder = (props: QueryBuilderProps) => {
     const [optionsWithType, setOptionsWithType] = useState<EligibleBuilderSchemas>({})
 
     useEffect(() => {
-        if (possibleOptions === undefined || possibleOptions.length === 0) {
-            // we use default options (batch firing rules)
-            setOptionsWithType(batchingSchema)
-            return
+        let options = possibleOptions
+        if (options === undefined || Object.keys(options).length === 0) {
+            // we use default options/schema (batch firing rules)
+            options = batchingSchema
         }
 
-        const opts = possibleOptions.reduce((accObj, currentAttrName) => {
-            const currVal = {
-                [currentAttrName]: {
-                    label: currentAttrName,
-                    type: "priority"
-                }
-            }
-
-            return {
-                ...accObj,
-                ...currVal
-            }
-        }, {})
-
-        setOptionsWithType(opts)
+        if (options !== optionsWithType) {
+            setOptionsWithType(options)
+        }
     }, [possibleOptions])
 
     return (

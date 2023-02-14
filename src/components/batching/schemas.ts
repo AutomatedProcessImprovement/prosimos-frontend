@@ -64,8 +64,7 @@ export const typeOperatorMap = {
       label: EQUALS
     }
   },
-  // TODO: priority should have two types: discrete and continuous
-  priority: {
+  priority_continuous: {
     "<=": {
       label: LESS_THAN_OR_EQUALS
     },
@@ -78,6 +77,11 @@ export const typeOperatorMap = {
     "in": {
       label: BETWEEN,
       multiple: true
+    },
+  },
+  priority_discrete: {
+    "=": {
+      label: EQUALS
     },
   }
 };
@@ -115,9 +119,5 @@ export const batchingSchema: BatchingBuilderSchema = {
   week_day: {
     label: "Weekday",
     type: "weekday"
-  },
-  priority: {
-    label: "Priority",
-    type: "priority"
   }
 };

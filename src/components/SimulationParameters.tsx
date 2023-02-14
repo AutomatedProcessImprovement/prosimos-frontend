@@ -115,7 +115,7 @@ const SimulationParameters = () => {
     const linkDownloadRef = useRef<HTMLAnchorElement>(null)
 
     const { tasksFromModel, gateways, eventsFromModel } = useBpmnFile(bpmnFile)
-    const { jsonData, missedElemNum, allCaseAttr } = useJsonFile(jsonFile, eventsFromModel)
+    const { jsonData, missedElemNum, builderSchema } = useJsonFile(jsonFile, eventsFromModel)
 
     const { formState } = useFormState(tasksFromModel, gateways, eventsFromModel, jsonData)
     const { formState: { errors, isValid, isSubmitted, submitCount }, getValues, handleSubmit } = formState
@@ -331,7 +331,7 @@ const SimulationParameters = () => {
             case TABS.CASE_BASED_PRIORITISATION:
                 return <AllPrioritisationItems
                     formState={formState}
-                    allCaseAttr={allCaseAttr}
+                    queryBuilderSchema={builderSchema}
                 />
             case TABS.SIMULATION_RESULTS:
                 if (!!currSimulatedOutput)
