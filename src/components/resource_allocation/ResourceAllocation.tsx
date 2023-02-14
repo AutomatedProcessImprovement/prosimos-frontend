@@ -28,7 +28,7 @@ interface RowProps {
 
 const Row = (props: RowProps) => {
     const { allocationIndex, taskName, allowedResources, setErrorMessage } = props
-    const { formState: { control: formControl, trigger, formState: { errors }} } = props
+    const { formState: { control: formControl, trigger, formState: { errors } } } = props
     const [openModule, setOpenModule] = useState(false)
     const [isRowAdded, setIsRowAdded] = useState(false)
     const listRef = useRef<List>(null)
@@ -63,7 +63,7 @@ const Row = (props: RowProps) => {
             setErrorMessage("Verify the correctness of all entered Resource Allocations")
             return
         }
-        
+
         append(defaultResourceAllocationDist)
         setIsRowAdded(true)
         if ((rowResourcesErrors as any)?.type === "min") {
@@ -76,7 +76,7 @@ const Row = (props: RowProps) => {
             setErrorMessage("At least one resource allocation for the task should be provided")
             return
         }
-        
+
         remove(index)
     }
 
@@ -84,7 +84,7 @@ const Row = (props: RowProps) => {
         const resourceDistr = fields[index]
 
         return (
-            <Grid item xs={12} key={`resource_distr_${resourceDistr.key}`} style={{ ...style, padding: "10px"}}>
+            <Grid item xs={12} key={`resource_distr_${resourceDistr.key}`} style={{ ...style, padding: "10px" }}>
                 <ResourceDistribution
                     formState={props.formState}
                     allocationIndex={allocationIndex}
@@ -117,7 +117,7 @@ const Row = (props: RowProps) => {
                     </IconButton>
                 </TableCell>
                 <TableCell
-                    style={{ paddingBottom: "0px" }}    
+                    style={{ paddingBottom: "0px" }}
                 >
                     <Typography>
                         {taskName}
@@ -182,7 +182,7 @@ const ResourceAllocation = (props: ResourceAllocationProps) => {
             ...acc,
             ...resources
         } as ResourceMap
-    }, {})
+    }, {}) ?? {}
 
     return (
         <Grid container spacing={2}>

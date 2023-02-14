@@ -1,14 +1,11 @@
 import { useEffect, useState } from "react";
-import { PrioritisationBuilderSchema } from "../batching/schemas";
 import { CaseBasedRule, FiringRule, JsonData, PriorityRule } from "../formData";
 import { EventsFromModel } from "../modelData";
-import { collectAndSetAllCaseAttr } from "./caseAttributesCollectorAndTransformer";
 
 
 const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
-    const [missedElemNum, setMissedElemNum] = useState(0)   // shows num of elements that were present in the config
-    const [builderSchema, setBuilderSchema] = useState<PrioritisationBuilderSchema>({}) // all defined case attributes
-    // but were absent in BPMN model
+    // shows num of elements that were present in the config but were absent in BPMN model
+    const [missedElemNum, setMissedElemNum] = useState(0)
     const [jsonData, setJsonData] = useState<JsonData>()
 
     useEffect(() => {
@@ -26,10 +23,7 @@ const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
                     rawData["event_distribution"] = finalEvents
 
                     parseAndUpdatePrioritisationRules(rawData)
-
                     updateRangesForBatchingRulesIfAny(rawData)
-                    const items = collectAndSetAllCaseAttr(rawData["case_attributes"])
-                    setBuilderSchema(items)
 
                     setJsonData(rawData)
                     setMissedElemNum(missedNum)
@@ -38,8 +32,7 @@ const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
         }
     }, [jsonFile, eventsFromModel]);
 
-
-    return { jsonData, missedElemNum, builderSchema }
+    return { jsonData, missedElemNum }
 }
 
 const parseAndUpdatePrioritisationRules = (rawData: any) => {
