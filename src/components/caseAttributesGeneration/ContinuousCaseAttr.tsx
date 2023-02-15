@@ -10,7 +10,7 @@ interface ContinuousCaseAttrProps {
     formState: UseFormReturn<JsonData, object>
     setErrorMessage: (value: string) => void
     itemIndex: number
-    remove: (index?: number | number[] | undefined) => void
+    remove: (index: number) => void
 }
 
 const ContinuousCaseAttr = (props: ContinuousCaseAttrProps) => {

@@ -7,6 +7,7 @@ import { defaultDiscreteCaseAttr, defaultContinuousCaseAttr } from "../simulatio
 import { AutoSizer, List } from "react-virtualized"
 import { useEffect, useRef, useState } from "react"
 import NoItemsCard from "../emptyComponents/NoItemsCard"
+import { collectUniqueAtrrs } from "./caseAttributesUniqueCollector"
 
 const CASE_ATTRIBUTES_PATH = "case_attributes"
 
@@ -16,9 +17,10 @@ interface AllCaseAttributesProps {
 }
 
 const AllCaseAttributes = (props: AllCaseAttributesProps) => {
-    const { formState: { control: formControl }, setErrorMessage } = props
+    const { formState: { control: formControl, getValues }, setErrorMessage } = props
     const listRef = useRef<List>(null)
     const [isAnyCaseAttrs, setIsAnyCaseAttrs] = useState(false)
+    const [referencedAttrs, setReferencedAttrs] = useState<Set<string>>(new Set())
 
     const { fields, prepend, remove } = useFieldArray({
         keyName: 'key',
@@ -27,11 +29,31 @@ const AllCaseAttributes = (props: AllCaseAttributesProps) => {
     })
 
     useEffect(() => {
+        const newReferencedAttrs = collectUniqueAtrrs(getValues("prioritisation_rules"))
+        if (newReferencedAttrs !== referencedAttrs) {
+            setReferencedAttrs(newReferencedAttrs)
+        }
+    }, [])
+
+    useEffect(() => {
         const isAny = fields.length > 0
         if (isAny !== isAnyCaseAttrs) {
             setIsAnyCaseAttrs(isAny)
         }
     }, [fields])
+
+    const removeByIndex = (index: number) => {
+        const itemName = getValues(`case_attributes.${index}.name`)
+        const isReferencedInPrioritisationRules = referencedAttrs.has(itemName)
+        if (isReferencedInPrioritisationRules) {
+            setErrorMessage(
+                "Case Attribute is referenced in one or many prioritisation rules. Remove those rules first"
+            )
+        }
+        else {
+            remove(index)
+        }
+    }
 
     const getCaseAttrComponent = (itemType: string, itemIndex: number): JSX.Element => {
         const ComponentToReturn = (({ "discrete": DiscreteCaseAttr, "continuous": ContinuousCaseAttr })[itemType] ?? undefined)
@@ -45,7 +67,7 @@ const AllCaseAttributes = (props: AllCaseAttributesProps) => {
                 formState={props.formState}
                 setErrorMessage={props.setErrorMessage}
                 itemIndex={itemIndex}
-                remove={remove}
+                remove={removeByIndex}
             />
         )
     }

@@ -125,7 +125,7 @@ const SimulationParameters = () => {
 
     const { onUploadNewModel } = useNewModel()
 
-    // validate both forms: scenatio params and json fields
+    // validate both forms: scenario params and json fields
     useEffect(() => {
         // isValid doesn't work properly on init
         const isJsonParamsValid = Object.keys(errors)?.length === 0
