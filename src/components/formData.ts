@@ -14,7 +14,7 @@ export interface JsonData {
 
 export interface PriorityRule {
     priority_level: number
-    rule: CaseBasedRule[][]
+    rules: CaseBasedRule[][]
 }
 
 export interface CaseBasedRule {

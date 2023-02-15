@@ -12,7 +12,7 @@ export const transformPrioritisationRules = (values: JsonData) => {
 
     if (prioritisation_rules !== undefined) {
         prioritisation_rules.forEach((element: PriorityRule) => {
-            _transformRulesToRangesIfAny(element.rule)
+            _transformRulesToRangesIfAny(element.rules)
         })
     }
 

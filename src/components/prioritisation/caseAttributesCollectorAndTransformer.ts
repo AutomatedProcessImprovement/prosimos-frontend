@@ -1,31 +1,46 @@
 import { PrioritisationBuilderSchema } from "../batching/schemas"
 import { CaseAttributeDefinition } from "../formData"
 
+type ValueOptionsByAttrName = {
+    [attrName: string]: []
+}
+
 /**
 * Collect all case attributes user has defined
-* 
+* Collect possible options of case attributes per each discrete case attribute
 * Transform them to the object parseable for dropdown
 * 
 * This means we add 'type' field to each case attributes 
 * which later tells us eligible list of operations for the case attribute
 *
 * @param {CaseAttributeDefinition[]} caseAttrsFromJson - array of all case attributes defined in a simulation scenario
-* @returns {Object} Dictionary (query builder schema) with case attributes name together with the QueryBuilder type
+* @returns {Object} Tuple with 
+* 1) Dictionary (query builder schema) with case attributes name together with the QueryBuilder type
+* 2) Dictionary with case attribute name as key and all possible choices of value (valid only for discrete values)
 */
-export const collectAndSetAllCaseAttr = (caseAttrsFromJson: CaseAttributeDefinition[]) => {
-    return caseAttrsFromJson?.reduce(transformCaseAttrArrToQueryBuilderSchema, {}) ?? {}
+export const collectAllCaseAttrWithTypes = (caseAttrsFromJson: CaseAttributeDefinition[]) => {
+    return caseAttrsFromJson?.reduce(transformCaseAttrArrToQueryBuilderSchema, [{}, {}] as [PrioritisationBuilderSchema, ValueOptionsByAttrName]) ?? [{}, {}]
 }
 
-const transformCaseAttrArrToQueryBuilderSchema = (accObj: PrioritisationBuilderSchema, { name: currentAttrName, type }: CaseAttributeDefinition) => {
+const transformCaseAttrArrToQueryBuilderSchema = (accObj: [PrioritisationBuilderSchema, ValueOptionsByAttrName], { name: currentAttrName, type, values }: CaseAttributeDefinition): [PrioritisationBuilderSchema, ValueOptionsByAttrName] => {
+    const [accBuilderSchema, accAllDiscreteOptions] = accObj
+    const isDiscrete = type === "discrete"
     const currVal = {
         [currentAttrName]: {
             label: currentAttrName,
-            type: (type === "discrete") ? "priority_discrete" : "priority_continuous"
+            type: isDiscrete ? "priority_discrete" : "priority_continuous"
         }
     } as PrioritisationBuilderSchema
 
-    return {
-        ...accObj,
+    const queryBuilderSchema = {
+        ...accBuilderSchema,
         ...currVal
     }
+
+    if (isDiscrete) {
+        // collect all options value for current case attribute
+        accAllDiscreteOptions[currentAttrName] = values.map(({ key, value }: any) => key)
+    }
+
+    return [queryBuilderSchema, accAllDiscreteOptions]
 }

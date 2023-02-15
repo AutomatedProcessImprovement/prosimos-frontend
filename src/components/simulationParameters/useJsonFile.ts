@@ -51,7 +51,7 @@ const parseAndUpdatePrioritisationRules = (rawData: any) => {
             const parsedAndRules: CaseBasedRule[] = []
 
             for (let simpleRule of andRule) {
-                const condition: string = simpleRule["condition"]
+                const condition: string = simpleRule["comparison"]
 
                 const [minValue, maxValue] = simpleRule["value"]
                 if (condition === "in") {
@@ -76,7 +76,7 @@ const parseAndUpdatePrioritisationRules = (rawData: any) => {
                         // both boundaries exist, so it is a range
                         parsedAndRules.push({
                             attribute: simpleRule["attribute"],
-                            comparison: simpleRule["condition"],
+                            comparison: simpleRule["comparison"],
                             value: simpleRule["value"]
                         } as CaseBasedRule)
                     }
@@ -84,7 +84,7 @@ const parseAndUpdatePrioritisationRules = (rawData: any) => {
                 else {
                     parsedAndRules.push({
                         attribute: simpleRule["attribute"],
-                        comparison: simpleRule["condition"],
+                        comparison: simpleRule["comparison"],
                         value: simpleRule["value"]
                     } as CaseBasedRule)
                 }
@@ -95,7 +95,7 @@ const parseAndUpdatePrioritisationRules = (rawData: any) => {
 
         parsePrioritisationRules.push({
             priority_level: orRule["priority_level"],
-            rule: parsedRule
+            rules: parsedRule
         })
     }
 

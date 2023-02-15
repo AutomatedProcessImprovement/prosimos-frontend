@@ -25,6 +25,7 @@ import WeekdaySelect from "../calendars/WeekdaySelect";
 import SliderWithInputs from "./SliderWithInputs";
 import { ChangeEvent, useState } from "react";
 import { useEffect } from "react";
+import QueryValueDiscreteSelect from "./QueryValueDiscreteSelect";
 
 const useQueryBuilderStyles = makeStyles(
     (theme: Theme) => ({
@@ -99,17 +100,18 @@ const useQueryBuilderStyles = makeStyles(
 interface QueryBuilderProps {
     formState: UseFormReturn<JsonData, object>;
     name: string;
-    possibleOptions?: PrioritisationBuilderSchema;
+    builderSchema?: PrioritisationBuilderSchema;
+    possibleValueOptions?: {}
 }
 
 type EligibleBuilderSchemas = BatchingBuilderSchema | PrioritisationBuilderSchema
 
 export const QueryBuilder = (props: QueryBuilderProps) => {
-    const { possibleOptions, ...otherProps } = props
+    const { builderSchema, ...otherProps } = props
     const [optionsWithType, setOptionsWithType] = useState<EligibleBuilderSchemas>({})
 
     useEffect(() => {
-        let options = possibleOptions
+        let options = builderSchema
         if (options === undefined || Object.keys(options).length === 0) {
             // we use default options/schema (batch firing rules)
             options = batchingSchema
@@ -118,12 +120,12 @@ export const QueryBuilder = (props: QueryBuilderProps) => {
         if (options !== optionsWithType) {
             setOptionsWithType(options)
         }
-    }, [possibleOptions])
+    }, [builderSchema])
 
     return (
         <QueryGroup
             {...otherProps}
-            possibleOptions={optionsWithType}
+            builderSchema={optionsWithType}
         />
     );
 };
@@ -131,9 +133,10 @@ export const QueryBuilder = (props: QueryBuilderProps) => {
 interface QueryGroupProps {
     name: string;
     formState: any;
-    possibleOptions: EligibleBuilderSchemas;
+    builderSchema: EligibleBuilderSchemas;
     depth?: number;
     onRemove?: () => any;
+    possibleValueOptions?: {}
 }
 
 export type FieldsPath = "query.items" | `query.items.${number}.items` | `query.items.${number}.items.${number}.items`
@@ -142,9 +145,10 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
     const {
         name,
         formState,
-        possibleOptions,
+        builderSchema,
         depth = 0,
         onRemove,
+        possibleValueOptions,
         ...props
     } = allProps
     const classes = useQueryBuilderStyles();
@@ -225,17 +229,19 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
                             key={field.id}
                             depth={depth + 1}
                             name={`${name}.${index}`}
-                            possibleOptions={possibleOptions}
+                            builderSchema={builderSchema}
                             formState={formState}
                             onRemove={() => remove(index)}
+                            possibleValueOptions={possibleValueOptions}
                         />
                     ) : (
                         <QueryCondition
                             key={field.id}
                             formState={formState}
                             name={`${name}.${index}`}
-                            possibleOptions={possibleOptions}
+                            builderSchema={builderSchema}
                             onRemove={() => remove(index)}
+                            possibleValueOptions={possibleValueOptions}
                         />
                     )
                 })}
@@ -247,15 +253,17 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
 interface QueryConditionProps {
     name: string;
     formState: any;
-    possibleOptions: EligibleBuilderSchemas;
+    builderSchema: EligibleBuilderSchemas;
     onRemove: () => any;
+    possibleValueOptions?: {}
 }
 
 const QueryCondition = (allProps: QueryConditionProps) => {
     const { name,
         formState,
-        possibleOptions,
+        builderSchema,
         onRemove,
+        possibleValueOptions,
         ...props } = allProps
 
     const { control, watch, formState: { errors }, setValue, clearErrors } = formState
@@ -274,7 +282,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
     const operatorValue = watch(conditionOperatorName);
 
     // dynamic operator and values
-    const fieldTypeSchema = (possibleOptions as any)[fieldValue];
+    const fieldTypeSchema = (builderSchema as any)[fieldValue];
     const typeOperator = (typeOperatorMap as any)[fieldTypeSchema?.type];
     const valueOpts = (typeOperator as any)?.[operatorValue];
 
@@ -306,6 +314,76 @@ const QueryCondition = (allProps: QueryConditionProps) => {
         nullifyValueAndClearErrors(conditionValueName)
     }
 
+    const getValueComponent = () => {
+        switch (fieldTypeSchema.type) {
+            case 'weekday':
+                return <Controller
+                    name={conditionValueName}
+                    control={control}
+                    render={({ field }) => (
+                        <WeekdaySelect
+                            field={field}
+                            label="Value"
+                            style={{ ml: 1.875, mt: 2, flex: 1 }}
+                            fieldError={conditionValueError}
+                        />
+                    )}
+                />
+            case 'priority_discrete':
+                const allPossibleOptions = (possibleValueOptions as any)?.[fieldValue] ?? []
+                return <QueryValueDiscreteSelect
+                    conditionValueName={conditionValueName}
+                    fieldError={conditionValueError}
+                    formState={formState}
+                    allPossibleOptions={allPossibleOptions}
+                    style={{ ml: 1.875, mt: 2, flex: 1 }} />
+            default:
+                return valueOpts?.multiple
+                    ? (
+                        <Controller
+                            key={`${typeOperator.label}-multiple`}
+                            control={control}
+                            name={conditionValueName}
+                            defaultValue={[]}
+                            render={({
+                                field: { onChange, value }
+                            }) => {
+                                return <SliderWithInputs
+                                    value={value}
+                                    onChange={onChange}
+                                    conditionValueError={conditionValueError}
+                                />
+                            }}
+                        />
+                    )
+                    : (
+                        <Controller
+                            key={`${typeOperator.label}-single`}
+                            control={control}
+                            name={conditionValueName}
+                            defaultValue={""}
+                            rules={{ required: "Required" }}
+                            render={({
+                                field: { onChange, value }
+                            }) => (
+                                <TextField
+                                    label="Value"
+                                    margin="normal"
+                                    type="text"
+                                    onChange={onChange}
+                                    style={{ flex: 1, marginLeft: 15 }}
+                                    error={!!conditionValueError}
+                                    helperText={getHelperTextForInputValue()}
+                                    value={value}
+                                    variant="standard"
+                                />
+                            )}
+                        />
+                    )
+        }
+
+    }
+
     return (
         <div className={clsx(classes.item, classes.cond)}
             {...props}
@@ -330,7 +408,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                         variant="standard"
                     >
                         <MenuItem value="">None</MenuItem>
-                        {Object.entries(possibleOptions).map(([key, item]) => {
+                        {Object.entries(builderSchema).map(([key, item]) => {
                             return (
                                 <MenuItem key={key} value={key}>
                                     {item.label}
@@ -378,65 +456,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                             )}
                         />
 
-                        {fieldTypeSchema.type === 'weekday'
-                            ? <Controller
-                                name={conditionValueName}
-                                control={control}
-                                render={({ field }) => (
-                                    <WeekdaySelect
-                                        field={field}
-                                        label="Value"
-                                        style={{ ml: 1.875, mt: 2, flex: 1 }}
-                                        fieldError={conditionValueError}
-                                    />
-                                )}
-                            />
-                            : valueOpts?.multiple
-                                ? (
-                                    <Controller
-                                        key={`${typeOperator.label}-multiple`}
-                                        control={control}
-                                        name={conditionValueName}
-                                        defaultValue={[]}
-                                        render={({
-                                            field: { onChange, value }
-                                        }) => {
-                                            return <SliderWithInputs
-                                                value={value}
-                                                onChange={onChange}
-                                                conditionValueError={conditionValueError}
-                                            />
-                                        }}
-                                    />
-                                )
-                                : (
-                                    <Controller
-                                        key={`${typeOperator.label}-single`}
-                                        control={control}
-                                        name={conditionValueName}
-                                        defaultValue={""}
-                                        rules={{ required: "Required" }}
-                                        render={({
-                                            field: { onChange, value }
-                                        }) => (
-                                            <TextField
-                                                label="Value"
-                                                margin="normal"
-                                                type={fieldTypeSchema.type === "number" ? "number" : "text"}
-                                                onChange={(e) => {
-                                                    fieldTypeSchema.type === "number"
-                                                        ? onChange(Number(e.target.value))
-                                                        : onChange(e.target.value);
-                                                }}
-                                                style={{ flex: 1, marginLeft: 15 }}
-                                                error={!!conditionValueError}
-                                                helperText={getHelperTextForInputValue()}
-                                                value={value}
-                                                variant="standard"
-                                            />
-                                        )}
-                                    />
-                                )}
+                        {getValueComponent()}
                     </>
                 )}
 

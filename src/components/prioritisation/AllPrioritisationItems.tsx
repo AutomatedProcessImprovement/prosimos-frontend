@@ -4,7 +4,7 @@ import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { QueryBuilder } from "../batching/QueryBuilder";
 import { PrioritisationBuilderSchema } from "../batching/schemas";
 import { JsonData } from "../formData";
-import { collectAndSetAllCaseAttr } from "./caseAttributesCollectorAndTransformer";
+import { collectAllCaseAttrWithTypes } from "./caseAttributesCollectorAndTransformer";
 
 interface AllPrioritisationItemsProps {
     formState: UseFormReturn<JsonData, object>
@@ -13,6 +13,7 @@ interface AllPrioritisationItemsProps {
 const AllPrioritisationItems = (props: AllPrioritisationItemsProps) => {
     const { formState: { control: formControl, getValues } } = props
     const [builderSchema, setBuilderSchema] = useState<PrioritisationBuilderSchema>({})
+    const [discreteOptionsByCaseAttributeName, setDiscreteOptionsByCaseAttributeName] = useState({})
 
     const { fields } = useFieldArray({
         keyName: 'key',
@@ -21,9 +22,12 @@ const AllPrioritisationItems = (props: AllPrioritisationItemsProps) => {
     })
 
     useEffect(() => {
-        const newBuilderSchema = collectAndSetAllCaseAttr(getValues("case_attributes"))
+        const [newBuilderSchema, newDiscreteOptions] = collectAllCaseAttrWithTypes(getValues("case_attributes"))
         if (newBuilderSchema !== builderSchema) {
             setBuilderSchema(newBuilderSchema)
+        }
+        if (newDiscreteOptions !== discreteOptionsByCaseAttributeName) {
+            setDiscreteOptionsByCaseAttributeName(newDiscreteOptions)
         }
     }, [])
 
@@ -34,8 +38,9 @@ const AllPrioritisationItems = (props: AllPrioritisationItemsProps) => {
                     <Typography variant="h6" align="left"> Rule </Typography>
                     <QueryBuilder
                         formState={props.formState}
-                        name={`prioritisation_rules.${index}.rule`}
-                        possibleOptions={builderSchema}
+                        name={`prioritisation_rules.${index}.rules`}
+                        builderSchema={builderSchema}
+                        possibleValueOptions={discreteOptionsByCaseAttributeName}
                     />
                 </Grid>
             ))}

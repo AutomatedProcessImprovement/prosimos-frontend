@@ -14,7 +14,7 @@ export const collectUniqueAtrrs = (rules: PriorityRule[]): Set<string> => {
     }
 
     for (let rule of rules) {
-        for (let orRules of rule["rule"]) {
+        for (let orRules of rule["rules"]) {
             for (let andRule of orRules) {
                 collectedAttr.add(andRule.attribute)
             }
