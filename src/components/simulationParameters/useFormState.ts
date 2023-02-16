@@ -3,11 +3,10 @@ import { useForm } from "react-hook-form";
 import { EventDistribution, JsonData } from "../formData";
 import { AllModelTasks, EventsFromModel, Gateways } from "../modelData";
 import { defaultTemplateSchedule, defaultArrivalTimeDistribution, defaultArrivalCalendarArr, defaultResourceProfiles } from "./defaultValues";
-import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, SUMMATION_ONE_MSG, INVALID_TIME_FORMAT } from "./../validationMessages";
 import { round } from "../../helpers/timeConversions";
-import { distributionValidation } from "../../yup-extended";
+import yup, { distributionValidation, stringOrNumberArr } from "../../yup-extended";
 
 const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsFromModel?: EventsFromModel, jsonData?: JsonData) => {
     const [data, setData] = useState({})
@@ -217,21 +216,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                                     yup.object({
                                         attribute: yup.string().required(REQUIRED_ERROR_MSG),
                                         comparison: yup.string().required(REQUIRED_ERROR_MSG),
-                                        // string for weekday and numeric string for all others
-                                        value: yup.number()
-                                        // value: yup.lazy(value => {
-                                        //     const stringOrNumber = yup.string().when("attribute", {
-                                        //         is: (value: string) => value === "week_day",
-                                        //         then: (schema) => schema,               // string is the only limitation (it can contain everything)
-                                        //         otherwise: (schema) => schema.integer() // string can contain only digit numbers
-                                        //     })
-                                        //     const oneValueSchema = stringOrNumber.required(REQUIRED_ERROR_MSG)
-
-                                        //     return Array.isArray(value)
-                                        //         ? yup.array().of(oneValueSchema)
-                                        //             .min(2, "Cannot be empty")
-                                        //         : oneValueSchema
-                                        // })
+                                        value: stringOrNumberArr
                                     })
                                 ) as any)
                                 .uniqueAttributes()

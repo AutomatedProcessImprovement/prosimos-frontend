@@ -23,9 +23,9 @@ import { batchingSchema, BatchingBuilderSchema, PrioritisationBuilderSchema, typ
 import { JsonData } from "../formData";
 import WeekdaySelect from "../calendars/WeekdaySelect";
 import SliderWithInputs from "./SliderWithInputs";
-import { ChangeEvent, useState } from "react";
-import { useEffect } from "react";
+import { ChangeEvent, useState, useEffect } from "react";
 import QueryValueDiscreteSelect from "./QueryValueDiscreteSelect";
+import { UpdateAndRemovePrioritisationErrors } from "../simulationParameters/usePrioritisationErrors";
 
 const useQueryBuilderStyles = makeStyles(
     (theme: Theme) => ({
@@ -102,6 +102,7 @@ interface QueryBuilderProps {
     name: string;
     builderSchema?: PrioritisationBuilderSchema;
     possibleValueOptions?: {}
+    updateAndRemovePrioritisationErrors?: UpdateAndRemovePrioritisationErrors
 }
 
 type EligibleBuilderSchemas = BatchingBuilderSchema | PrioritisationBuilderSchema
@@ -137,6 +138,7 @@ interface QueryGroupProps {
     depth?: number;
     onRemove?: () => any;
     possibleValueOptions?: {}
+    updateAndRemovePrioritisationErrors?: UpdateAndRemovePrioritisationErrors
 }
 
 export type FieldsPath = "query.items" | `query.items.${number}.items` | `query.items.${number}.items.${number}.items`
@@ -149,6 +151,7 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
         depth = 0,
         onRemove,
         possibleValueOptions,
+        updateAndRemovePrioritisationErrors,
         ...props
     } = allProps
     const classes = useQueryBuilderStyles();
@@ -233,6 +236,7 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
                             formState={formState}
                             onRemove={() => remove(index)}
                             possibleValueOptions={possibleValueOptions}
+                            updateAndRemovePrioritisationErrors={updateAndRemovePrioritisationErrors}
                         />
                     ) : (
                         <QueryCondition
@@ -242,6 +246,7 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
                             builderSchema={builderSchema}
                             onRemove={() => remove(index)}
                             possibleValueOptions={possibleValueOptions}
+                            updateAndRemovePrioritisationErrors={updateAndRemovePrioritisationErrors}
                         />
                     )
                 })}
@@ -256,6 +261,7 @@ interface QueryConditionProps {
     builderSchema: EligibleBuilderSchemas;
     onRemove: () => any;
     possibleValueOptions?: {}
+    updateAndRemovePrioritisationErrors?: UpdateAndRemovePrioritisationErrors
 }
 
 const QueryCondition = (allProps: QueryConditionProps) => {
@@ -264,6 +270,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
         builderSchema,
         onRemove,
         possibleValueOptions,
+        updateAndRemovePrioritisationErrors,
         ...props } = allProps
 
     const { control, watch, formState: { errors }, setValue, clearErrors } = formState
@@ -336,7 +343,9 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                     fieldError={conditionValueError}
                     formState={formState}
                     allPossibleOptions={allPossibleOptions}
-                    style={{ ml: 1.875, mt: 2, flex: 1 }} />
+                    style={{ ml: 1.875, mt: 2, flex: 1 }}
+                    updateAndRemovePrioritisationErrors={updateAndRemovePrioritisationErrors!!}
+                />
             default:
                 return valueOpts?.multiple
                     ? (

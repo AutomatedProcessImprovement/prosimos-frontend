@@ -38,6 +38,7 @@ import useTabVisibility, { TABS } from './simulationParameters/useTabVisibility'
 import AllCaseAttributes from './caseAttributesGeneration/AllCaseAttributes';
 import AllPrioritisationItems from './prioritisation/AllPrioritisationItems';
 import { transformPrioritisationRules } from './prioritisation/prioritisationRulesTransformer';
+import usePrioritisationErrors from './simulationParameters/usePrioritisationErrors';
 
 const useStyles = makeStyles((theme: Theme) => ({
     simParamsGrid: {
@@ -120,7 +121,7 @@ const SimulationParameters = () => {
     const { formState } = useFormState(tasksFromModel, gateways, eventsFromModel, jsonData)
     const { formState: { errors, isValid, isSubmitted, submitCount }, getValues, handleSubmit } = formState
     const [isScenarioParamsValid, setIsScenarioParamsValid] = useState(true)
-
+    const { isPrioritisationRulesValid, updateErrors, removeErrorByPath } = usePrioritisationErrors(getValues("case_attributes"), getValues("prioritisation_rules"))
     const { visibleTabs, getIndexOfTab } = useTabVisibility(eventsFromModel)
 
     const { onUploadNewModel } = useNewModel()
@@ -331,6 +332,7 @@ const SimulationParameters = () => {
             case TABS.CASE_BASED_PRIORITISATION:
                 return <AllPrioritisationItems
                     formState={formState}
+                    updateAndRemovePrioritisationErrors={[updateErrors, removeErrorByPath]}
                 />
             case TABS.SIMULATION_RESULTS:
                 if (!!currSimulatedOutput)
@@ -384,7 +386,10 @@ const SimulationParameters = () => {
                 Icon = <DynamicFeedIcon style={styles} />
                 break
             case TABS.CASE_BASED_PRIORITISATION:
-                currError = errors.prioritisation_rules
+                const prioritisationErrors = isPrioritisationRulesValid
+                    ? ""
+                    : "Invalid Value"
+                currError = errors.prioritisation_rules || prioritisationErrors
                 // TODO: find appropriate icon
                 Icon = <DynamicFeedIcon style={styles} />
                 break
@@ -426,15 +431,17 @@ const SimulationParameters = () => {
     };
 
     const onStartSimulation = async () => {
-        setInfoMessage("Simulation started...")
         const isScenarioValid = await triggerScenario()
         setIsScenarioParamsValid(isScenarioValid)
 
-        // scenario params or json params or both are not valid
-        if (!isValid || !isScenarioValid) {
+        // scenario params or json params 
+        // or values used for prioritisation rules 
+        // or all of them are not valid
+        if (!isValid || !isScenarioValid || !isPrioritisationRulesValid) {
             return;
         }
 
+        setInfoMessage("Simulation started...")
         const newBlob = getBlobBasedOnExistingInput()
         const { num_processes: numProcesses, start_date: startDate } = getScenarioValues()
 

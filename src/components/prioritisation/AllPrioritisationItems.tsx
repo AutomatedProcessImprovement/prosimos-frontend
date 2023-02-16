@@ -4,14 +4,16 @@ import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { QueryBuilder } from "../batching/QueryBuilder";
 import { PrioritisationBuilderSchema } from "../batching/schemas";
 import { JsonData } from "../formData";
+import { UpdateAndRemovePrioritisationErrors } from "../simulationParameters/usePrioritisationErrors";
 import { collectAllCaseAttrWithTypes } from "./caseAttributesCollectorAndTransformer";
 
 interface AllPrioritisationItemsProps {
     formState: UseFormReturn<JsonData, object>
+    updateAndRemovePrioritisationErrors: UpdateAndRemovePrioritisationErrors
 }
 
 const AllPrioritisationItems = (props: AllPrioritisationItemsProps) => {
-    const { formState: { control: formControl, getValues } } = props
+    const { formState: { control: formControl, getValues }, updateAndRemovePrioritisationErrors } = props
     const [builderSchema, setBuilderSchema] = useState<PrioritisationBuilderSchema>({})
     const [discreteOptionsByCaseAttributeName, setDiscreteOptionsByCaseAttributeName] = useState({})
 
@@ -22,7 +24,7 @@ const AllPrioritisationItems = (props: AllPrioritisationItemsProps) => {
     })
 
     useEffect(() => {
-        const [newBuilderSchema, newDiscreteOptions] = collectAllCaseAttrWithTypes(getValues("case_attributes"))
+        const [newBuilderSchema, newDiscreteOptions] = collectAllCaseAttrWithTypes(getValues("case_attributes"), false)
         if (newBuilderSchema !== builderSchema) {
             setBuilderSchema(newBuilderSchema)
         }
@@ -41,6 +43,7 @@ const AllPrioritisationItems = (props: AllPrioritisationItemsProps) => {
                         name={`prioritisation_rules.${index}.rules`}
                         builderSchema={builderSchema}
                         possibleValueOptions={discreteOptionsByCaseAttributeName}
+                        updateAndRemovePrioritisationErrors={updateAndRemovePrioritisationErrors}
                     />
                 </Grid>
             ))}

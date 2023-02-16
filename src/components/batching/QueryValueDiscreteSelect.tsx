@@ -1,6 +1,9 @@
 import { MenuItem, TextField } from "@mui/material"
-import { useState, useEffect } from "react"
+import { useState, useEffect, ChangeEvent } from "react"
 import { Controller, FieldError } from "react-hook-form"
+import { UpdateAndRemovePrioritisationErrors } from "../simulationParameters/usePrioritisationErrors"
+
+const INVALID_VALUE_MESSAGE = "Invalid value"
 
 interface QueryValueDiscreteSelectProps {
     conditionValueName: string
@@ -8,11 +11,12 @@ interface QueryValueDiscreteSelectProps {
     formState: any
     allPossibleOptions: string[]
     style: any
+    updateAndRemovePrioritisationErrors: UpdateAndRemovePrioritisationErrors
 }
 
 const QueryValueDiscreteSelect = (props: QueryValueDiscreteSelectProps) => {
-    const { control, getValues } = props.formState
-    const { conditionValueName, fieldError, allPossibleOptions, style } = props
+    const [updateErrors, removeErrors] = props.updateAndRemovePrioritisationErrors
+    const { conditionValueName, fieldError, formState: { control, getValues }, allPossibleOptions, style } = props
     const [errorMessage, setErrorMessage] = useState("")
 
     useEffect(() => {
@@ -24,20 +28,42 @@ const QueryValueDiscreteSelect = (props: QueryValueDiscreteSelectProps) => {
 
     useEffect(() => {
         const currValue = getValues(conditionValueName)
-        if (!allPossibleOptions.includes(currValue ?? "")) {
-            // the value initially provided in the sim scenario - is not valid
-            // (it means the case attribute does not have this value as an option)
-            setErrorMessage("Invalid value")
-        }
+        setErrorIfInvalid(currValue ?? "")
     }, [])
+
+    const setErrorIfInvalid = (currValue: string) => {
+        if (!allPossibleOptions.includes(currValue)) {
+            // the value provided is not valid
+            // (it means the case attribute does not have this value as an option)
+            setErrorMessage(INVALID_VALUE_MESSAGE)
+            updateErrors(conditionValueName, INVALID_VALUE_MESSAGE)
+            return true
+        }
+
+        return false
+    }
+
+    const validateAndChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, onChange: any) => {
+        const newValue = e.target?.value ?? ""
+        const isInvalid = setErrorIfInvalid(newValue)
+        if (!isInvalid) {
+            // remove errors
+            setErrorMessage("")
+            removeErrors(conditionValueName)
+
+            // clear the error field
+            onChange(e)
+        }
+    }
 
     return (
         <Controller
             name={conditionValueName}
             control={control}
-            render={({ field: fieldProps }) => (
+            render={({ field: { onChange, value } }) => (
                 <TextField
-                    {...fieldProps}
+                    value={value}
+                    onChange={e => validateAndChange(e, onChange)}
                     sx={style ? style : { width: "100%" }}
                     error={errorMessage !== ""}
                     helperText={errorMessage}

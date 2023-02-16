@@ -79,14 +79,25 @@ yup.addMethod(yup.array, "uniqueKeyDistr", function () {
 export const distributionValidation = {
   distribution_name: yup.string().required(REQUIRED_ERROR_MSG),
   distribution_params: yup.array()
-      .of(
-          yup.object().shape({
-              value: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG)
-          })
-      )
-      .required()
-      .min(2, "At least two required parameters should be provided")
+    .of(
+      yup.object().shape({
+        value: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG)
+      })
+    )
+    .required()
+    .min(2, "At least two required parameters should be provided")
 }
+
+const stringSchema = yup.string()
+const numArraySchema = yup.array()
+  .of(
+    yup.number()
+  )
+  .required()
+  .min(2, "At least two required parameters should be provided")
+
+export const stringOrNumberArr = yup.mixed<yup.InferType<typeof stringSchema> | yup.InferType<typeof numArraySchema>>()
+  .test("shape", "invalid", (data) => (stringSchema.isValidSync(data) || numArraySchema.isValidSync(data)));
 
 declare module "yup" {
   interface StringSchema<
