@@ -22,7 +22,6 @@ const DistributionSection = (props: DistributionSectionProps) => {
     const [isRowAdded, setIsRowAdded] = useState(false)
 
     const { fields, append, remove } = useFieldArray({
-        keyName: 'key',
         control: formControl,
         name: objectFieldNamePart
     });

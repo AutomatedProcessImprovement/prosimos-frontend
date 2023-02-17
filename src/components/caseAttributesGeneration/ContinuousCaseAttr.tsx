@@ -16,6 +16,7 @@ interface ContinuousCaseAttrProps {
 const ContinuousCaseAttr = (props: ContinuousCaseAttrProps) => {
     const { formState, formState: { control: formControl, formState: { errors } }, setErrorMessage, itemIndex, remove } = props
     const classes = useSharedStyles()
+
     const onContinuousCaseAttrDelete = () => {
         remove(itemIndex)
     }

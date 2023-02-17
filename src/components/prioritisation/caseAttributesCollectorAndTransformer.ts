@@ -2,7 +2,7 @@ import { PrioritisationBuilderSchema } from "../batching/schemas"
 import { CaseAttributeDefinition } from "../formData"
 
 export type ValueOptionsByAttrName = {
-    [attrName: string]: []
+    [attrName: string]: string[]
 }
 
 /**

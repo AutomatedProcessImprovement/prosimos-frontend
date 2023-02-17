@@ -1,13 +1,13 @@
 import { Button, ButtonGroup, Grid, Toolbar } from "@mui/material"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
-import { JsonData } from "../formData"
+import { CaseAttributeDefinition, JsonData } from "../formData"
 import DiscreteCaseAttr from "./DiscreteCaseAttr"
 import ContinuousCaseAttr from "./ContinuousCaseAttr"
 import { defaultDiscreteCaseAttr, defaultContinuousCaseAttr } from "../simulationParameters/defaultValues"
 import { AutoSizer, List } from "react-virtualized"
 import { useEffect, useRef, useState } from "react"
 import NoItemsCard from "../emptyComponents/NoItemsCard"
-import { collectUniqueAtrrs } from "./caseAttributesUniqueCollector"
+import { collectUniqueAtrrs, ValuesByCaseAttr } from "./caseAttributesUniqueCollector"
 
 const CASE_ATTRIBUTES_PATH = "case_attributes"
 
@@ -21,6 +21,7 @@ const AllCaseAttributes = (props: AllCaseAttributesProps) => {
     const listRef = useRef<List>(null)
     const [isAnyCaseAttrs, setIsAnyCaseAttrs] = useState(false)
     const [referencedAttrs, setReferencedAttrs] = useState<Set<string>>(new Set())
+    const [referencedValuesByCaseAttr, setReferencedValuesByCaseAttr] = useState<ValuesByCaseAttr>({})
 
     const { fields, prepend, remove } = useFieldArray({
         keyName: 'key',
@@ -29,10 +30,10 @@ const AllCaseAttributes = (props: AllCaseAttributesProps) => {
     })
 
     useEffect(() => {
-        const newReferencedAttrs = collectUniqueAtrrs(getValues("prioritisation_rules"))
-        if (newReferencedAttrs !== referencedAttrs) {
-            setReferencedAttrs(newReferencedAttrs)
-        }
+        const [newReferencedAttrs, newReferencedValuesByCaseAttr] = collectUniqueAtrrs(getValues("prioritisation_rules"))
+
+        setReferencedAttrs(newReferencedAttrs)
+        setReferencedValuesByCaseAttr(newReferencedValuesByCaseAttr)
     }, [])
 
     useEffect(() => {
@@ -55,7 +56,8 @@ const AllCaseAttributes = (props: AllCaseAttributesProps) => {
         }
     }
 
-    const getCaseAttrComponent = (itemType: string, itemIndex: number): JSX.Element => {
+    const getCaseAttrComponent = (item: CaseAttributeDefinition, itemIndex: number): JSX.Element => {
+        const itemType = item.type
         const ComponentToReturn = (({ "discrete": DiscreteCaseAttr, "continuous": ContinuousCaseAttr })[itemType] ?? undefined)
 
         if (ComponentToReturn === undefined) {
@@ -68,6 +70,7 @@ const AllCaseAttributes = (props: AllCaseAttributesProps) => {
                 setErrorMessage={props.setErrorMessage}
                 itemIndex={itemIndex}
                 remove={removeByIndex}
+                referencedValuesByCaseAttr={referencedValuesByCaseAttr[item.name] ?? {}}
             />
         )
     }
@@ -85,7 +88,7 @@ const AllCaseAttributes = (props: AllCaseAttributesProps) => {
 
         return (
             <Grid item xs={12} style={{ ...style }} key={currCaseAttr.key}>
-                {getCaseAttrComponent(currCaseAttr.type, index)}
+                {getCaseAttrComponent(currCaseAttr, index)}
             </Grid>
         )
     }

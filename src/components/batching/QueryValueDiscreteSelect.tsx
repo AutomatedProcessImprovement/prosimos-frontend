@@ -72,7 +72,7 @@ const QueryValueDiscreteSelect = (props: QueryValueDiscreteSelectProps) => {
                     select
                 >
                     {allPossibleOptions.map((item) => (
-                        <MenuItem value={item}>{item}</MenuItem>
+                        <MenuItem key={item} value={item}>{item}</MenuItem>
                     ))}
                 </TextField>
             )}

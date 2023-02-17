@@ -20,7 +20,7 @@ export const transformPrioritisationRules = (values: JsonData) => {
 };
 
 const _transformRulesToRangesIfAny = (orRules: CaseBasedRule[][]) => {
-    let newValueArr: (number | string)[];
+    let newValueArr: (number | "inf")[];
 
     for (let orRule of orRules) {
         for (let andRule of orRule) {

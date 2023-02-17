@@ -20,7 +20,7 @@ export interface PriorityRule {
 export interface CaseBasedRule {
     attribute: string
     comparison: string
-    value: number | (number | string)[]
+    value: number | string | (number | "inf")[]
 }
 
 export interface BatchProcessing {
