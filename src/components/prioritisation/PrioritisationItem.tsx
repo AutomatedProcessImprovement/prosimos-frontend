@@ -48,7 +48,7 @@ const PrioritisationItem = (props: PrioritisationItemProps) => {
                                 }}
                                 inputProps={{
                                     step: "any",
-                                    min: 0
+                                    min: 1
                                 }}
                                 // error={errors?.value !== undefined}
                                 // helperText={errors?.value?.message || ""}

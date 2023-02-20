@@ -91,3 +91,16 @@ export const defaultContinuousCaseAttr = {
         ...defaultArrivalTimeDistribution
     }
 }
+
+export const defaultPrioritisationRule = {
+    priority_level: 1,
+    rules: [
+        [
+            {
+                attribute: "",
+                comparison: "",
+                value: ""
+            }
+        ]
+    ]
+}

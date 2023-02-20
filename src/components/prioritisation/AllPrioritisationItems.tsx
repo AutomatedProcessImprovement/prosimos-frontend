@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { PrioritisationBuilderSchema } from "../batching/schemas";
 import { JsonData } from "../formData";
+import { defaultPrioritisationRule } from "../simulationParameters/defaultValues";
 import { UpdateAndRemovePrioritisationErrors } from "../simulationParameters/usePrioritisationErrors";
+import AllPrioritisationItemsToolbar from "./AllPrioritisationItemsToolbar";
 import { collectAllCaseAttrWithTypes, ValueOptionsByAttrName } from "./caseAttributesCollectorAndTransformer";
 import PrioritisationItem from "./PrioritisationItem";
 
@@ -17,7 +19,7 @@ const AllPrioritisationItems = (props: AllPrioritisationItemsProps) => {
     const [builderSchema, setBuilderSchema] = useState<PrioritisationBuilderSchema>({})
     const [discreteOptionsByCaseAttributeName, setDiscreteOptionsByCaseAttributeName] = useState<ValueOptionsByAttrName>({})
 
-    const { fields, remove } = useFieldArray({
+    const { fields, remove, prepend } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: 'prioritisation_rules'
@@ -37,19 +39,28 @@ const AllPrioritisationItems = (props: AllPrioritisationItemsProps) => {
         }
     }, [])
 
+    const onAddNewPrioritisationItem = () => {
+        prepend(defaultPrioritisationRule)
+    }
+
     return (
-        <Grid container item xs={12}>
-            {fields.map((item, index) => (
-                <PrioritisationItem
-                    key={item.key}
-                    formState={formState}
-                    updateAndRemovePrioritisationErrors={updateAndRemovePrioritisationErrors}
-                    discreteOptionsByCaseAttributeName={discreteOptionsByCaseAttributeName}
-                    builderSchema={builderSchema}
-                    index={index}
-                    onPrioritisationItemDelete={onPrioritisationItemDelete}
-                />
-            ))}
+        <Grid container item xs={12} spacing={2} >
+            <AllPrioritisationItemsToolbar
+                onAddNew={onAddNewPrioritisationItem}
+            />
+            <Grid container item xs={12} style={{ paddingTop: "0px" }}>
+                {fields.map((item, index) => (
+                    <PrioritisationItem
+                        key={item.key}
+                        formState={formState}
+                        updateAndRemovePrioritisationErrors={updateAndRemovePrioritisationErrors}
+                        discreteOptionsByCaseAttributeName={discreteOptionsByCaseAttributeName}
+                        builderSchema={builderSchema}
+                        index={index}
+                        onPrioritisationItemDelete={onPrioritisationItemDelete}
+                    />
+                ))}
+            </Grid>
         </Grid>
     )
 }
