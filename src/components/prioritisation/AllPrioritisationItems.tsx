@@ -1,11 +1,11 @@
-import { Grid, Typography } from "@mui/material";
+import { Grid } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
-import { QueryBuilder } from "../batching/QueryBuilder";
 import { PrioritisationBuilderSchema } from "../batching/schemas";
 import { JsonData } from "../formData";
 import { UpdateAndRemovePrioritisationErrors } from "../simulationParameters/usePrioritisationErrors";
-import { collectAllCaseAttrWithTypes } from "./caseAttributesCollectorAndTransformer";
+import { collectAllCaseAttrWithTypes, ValueOptionsByAttrName } from "./caseAttributesCollectorAndTransformer";
+import PrioritisationItem from "./PrioritisationItem";
 
 interface AllPrioritisationItemsProps {
     formState: UseFormReturn<JsonData, object>
@@ -13,15 +13,19 @@ interface AllPrioritisationItemsProps {
 }
 
 const AllPrioritisationItems = (props: AllPrioritisationItemsProps) => {
-    const { formState: { control: formControl, getValues }, updateAndRemovePrioritisationErrors } = props
+    const { formState: { control: formControl, getValues }, formState, updateAndRemovePrioritisationErrors } = props
     const [builderSchema, setBuilderSchema] = useState<PrioritisationBuilderSchema>({})
-    const [discreteOptionsByCaseAttributeName, setDiscreteOptionsByCaseAttributeName] = useState({})
+    const [discreteOptionsByCaseAttributeName, setDiscreteOptionsByCaseAttributeName] = useState<ValueOptionsByAttrName>({})
 
-    const { fields } = useFieldArray({
+    const { fields, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: 'prioritisation_rules'
     })
+
+    const onPrioritisationItemDelete = (index: number) => {
+        remove(index)
+    }
 
     useEffect(() => {
         const [newBuilderSchema, newDiscreteOptions] = collectAllCaseAttrWithTypes(getValues("case_attributes"), false)
@@ -36,16 +40,15 @@ const AllPrioritisationItems = (props: AllPrioritisationItemsProps) => {
     return (
         <Grid container item xs={12}>
             {fields.map((item, index) => (
-                <Grid item xs={12} sx={{ mt: 2 }}>
-                    <Typography variant="h6" align="left"> Rule </Typography>
-                    <QueryBuilder
-                        formState={props.formState}
-                        name={`prioritisation_rules.${index}.rules`}
-                        builderSchema={builderSchema}
-                        possibleValueOptions={discreteOptionsByCaseAttributeName}
-                        updateAndRemovePrioritisationErrors={updateAndRemovePrioritisationErrors}
-                    />
-                </Grid>
+                <PrioritisationItem
+                    key={item.key}
+                    formState={formState}
+                    updateAndRemovePrioritisationErrors={updateAndRemovePrioritisationErrors}
+                    discreteOptionsByCaseAttributeName={discreteOptionsByCaseAttributeName}
+                    builderSchema={builderSchema}
+                    index={index}
+                    onPrioritisationItemDelete={onPrioritisationItemDelete}
+                />
             ))}
         </Grid>
     )
