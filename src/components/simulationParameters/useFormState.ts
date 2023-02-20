@@ -164,7 +164,9 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                                     })
                                 ) as any)
                                 .uniqueAttributes()
+                                .min(1, MIN_LENGTH_REQUIRED_MSG("condition inside a firing rule"))
                         )
+                        .min(1, MIN_LENGTH_REQUIRED_MSG("condition inside a firing rule"))
                 })
             )
             .uniqueTaskBatching(),
@@ -208,7 +210,8 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
         prioritisation_rules: yup.array()
             .of(
                 yup.object({
-                    priority_level: yup.number(),
+                    priority_level: yup.number()
+                        .min(1, "The lowest possible priority level is 1"),
                     rules: yup.array()
                         .of(
                             yup.array()
@@ -220,7 +223,9 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                                     })
                                 ) as any)
                                 .uniqueAttributes()
+                                .min(1, MIN_LENGTH_REQUIRED_MSG("condition"))
                         )
+                        .min(1, MIN_LENGTH_REQUIRED_MSG("condition"))
                 })
             )
     })), []);

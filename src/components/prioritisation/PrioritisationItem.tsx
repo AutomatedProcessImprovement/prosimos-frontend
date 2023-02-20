@@ -1,4 +1,5 @@
 import { Card, Grid, TextField, Typography } from "@mui/material";
+import { useState, useEffect } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { QueryBuilder } from "../batching/QueryBuilder";
 import { PrioritisationBuilderSchema } from "../batching/schemas";
@@ -19,9 +20,17 @@ interface PrioritisationItemProps {
 }
 
 const PrioritisationItem = (props: PrioritisationItemProps) => {
-    const { formState, formState: { control: formControl }, builderSchema, discreteOptionsByCaseAttributeName,
+    const { formState, formState: { control: formControl, formState: { errors } }, builderSchema, discreteOptionsByCaseAttributeName,
         updateAndRemovePrioritisationErrors, index, onPrioritisationItemDelete: onPrioritisationItemDeleteProp } = props
+    const [priorityLevelErrors, setPriorityLevelErrors] = useState<string | undefined>(undefined)
     const classes = useSharedStyles()
+
+    useEffect(() => {
+        const newPriorityErrorMessage = errors?.prioritisation_rules?.[index]?.priority_level?.message
+        if (priorityLevelErrors !== newPriorityErrorMessage) {
+            setPriorityLevelErrors(newPriorityErrorMessage)
+        }
+    }, [errors?.prioritisation_rules?.[index]?.priority_level, index])
 
     const onContinuousCaseAttrDelete = () => {
         onPrioritisationItemDeleteProp(index)
@@ -50,8 +59,8 @@ const PrioritisationItem = (props: PrioritisationItemProps) => {
                                     step: "any",
                                     min: 1
                                 }}
-                                // error={errors?.value !== undefined}
-                                // helperText={errors?.value?.message || ""}
+                                error={priorityLevelErrors !== undefined}
+                                helperText={priorityLevelErrors || ""}
                                 variant="standard"
                                 style={{ width: "100%" }}
                             />
