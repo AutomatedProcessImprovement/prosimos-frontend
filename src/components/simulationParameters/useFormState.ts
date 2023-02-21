@@ -228,6 +228,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                         .min(1, MIN_LENGTH_REQUIRED_MSG("condition"))
                 })
             )
+            .uniquePriorityLevel()
     })), []);
 
     const formState = useForm<JsonData>({

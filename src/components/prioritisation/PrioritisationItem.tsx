@@ -20,17 +20,21 @@ interface PrioritisationItemProps {
 }
 
 const PrioritisationItem = (props: PrioritisationItemProps) => {
-    const { formState, formState: { control: formControl, formState: { errors } }, builderSchema, discreteOptionsByCaseAttributeName,
+    const { formState, formState: { control: formControl, formState: { errors }, trigger }, builderSchema, discreteOptionsByCaseAttributeName,
         updateAndRemovePrioritisationErrors, index, onPrioritisationItemDelete: onPrioritisationItemDeleteProp } = props
     const [priorityLevelErrors, setPriorityLevelErrors] = useState<string | undefined>(undefined)
     const classes = useSharedStyles()
 
     useEffect(() => {
-        const newPriorityErrorMessage = errors?.prioritisation_rules?.[index]?.priority_level?.message
+        const prioritisationErrors = errors?.prioritisation_rules as any
+        const newUniqueErrorMessage = (prioritisationErrors?.type === "unique")
+            ? prioritisationErrors?.message
+            : undefined
+        const newPriorityErrorMessage = newUniqueErrorMessage ?? prioritisationErrors?.[index]?.priority_level?.message
         if (priorityLevelErrors !== newPriorityErrorMessage) {
             setPriorityLevelErrors(newPriorityErrorMessage)
         }
-    }, [errors?.prioritisation_rules?.[index]?.priority_level, index])
+    }, [errors?.prioritisation_rules?.[index]?.priority_level, (errors?.prioritisation_rules as any)?.message, index])
 
     const onContinuousCaseAttrDelete = () => {
         onPrioritisationItemDeleteProp(index)
@@ -60,6 +64,9 @@ const PrioritisationItem = (props: PrioritisationItemProps) => {
                                 onChange={(e) => {
                                     // save as a number in the json file
                                     onChange(Number(e.target.value))
+
+                                    // validate input
+                                    trigger("prioritisation_rules")
                                 }}
                                 inputProps={{
                                     step: "any",

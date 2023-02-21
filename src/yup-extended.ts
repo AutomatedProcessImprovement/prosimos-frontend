@@ -34,47 +34,36 @@ yup.addMethod<yup.StringSchema>(yup.string, "integer", function () {
   return this.matches(/^\d+$/, "Only digits are allowed")
 })
 
-// quarantees that AND rule doesn't have duplicated attributes (e.g., two weekdays)
-yup.addMethod(yup.array, "uniqueAttributes", function () {
-  const message = "Fields should be unique"
-  return this.test("unique", message, function (value) {
-    const keysArr = value?.map(({ attribute }) => attribute ?? "")
-    const { path, createError } = this;
+const validateArrayUniquenessTest = (ref: any, distrArr: [], fieldName: string, message: string) => {
+  const keysArr = distrArr?.map(({ [fieldName]: value }) => value ?? "")
+  const { path, createError } = ref;
 
-    return (
-      isStrArrUnique(keysArr) ||
-      createError({ path, message })
-    )
-  });
-});
+  return (
+    isStrArrUnique(keysArr) ||
+    createError({ path, message })
+  )
+}
+
+const validateArrayUniqueness = (ref: any, fieldName: string, message: string) => {
+  return ref.test(
+    "unique",
+    message,
+    function (this: any, distrArr: []) {
+      return validateArrayUniquenessTest(this, distrArr, fieldName, message)
+    });
+};
+
+// quarantees that AND rule doesn't have duplicated attributes (e.g., two weekdays)
+yup.addMethod(yup.array, "uniqueAttributes", function () { return validateArrayUniqueness(this, "attribute", "Fields should be unique") });
 
 // quarantees that we have only one setup per task
-yup.addMethod(yup.array, "uniqueTaskBatching", function () {
-  const message = "Only one batch setup per task is allowed"
-  return this.test("unique", message, function (orRules) {
-    const keysArr = orRules?.map(({ task_id }) => task_id ?? "")
-    const { path, createError } = this;
-
-    return (
-      isStrArrUnique(keysArr) ||
-      createError({ path, message })
-    )
-  });
-});
+yup.addMethod(yup.array, "uniqueTaskBatching", function () { return validateArrayUniqueness(this, "task_id", "Only one batch setup per task is allowed") });
 
 // quarantees the uniqueness of keys per distribution map
-yup.addMethod(yup.array, "uniqueKeyDistr", function () {
-  const message = UNIQUE_KEYS
-  return this.test("unique", message, function (distrArr) {
-    const keysArr = distrArr?.map(({ key }) => key ?? "")
-    const { path, createError } = this;
+yup.addMethod(yup.array, "uniqueKeyDistr", function () { return validateArrayUniqueness(this, "key", UNIQUE_KEYS) });
 
-    return (
-      isStrArrUnique(keysArr) ||
-      createError({ path, message })
-    )
-  });
-});
+// quarantees the uniqueness of keys per distribution map
+yup.addMethod(yup.array, "uniquePriorityLevel", function () { return validateArrayUniqueness(this, "priority_level", UNIQUE_KEYS) });
 
 export const distributionValidation = {
   distribution_name: yup.string().required(REQUIRED_ERROR_MSG),
@@ -113,6 +102,7 @@ declare module "yup" {
     uniqueAttributes(): ArraySchema<T>;
     uniqueTaskBatching(): ArraySchema<T>;
     uniqueKeyDistr(): ArraySchema<T>;
+    uniquePriorityLevel(): ArraySchema<T>;
   }
 }
 
