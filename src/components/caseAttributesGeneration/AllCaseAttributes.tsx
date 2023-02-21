@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Grid, Toolbar } from "@mui/material"
+import { Grid } from "@mui/material"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { CaseAttributeDefinition, JsonData } from "../formData"
 import DiscreteCaseAttr from "./DiscreteCaseAttr"
@@ -8,6 +8,7 @@ import { AutoSizer, List } from "react-virtualized"
 import { useEffect, useRef, useState } from "react"
 import NoItemsCard from "../emptyComponents/NoItemsCard"
 import { collectUniqueAtrrs, ValuesByCaseAttr } from "./caseAttributesUniqueCollector"
+import AllCaseAttributesToolbar, { DiscreteOrContinuousString, DISCRETE_STRING, CONTINUOUS_STRING } from "./AllCaseAttributesToolbar"
 
 const CASE_ATTRIBUTES_PATH = "case_attributes"
 
@@ -57,8 +58,7 @@ const AllCaseAttributes = (props: AllCaseAttributesProps) => {
     }
 
     const getCaseAttrComponent = (item: CaseAttributeDefinition, itemIndex: number): JSX.Element => {
-        const itemType = item.type
-        const ComponentToReturn = (({ "discrete": DiscreteCaseAttr, "continuous": ContinuousCaseAttr })[itemType] ?? undefined)
+        const ComponentToReturn = (({ [DISCRETE_STRING]: DiscreteCaseAttr, [CONTINUOUS_STRING]: ContinuousCaseAttr })[item.type] ?? undefined)
 
         if (ComponentToReturn === undefined) {
             return <div>Invalid type of a case attribute</div>
@@ -75,8 +75,8 @@ const AllCaseAttributes = (props: AllCaseAttributesProps) => {
         )
     }
 
-    const onAddNew = (type: "discrete" | "continuous") => {
-        const itemToAdd = (type === "discrete")
+    const onAddNew = (type: DiscreteOrContinuousString) => {
+        const itemToAdd = (type === DISCRETE_STRING)
             ? defaultDiscreteCaseAttr
             : defaultContinuousCaseAttr
 
@@ -120,20 +120,11 @@ const AllCaseAttributes = (props: AllCaseAttributesProps) => {
     }
 
     return <Grid container item xs={12} spacing={2}>
-        <Toolbar sx={{ justifyContent: "flex-end", marginLeft: "auto" }}>
-            <ButtonGroup>
-                <Button
-                    onClick={() => onAddNew("discrete")}>
-                    Add discrete case attribute
-                </Button>
-                <Button
-                    onClick={() => onAddNew("continuous")}>
-                    Add continuous value
-                </Button>
-            </ButtonGroup>
-        </Toolbar>
+        <AllCaseAttributesToolbar
+            onAddNew={onAddNew}
+        />
         {getItemListOrEmptyCard()}
-    </Grid>
+    </Grid >
 }
 
 export default AllCaseAttributes;

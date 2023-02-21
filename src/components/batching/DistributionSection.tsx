@@ -42,8 +42,9 @@ const DistributionSection = (props: DistributionSectionProps) => {
                 </Grid>
                 <Grid item xs={3}>
                     <AddButtonBase
-                        labelName="Add a mapping"
+                        labelName="new mapping"
                         onClick={onTimePeriodAdd}
+                        tooltipText="Add new mapping"
                     />
                 </Grid>
             </Grid>

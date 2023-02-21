@@ -18,13 +18,13 @@ import { VariableSizeList } from "react-window";
 const ROW_HEIGHT = 80;
 const OPEN_ROW_HEIGHT = 5.5 * ROW_HEIGHT;
 
-const colWidth = [ "10%", "70%", "20%", "10%"]
+const colWidth = ["10%", "70%", "20%", "10%"]
 
-export const removeArrayElemByIndex = (index: number, arr: any []) => {
+export const removeArrayElemByIndex = (index: number, arr: any[]) => {
     const copyArray = [...arr]
-    for (var i = 0; i < copyArray.length; i++) { 
-        if (i === index) { 
-            copyArray.splice(i, 1); 
+    for (var i = 0; i < copyArray.length; i++) {
+        if (i === index) {
+            copyArray.splice(i, 1);
         }
     }
 
@@ -67,9 +67,9 @@ const Row = (props: RowProps) => {
 
     const getResourceCount = (resourceListValues?: ResourceInfo[]) => {
         return resourceListValues
-        ? (resourceListValues)
-            .reduce(function (prev, curr) { return Number(prev) + Number(curr.amount) }, 0)
-        : 0
+            ? (resourceListValues)
+                .reduce(function (prev, curr) { return Number(prev) + Number(curr.amount) }, 0)
+            : 0
     };
 
     useEffect(() => {
@@ -98,65 +98,65 @@ const Row = (props: RowProps) => {
     return (
         <React.Fragment>
             <TableRow style={{ ...props.style }} >
-            <TableRow hover style={getHeightForRow()}>
-                <TableCell style={{ width: colWidth[0] }}>
-                    <IconButton
-                        size="small"
-                        onClick={onOpenRow}
-                    >
-                        {props.rowOpenState ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                    </IconButton>
-                </TableCell>
-                <TableCell style={{ width: colWidth[1] }}>
-                    <Controller
-                        name={`resource_profiles.${resourcePoolIndex}.name`}
-                        control={formControl}
-                        rules={{ required: REQUIRED_ERROR_MSG }}
-                        render={({ field: { ref, ...others } }) => {
-                            return (
-                                <TextField
-                                    {...others}
-                                    inputRef={ref}
-                                    style={{ width: "100%" }}
-                                    error={areAnyErrors}
-                                    helperText={errorMessage}
-                                    variant="standard"
-                                    placeholder="Resource pool name"
-                                />
-                            )
-                        }}
-                    />
-                </TableCell>
-                <TableCell style={{ width: colWidth[2] }}>
-                    {resourceListCount}
-                </TableCell>
-                <TableCell style={{ width: colWidth[3] }}>
-                    <IconButton
-                        size="small"
-                        onClick={() => onResourcePoolDelete(resourcePoolIndex)}
-                    >
-                        <DeleteIcon />
-                    </IconButton>
-                </TableCell>
-            </TableRow>
-            <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-                    <Collapse in={props.rowOpenState} timeout="auto" unmountOnExit>
-                        <Box margin={1} height={"45vh"}>
-                            {resourceTypeUid && <ResourceProfilesTable
-                                key={`resource_profile_table_${resourcePoolIndex}`}
-                                resourcePoolIndex={resourcePoolIndex}
-                                poolUuid={resourceTypeUid}
-                                formState={props.formState}
-                                errors={resourceListErrors?.resource_list}
-                                calendars={props.calendars}
-                                setErrorMessage={props.setErrorMessage}
-                                onResourceListCountChange={onResourceListCountChange}
-                            />}
-                        </Box>
-                    </Collapse>
-                </TableCell>
-            </TableRow>
+                <TableRow hover style={getHeightForRow()}>
+                    <TableCell style={{ width: colWidth[0] }}>
+                        <IconButton
+                            size="small"
+                            onClick={onOpenRow}
+                        >
+                            {props.rowOpenState ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                        </IconButton>
+                    </TableCell>
+                    <TableCell style={{ width: colWidth[1] }}>
+                        <Controller
+                            name={`resource_profiles.${resourcePoolIndex}.name`}
+                            control={formControl}
+                            rules={{ required: REQUIRED_ERROR_MSG }}
+                            render={({ field: { ref, ...others } }) => {
+                                return (
+                                    <TextField
+                                        {...others}
+                                        inputRef={ref}
+                                        style={{ width: "100%" }}
+                                        error={areAnyErrors}
+                                        helperText={errorMessage}
+                                        variant="standard"
+                                        placeholder="Resource pool name"
+                                    />
+                                )
+                            }}
+                        />
+                    </TableCell>
+                    <TableCell style={{ width: colWidth[2] }}>
+                        {resourceListCount}
+                    </TableCell>
+                    <TableCell style={{ width: colWidth[3] }}>
+                        <IconButton
+                            size="small"
+                            onClick={() => onResourcePoolDelete(resourcePoolIndex)}
+                        >
+                            <DeleteIcon />
+                        </IconButton>
+                    </TableCell>
+                </TableRow>
+                <TableRow>
+                    <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                        <Collapse in={props.rowOpenState} timeout="auto" unmountOnExit>
+                            <Box margin={1} height={"45vh"}>
+                                {resourceTypeUid && <ResourceProfilesTable
+                                    key={`resource_profile_table_${resourcePoolIndex}`}
+                                    resourcePoolIndex={resourcePoolIndex}
+                                    poolUuid={resourceTypeUid}
+                                    formState={props.formState}
+                                    errors={resourceListErrors?.resource_list}
+                                    calendars={props.calendars}
+                                    setErrorMessage={props.setErrorMessage}
+                                    onResourceListCountChange={onResourceListCountChange}
+                                />}
+                            </Box>
+                        </Collapse>
+                    </TableCell>
+                </TableRow>
             </TableRow>
         </React.Fragment>
     );
@@ -191,8 +191,8 @@ const ResourcePools = (props: ResourcePoolsProps) => {
             setFocus(`resource_profiles.1.name`)
             setIsRowAdding(false)
         }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, [fields, isRowAdding])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fields, isRowAdding])
 
     const onNewPoolCreation = async () => {
         const arePrevResourcesValid = await trigger(`resource_profiles`)
@@ -201,7 +201,7 @@ const ResourcePools = (props: ResourcePoolsProps) => {
             return
         }
 
-        prepend( {
+        prepend({
             id: "sid-" + uuid(),
             name: "",
             resource_list: []
@@ -252,13 +252,13 @@ const ResourcePools = (props: ResourcePoolsProps) => {
         setRowSizes([
             ...rowSizes.slice(0, i),
             rowSizes[i] === ROW_HEIGHT ? OPEN_ROW_HEIGHT : ROW_HEIGHT,
-            ...rowSizes.slice(i+1)
+            ...rowSizes.slice(i + 1)
         ])
 
         setRowOpenState([
             ...rowOpenState.slice(0, i),
             !rowOpenState[i],
-            ...rowOpenState.slice(i+1),
+            ...rowOpenState.slice(i + 1),
         ])
     };
 
@@ -267,7 +267,7 @@ const ResourcePools = (props: ResourcePoolsProps) => {
 
         return (
             <Row key={profile.key}
-                style={{...style}}
+                style={{ ...style }}
                 resourcePoolIndex={index}
                 resourceTypeUid={profile.id}
                 onResourcePoolDelete={onResourcePoolDeletion}
@@ -285,7 +285,8 @@ const ResourcePools = (props: ResourcePoolsProps) => {
             <Toolbar sx={{ justifyContent: "flex-end", marginLeft: "auto" }}>
                 <AddButtonToolbar
                     onClick={onNewPoolCreation}
-                    labelName="Add new pool"
+                    labelName="new pool"
+                    tooltipText="Add new pool"
                 />
             </Toolbar>
 

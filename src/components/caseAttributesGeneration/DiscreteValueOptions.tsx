@@ -55,8 +55,9 @@ const DiscreteValueOptions = (props: DiscreteValueOptionsProps) => {
                 </Grid>
                 <Grid item xs={2} className={classes.centeredGrid}>
                     <AddButtonBase
-                        labelName="Add an option"
+                        labelName="new option"
                         onClick={onOptionAdd}
+                        tooltipText="Add new option"
                     />
                 </Grid>
             </Grid>

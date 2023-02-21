@@ -12,7 +12,7 @@ import { MIN_LENGTH_REQUIRED_MSG } from "../validationMessages";
 import BatchingTableRow from "./BatchingTableRow";
 
 export const BATCH_PROCESSING = "batch_processing"
-export const colWidth = [ "10%", "90%", "10%" ]
+export const colWidth = ["10%", "90%", "10%"]
 
 const ROW_HEIGHT = 80;
 const OPEN_ROW_HEIGHT = 480;
@@ -24,7 +24,7 @@ interface AllBatchingProps {
 }
 
 const AllBatching = (props: AllBatchingProps) => {
-    const {tasksFromModel, formState: { control: formControl, trigger, setFocus }, setErrorMessage} = props
+    const { tasksFromModel, formState: { control: formControl, trigger, setFocus }, setErrorMessage } = props
 
     const { fields, prepend, remove } = useFieldArray({
         keyName: 'key',
@@ -40,14 +40,14 @@ const AllBatching = (props: AllBatchingProps) => {
     const [rowOpenState, setRowOpenState] = useState<boolean[]>(initialRowState)
 
     const ref = React.useRef<VariableSizeList>(null);
-    
+
     useEffect(() => {
         if (isRowAdding) {
             setFocus('batch_processing.1.task_id')
             setIsRowAdding(false)
         }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, [fields, isRowAdding])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fields, isRowAdding])
 
     const onNewTaskBatchCreation = async () => {
         const arePrevResourcesValid = await trigger(`batch_processing`)
@@ -60,7 +60,7 @@ const AllBatching = (props: AllBatchingProps) => {
             task_id: "",
             type: "Parallel",
             size_distrib: [
-                { 
+                {
                     "key": "1",
                     "value": 0,
                 },
@@ -70,7 +70,7 @@ const AllBatching = (props: AllBatchingProps) => {
                 }
             ],
             duration_distrib: [
-                { 
+                {
                     "key": "1",
                     "value": 0.9,
                 }
@@ -119,13 +119,13 @@ const AllBatching = (props: AllBatchingProps) => {
         setRowSizes([
             ...rowSizes.slice(0, i),
             rowSizes[i] === ROW_HEIGHT ? OPEN_ROW_HEIGHT : ROW_HEIGHT,
-            ...rowSizes.slice(i+1)
+            ...rowSizes.slice(i + 1)
         ])
 
         setRowOpenState([
             ...rowOpenState.slice(0, i),
             !rowOpenState[i],
-            ...rowOpenState.slice(i+1),
+            ...rowOpenState.slice(i + 1),
         ])
     };
 
@@ -138,7 +138,7 @@ const AllBatching = (props: AllBatchingProps) => {
 
         return (
             <BatchingTableRow key={currentField.key}
-                style={{...style}}
+                style={{ ...style }}
                 onResourcePoolDelete={onResourcePoolDeletion}
                 formState={props.formState}
                 setErrorMessage={setErrorMessage}
@@ -155,7 +155,7 @@ const AllBatching = (props: AllBatchingProps) => {
         <Toolbar sx={{ justifyContent: "flex-end", marginLeft: "auto" }}>
             <AddButtonToolbar
                 onClick={onNewTaskBatchCreation}
-                labelName="Add new task batching"
+                labelName="new task batching"
             />
         </Toolbar>
 

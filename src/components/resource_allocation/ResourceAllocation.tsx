@@ -149,8 +149,9 @@ const Row = (props: RowProps) => {
                                 </Grid>
                                 <Grid item xs={12}>
                                     <AddButtonToolbar
-                                        labelName="Add a new resource allocation"
+                                        labelName="new resource allocation"
                                         onClick={onResourceAllocationAdd}
+                                        tooltipText="Add new resource allocation"
                                     />
                                 </Grid>
                             </Grid>

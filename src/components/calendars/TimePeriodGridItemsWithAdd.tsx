@@ -3,7 +3,7 @@ import { FieldArrayPath, FieldArrayWithId } from "react-hook-form";
 import { UseFormReturn } from "react-hook-form";
 import AddButtonBase from "../toolbar/AddButtonBase";
 import TimePeriodGridItem from "./TimePeriodGridItem";
-import { List , AutoSizer } from 'react-virtualized';
+import { List, AutoSizer } from 'react-virtualized';
 import { useEffect, useState, useRef } from "react";
 
 interface TimePeriodGridItemsWithAddProps<FieldValues> {
@@ -34,11 +34,11 @@ const TimePeriodGridItemsWithAdd = <FieldValues,>(props: TimePeriodGridItemsWith
     }, [fields, isRowAdded]);
 
     const renderRow = ({ index, key, style }: any) => {
-        const isWithoutDeleteButton = (fields.length === 1 && index === 0 )
+        const isWithoutDeleteButton = (fields.length === 1 && index === 0)
         const item = fields[index]
 
         return (
-            <Grid item xs={12} key={`resource_calendar_${index}`} style={style}> 
+            <Grid item xs={12} key={`resource_calendar_${index}`} style={style}>
                 <TimePeriodGridItem
                     key={item.key}
                     formState={props.formState}
@@ -70,8 +70,9 @@ const TimePeriodGridItemsWithAdd = <FieldValues,>(props: TimePeriodGridItemsWith
             </Grid>
             <Grid item xs={12}>
                 <AddButtonBase
-                    labelName="Add a time period"
+                    labelName="new time period"
                     onClick={onTimePeriodAdd}
+                    tooltipText="Add new time period"
                 />
             </Grid>
         </Grid>

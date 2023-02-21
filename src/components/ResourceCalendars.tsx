@@ -109,11 +109,12 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
                         labelName="Delete selected"
                     />
                 </Grid>
-                <Grid item xs={1} className={classes.centeredGrid}>
+                <Grid item xs={2} className={classes.centeredGrid}>
                     <AddButtonToolbar
                         onClick={onAddNewCalendar}
-                        labelName="Add new"
+                        labelName="new calendar"
                         variant="text"
+                        tooltipText="Add new calendar"
                     />
                 </Grid>
             </Grid>
