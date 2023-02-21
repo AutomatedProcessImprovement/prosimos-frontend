@@ -37,7 +37,13 @@ const PrioritisationItem = (props: PrioritisationItemProps) => {
     }
 
     return (
-        <Card elevation={5} sx={{ m: 1, p: 1, minHeight: "262.5px", width: "100%" }}>
+        <Card elevation={5} sx={{
+            m: 1,
+            p: 1,
+            minHeight: "270px",
+            maxHeight: "270px",
+            overflowY: "scroll"
+        }}>
             <Grid container item xs={12} sx={{ p: 1 }}>
                 <Grid item xs={10}>
                     <Controller

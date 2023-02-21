@@ -8,6 +8,7 @@ import { UpdateAndRemovePrioritisationErrors } from "../simulationParameters/use
 import AllPrioritisationItemsToolbar from "./AllPrioritisationItemsToolbar";
 import { collectAllCaseAttrWithTypes, ValueOptionsByAttrName } from "./caseAttributesCollectorAndTransformer";
 import PrioritisationItem from "./PrioritisationItem";
+import PrioritisationVirtualizedList from "./PrioritisationVirtualizedList";
 
 interface AllPrioritisationItemsProps {
     formState: UseFormReturn<JsonData, object>
@@ -43,23 +44,36 @@ const AllPrioritisationItems = (props: AllPrioritisationItemsProps) => {
         prepend(defaultPrioritisationRule)
     }
 
+    const renderRow = ({ index, key, style }: any) => {
+        const prioritisationItemKey = fields[index].key
+
+        return (
+            <Grid item xs={12} style={{ ...style }} key={prioritisationItemKey}>
+                <PrioritisationItem
+                    key={prioritisationItemKey}
+                    formState={formState}
+                    updateAndRemovePrioritisationErrors={updateAndRemovePrioritisationErrors}
+                    discreteOptionsByCaseAttributeName={discreteOptionsByCaseAttributeName}
+                    builderSchema={builderSchema}
+                    index={index}
+                    onPrioritisationItemDelete={onPrioritisationItemDelete}
+                />
+            </Grid>
+        )
+    }
+
     return (
         <Grid container item xs={12} spacing={2} >
             <AllPrioritisationItemsToolbar
                 onAddNew={onAddNewPrioritisationItem}
             />
-            <Grid container item xs={12} style={{ paddingTop: "0px" }}>
-                {fields.map((item, index) => (
-                    <PrioritisationItem
-                        key={item.key}
-                        formState={formState}
-                        updateAndRemovePrioritisationErrors={updateAndRemovePrioritisationErrors}
-                        discreteOptionsByCaseAttributeName={discreteOptionsByCaseAttributeName}
-                        builderSchema={builderSchema}
-                        index={index}
-                        onPrioritisationItemDelete={onPrioritisationItemDelete}
-                    />
-                ))}
+            <Grid container item xs={12} style={{ paddingTop: "0px", minHeight: "56vh" }}>
+                <PrioritisationVirtualizedList
+                    rowHeight={300}
+                    renderRow={renderRow}
+                    rowCount={fields.length}
+                    overscanRowCount={2}
+                />
             </Grid>
         </Grid>
     )
