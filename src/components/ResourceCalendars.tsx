@@ -10,6 +10,7 @@ import DeleteButtonToolbar from "./toolbar/DeleteButtonToolbar"
 import AddButtonToolbar from "./toolbar/AddButtonToolbar"
 import CalendarNameDialog from "./profiles/CalendarNameDialog"
 import { useSharedStyles } from "./sharedHooks/useSharedStyles"
+import { collectAllAssignedCalendars } from "./calendars/assignedCalendarsCollector"
 
 
 interface ResourceCalendarsProps {
@@ -18,13 +19,12 @@ interface ResourceCalendarsProps {
 }
 
 const ResourceCalendars = (props: ResourceCalendarsProps) => {
-    const { formState } = props
     const classes = useSharedStyles()
-    const { control: formControl } = formState
-    const { setErrorMessage } = props
+    const { formState: { control: formControl, getValues }, formState, setErrorMessage } = props
     const [currCalendarIndex, setCurrCalendarIndex] = useState<number>()
     const [currCalendarKey, setCurrCalendarKey] = useState<string>("")
     const [isNameDialogOpen, setIsNameDialogOpen] = useState<boolean>(false)
+    const [assignedCalendars, setAssignedCalendars] = useState<Set<string>>(new Set())
 
     const { fields: allCalendars, prepend: prependCalendarFields, remove: removeCalendarsFields } = useFieldArray({
         keyName: 'key',
@@ -36,6 +36,13 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
         setIsNameDialogOpen(true)
     };
 
+    useEffect(() => {
+        const usedCalendars = collectAllAssignedCalendars(getValues("resource_profiles"))
+        if (usedCalendars !== assignedCalendars) {
+            setAssignedCalendars(usedCalendars)
+        }
+    }, [])
+
     const onDeleteCalendars = () => {
         if (currCalendarIndex === undefined) {
             setErrorMessage("Calendar is not selected")
@@ -44,6 +51,12 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
 
         if (allCalendars.length === 1) {
             setErrorMessage(MIN_LENGTH_REQUIRED_MSG("calendar"))
+            return
+        }
+
+        const calendarName = getValues(`resource_calendars.${currCalendarIndex}.name`)
+        if (assignedCalendars.has(calendarName)) {
+            setErrorMessage("Calendar is assigned to one or many resources. Remove those assignments first")
             return
         }
 
