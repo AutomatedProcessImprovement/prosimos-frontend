@@ -13,7 +13,7 @@ interface DistributionMappingWithAddProps {
     valueLabel: string
     isRowAdded: boolean
     setIsRowAdded: any
-    fields: FieldArrayWithId<JsonData, AllowedDistrParamsName, "key">[]
+    fields: FieldArrayWithId<JsonData, AllowedDistrParamsName>[]
     remove: any
     keyTextFieldProps: { label: string, type: string }
 }
@@ -38,11 +38,12 @@ const DistributionMappingWithAdd = (props: DistributionMappingWithAddProps) => {
 
     const renderRow = ({ index, key, style }: any) => {
         const isWithoutDeleteButton = (fields.length === 1 && index === 0)
+        const uniqueKey = fields[index].id
 
         return (
             <Grid item xs={12} key={key} style={style}>
                 <DistributionMappingRow
-                    key={`${key}-row`}
+                    key={uniqueKey}
                     formState={formState}
                     objectFieldName={`${objectFieldNamePart}.${index}`}
                     isWithDeleteButton={!isWithoutDeleteButton}

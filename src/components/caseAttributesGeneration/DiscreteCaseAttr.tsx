@@ -10,11 +10,12 @@ interface DiscreteCaseAttrProps {
     formState: UseFormReturn<JsonData, object>
     setErrorMessage: (value: string) => void
     itemIndex: number
-    remove: (index?: number | number[] | undefined) => void
+    remove: (index: number) => void
+    referencedValuesByCaseAttr: Set<string>
 }
 
 const DiscreteCaseAttr = (props: DiscreteCaseAttrProps) => {
-    const { formState, formState: { control: formControl, formState: { errors } }, setErrorMessage, itemIndex, remove } = props
+    const { formState, formState: { control: formControl, formState: { errors } }, setErrorMessage, itemIndex, remove, referencedValuesByCaseAttr } = props
     const classes = useSharedStyles()
 
     const onDiscreteCaseAttrDelete = () => {
@@ -59,8 +60,9 @@ const DiscreteCaseAttr = (props: DiscreteCaseAttrProps) => {
                     <DiscreteValueOptions
                         formState={formState}
                         itemIndex={itemIndex}
+                        setErrorMessage={setErrorMessage}
+                        referencedValuesByCaseAttr={referencedValuesByCaseAttr}
                     />
-
                 </Grid>
             </Grid>
         </Card>

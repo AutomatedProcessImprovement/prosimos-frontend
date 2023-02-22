@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { FiringRule, JsonData } from "../formData";
+import { CaseBasedRule, FiringRule, JsonData, PriorityRule } from "../formData";
 import { EventsFromModel } from "../modelData";
 
 
 const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
-    const [missedElemNum, setMissedElemNum] = useState(0)   // shows num of elements that were present in the config
-                                                            // but were absent in BPMN model
+    // shows num of elements that were present in the config but were absent in BPMN model
+    const [missedElemNum, setMissedElemNum] = useState(0)
     const [jsonData, setJsonData] = useState<JsonData>()
 
     useEffect(() => {
@@ -21,8 +21,10 @@ const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
                     const mergeResults = getMergeEventsList(eventsFromModel, rawData["event_distribution"])
                     const [missedNum, finalEvents] = mergeResults
                     rawData["event_distribution"] = finalEvents
-                    
+
+                    parseAndUpdatePrioritisationRules(rawData)
                     updateRangesForBatchingRulesIfAny(rawData)
+
                     setJsonData(rawData)
                     setMissedElemNum(missedNum)
                 }
@@ -31,6 +33,73 @@ const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
     }, [jsonFile, eventsFromModel]);
 
     return { jsonData, missedElemNum }
+}
+
+const parseAndUpdatePrioritisationRules = (rawData: any) => {
+    const prioritisationRulesArr: [] = rawData["prioritisation_rules"]
+
+    if (prioritisationRulesArr === undefined || prioritisationRulesArr.length === 0) {
+        // nothing to do, array is empty
+        return
+    }
+    const parsePrioritisationRules: PriorityRule[] = []
+
+    for (let orRule of prioritisationRulesArr) {
+        const parsedRule: CaseBasedRule[][] = []
+
+        for (let andRule of (orRule as any)["rules"]) {
+            const parsedAndRules: CaseBasedRule[] = []
+
+            for (let simpleRule of andRule) {
+                const condition: string = simpleRule["comparison"]
+
+                const [minValue, maxValue] = simpleRule["value"]
+                if (condition === "in") {
+                    // TODO: add validation when the infinite range is provided
+                    if (minValue === 0) {
+                        // no lower boundary, so we transform the rule to <=
+                        parsedAndRules.push({
+                            attribute: simpleRule["attribute"],
+                            comparison: "<=",
+                            value: maxValue
+                        } as CaseBasedRule)
+                    }
+                    else if (maxValue === "inf") {
+                        // no lower boundary, so we transform the rule to >=
+                        parsedAndRules.push({
+                            attribute: simpleRule["attribute"],
+                            comparison: ">=",
+                            value: minValue
+                        } as CaseBasedRule)
+                    }
+                    else {
+                        // both boundaries exist, so it is a range
+                        parsedAndRules.push({
+                            attribute: simpleRule["attribute"],
+                            comparison: simpleRule["comparison"],
+                            value: simpleRule["value"]
+                        } as CaseBasedRule)
+                    }
+                }
+                else {
+                    parsedAndRules.push({
+                        attribute: simpleRule["attribute"],
+                        comparison: simpleRule["comparison"],
+                        value: simpleRule["value"]
+                    } as CaseBasedRule)
+                }
+            }
+
+            parsedRule.push(parsedAndRules)
+        }
+
+        parsePrioritisationRules.push({
+            priority_level: orRule["priority_level"],
+            rules: parsedRule
+        })
+    }
+
+    rawData["prioritisation_rules"] = parsePrioritisationRules
 }
 
 /**
@@ -101,7 +170,7 @@ const _transform_between_operators = (firing_rules: FiringRule[][]) => {
             if (result === undefined) {
                 console.log(`Invalid setup for ready_wt rules ${ready_wt_rules}`)
             }
-            
+
             ready_wt_new_rule = [{
                 attribute: "ready_wt",
                 comparison: "between",
@@ -114,7 +183,7 @@ const _transform_between_operators = (firing_rules: FiringRule[][]) => {
             if (result === undefined) {
                 console.log(`Invalid setup for ready_wt rules ${ready_wt_rules}`)
             }
-            
+
             large_wt_new_rule = [{
                 attribute: "large_wt",
                 comparison: "between",
@@ -135,13 +204,13 @@ const _transform_between_operators = (firing_rules: FiringRule[][]) => {
     return true
 }
 
-const _get_min_and_max_rules = (rules: FiringRule[]): [string, string] | undefined  => {
+const _get_min_and_max_rules = (rules: FiringRule[]): [string, string] | undefined => {
     const minValue = rules.find((v: FiringRule) => _is_equal_any(v.comparison, ['>', '>=']))?.value
     const maxValue = rules.find((v: FiringRule) => _is_equal_any(v.comparison, ['<', '<=']))?.value
 
     if (minValue === undefined || maxValue === undefined)
         return undefined
-    
+
     return [minValue as string, maxValue as string]
 }
 
@@ -153,7 +222,7 @@ const _is_equal_any = (value: string, possible_options: string[]) => {
             return curr_res
         }
     }
-    
+
     return false
 }
 

@@ -22,7 +22,6 @@ const DistributionSection = (props: DistributionSectionProps) => {
     const [isRowAdded, setIsRowAdded] = useState(false)
 
     const { fields, append, remove } = useFieldArray({
-        keyName: 'key',
         control: formControl,
         name: objectFieldNamePart
     });
@@ -43,8 +42,9 @@ const DistributionSection = (props: DistributionSectionProps) => {
                 </Grid>
                 <Grid item xs={3}>
                     <AddButtonBase
-                        labelName="Add a mapping"
+                        labelName="new mapping"
                         onClick={onTimePeriodAdd}
+                        tooltipText="Add new mapping"
                     />
                 </Grid>
             </Grid>

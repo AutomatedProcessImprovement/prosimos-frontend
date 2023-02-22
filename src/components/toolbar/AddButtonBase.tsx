@@ -4,6 +4,7 @@ import AddIcon from '@mui/icons-material/Add';
 interface AddButtonBaseProps {
     onClick: () => void
     labelName: string
+    tooltipText?: string
 }
 
 const AddButtonBase = (props: AddButtonBaseProps) => {
@@ -13,6 +14,7 @@ const AddButtonBase = (props: AddButtonBaseProps) => {
             labelName={props.labelName}
             startIcon={<AddIcon />}
             variant="text"
+            tooltipText={props.tooltipText}
         />
     )
 }

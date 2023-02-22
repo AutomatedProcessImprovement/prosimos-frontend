@@ -36,6 +36,9 @@ import AllBatching from './batching/AllBatching';
 import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
 import useTabVisibility, { TABS } from './simulationParameters/useTabVisibility';
 import AllCaseAttributes from './caseAttributesGeneration/AllCaseAttributes';
+import AllPrioritisationItems from './prioritisation/AllPrioritisationItems';
+import { transformPrioritisationRules } from './prioritisation/prioritisationRulesTransformer';
+import usePrioritisationErrors from './simulationParameters/usePrioritisationErrors';
 
 const useStyles = makeStyles((theme: Theme) => ({
     simParamsGrid: {
@@ -66,6 +69,8 @@ const tooltip_desc: { [key: string]: string } = {
         "Represents the setup needed in order to execute the task in a batched way",
     CASE_ATTRIBUTES:
         "Represents the setup on how case attributes need to be generated",
+    CASE_BASED_PRIORITISATION:
+        "Represents the case-based prioritisation by defining rules and its appropriate priority level",
     SIMULATION_RESULTS: "",
 }
 
@@ -116,12 +121,12 @@ const SimulationParameters = () => {
     const { formState } = useFormState(tasksFromModel, gateways, eventsFromModel, jsonData)
     const { formState: { errors, isValid, isSubmitted, submitCount }, getValues, handleSubmit } = formState
     const [isScenarioParamsValid, setIsScenarioParamsValid] = useState(true)
-
+    const { isPrioritisationRulesValid, updateErrors, removeErrorByPath } = usePrioritisationErrors(getValues("case_attributes"), getValues("prioritisation_rules"))
     const { visibleTabs, getIndexOfTab } = useTabVisibility(eventsFromModel)
 
     const { onUploadNewModel } = useNewModel()
 
-    // validate both forms: scenatio params and json fields
+    // validate both forms: scenario params and json fields
     useEffect(() => {
         // isValid doesn't work properly on init
         const isJsonParamsValid = Object.keys(errors)?.length === 0
@@ -198,9 +203,10 @@ const SimulationParameters = () => {
     };
 
     const getBlobBasedOnExistingInput = (): Blob => {
-        const values = getValues()
-        const newTransformedValues = transformBetweenOperations(values)
-        const blob = fromContentToBlob(newTransformedValues)
+        const values = getValues() as JsonData
+        const newTransformedValuesAfterBatching = transformBetweenOperations(values)
+        const newTransformedValuesAfterPrioritisation = transformPrioritisationRules(newTransformedValuesAfterBatching)
+        const blob = fromContentToBlob(newTransformedValuesAfterPrioritisation)
 
         return blob
     };
@@ -323,6 +329,11 @@ const SimulationParameters = () => {
                     formState={formState}
                     setErrorMessage={setErrorMessage}
                 />
+            case TABS.CASE_BASED_PRIORITISATION:
+                return <AllPrioritisationItems
+                    formState={formState}
+                    updateAndRemovePrioritisationErrors={[updateErrors, removeErrorByPath]}
+                />
             case TABS.SIMULATION_RESULTS:
                 if (!!currSimulatedOutput)
                     return <SimulationResults
@@ -374,6 +385,14 @@ const SimulationParameters = () => {
                 // TODO: find appropriate icon
                 Icon = <DynamicFeedIcon style={styles} />
                 break
+            case TABS.CASE_BASED_PRIORITISATION:
+                const prioritisationErrors = isPrioritisationRulesValid
+                    ? ""
+                    : "Invalid Value"
+                currError = errors.prioritisation_rules || prioritisationErrors
+                // TODO: find appropriate icon
+                Icon = <DynamicFeedIcon style={styles} />
+                break
             case TABS.SIMULATION_RESULTS:
                 lastStep = true
                 Icon = <BarChartIcon style={styles} />
@@ -412,15 +431,17 @@ const SimulationParameters = () => {
     };
 
     const onStartSimulation = async () => {
-        setInfoMessage("Simulation started...")
         const isScenarioValid = await triggerScenario()
         setIsScenarioParamsValid(isScenarioValid)
 
-        // scenario params or json params or both are not valid
-        if (!isValid || !isScenarioValid) {
+        // scenario params or json params 
+        // or values used for prioritisation rules 
+        // or all of them are not valid
+        if (!isValid || !isScenarioValid || !isPrioritisationRulesValid) {
             return;
         }
 
+        setInfoMessage("Simulation started...")
         const newBlob = getBlobBasedOnExistingInput()
         const { num_processes: numProcesses, start_date: startDate } = getScenarioValues()
 

@@ -37,7 +37,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
         formState: { control: formControl, trigger, setValue, getValues, setFocus },
         resourcePoolIndex, calendars, errors, setErrorMessage
     } = props
-    
+
     const { fields, prepend, remove } = useFieldArray({
         keyName: 'key',
         control: formControl,
@@ -55,7 +55,7 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
             setFocus(`resource_profiles.${resourcePoolIndex}.resource_list.1.name`)
             setIsRowAdding(false)
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fields, isRowAdding])
 
     const onResourceProfileDelete = (index: number) => {
@@ -140,8 +140,9 @@ const ResourceProfilesTable = (props: ResourceProfilesTableProps) => {
         <React.Fragment>
             <Toolbar sx={{ justifyContent: "flex-end", marginLeft: "auto" }}>
                 <AddButtonToolbar
-                    labelName="Add new profile"
+                    labelName="new profile"
                     onClick={onProfileAdd}
+                    tooltipText="Add new profile"
                 />
             </Toolbar>
             <Table size="small" style={{ width: "90%", height: "35vh", margin: "auto" }}>

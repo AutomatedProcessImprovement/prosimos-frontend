@@ -10,6 +10,7 @@ export enum TABS {
     INTERMEDIATE_EVENTS,
     BATCHING,
     CASE_ATTRIBUTES,
+    CASE_BASED_PRIORITISATION,
     SIMULATION_RESULTS
 }
 
@@ -22,6 +23,7 @@ const tabsName: { [key: string]: string } = {
     INTERMEDIATE_EVENTS: "Intermediate Events",
     BATCHING: "Batching",
     CASE_ATTRIBUTES: "Case Attributes",
+    CASE_BASED_PRIORITISATION: "Prioritisation",
     SIMULATION_RESULTS: "Simulation Results"
 };
 

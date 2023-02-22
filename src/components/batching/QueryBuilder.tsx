@@ -19,11 +19,13 @@ import { makeStyles } from "@mui/styles";
 import QueryGroupIcon from '@mui/icons-material/AccountTreeRounded';
 import QueryConditionIcon from '@mui/icons-material/FunctionsRounded';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutlineRounded';
-import { exampleSchema, typeOperatorMap } from "./schemas";
+import { batchingSchema, BatchingBuilderSchema, PrioritisationBuilderSchema, typeOperatorMap } from "./schemas";
 import { JsonData } from "../formData";
 import WeekdaySelect from "../calendars/WeekdaySelect";
 import SliderWithInputs from "./SliderWithInputs";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState, useEffect } from "react";
+import QueryValueDiscreteSelect from "./QueryValueDiscreteSelect";
+import { UpdateAndRemovePrioritisationErrors } from "../simulationParameters/usePrioritisationErrors";
 
 const useQueryBuilderStyles = makeStyles(
     (theme: Theme) => ({
@@ -96,17 +98,35 @@ const useQueryBuilderStyles = makeStyles(
 );
 
 interface QueryBuilderProps {
-    formState: UseFormReturn<JsonData, object>
-    taskIndex: number
+    formState: UseFormReturn<JsonData, object>;
+    name: string;
+    builderSchema?: PrioritisationBuilderSchema;
+    possibleValueOptions?: {}
+    updateAndRemovePrioritisationErrors?: UpdateAndRemovePrioritisationErrors
 }
 
+type EligibleBuilderSchemas = BatchingBuilderSchema | PrioritisationBuilderSchema
+
 export const QueryBuilder = (props: QueryBuilderProps) => {
-    const { formState, taskIndex } = props 
+    const { builderSchema, ...otherProps } = props
+    const [optionsWithType, setOptionsWithType] = useState<EligibleBuilderSchemas>({})
+
+    useEffect(() => {
+        let options = builderSchema
+        if (options === undefined || Object.keys(options).length === 0) {
+            // we use default options/schema (batch firing rules)
+            options = batchingSchema
+        }
+
+        if (options !== optionsWithType) {
+            setOptionsWithType(options)
+        }
+    }, [builderSchema])
 
     return (
-        <QueryGroup 
-            name={`batch_processing.${taskIndex}.firing_rules`}
-            formState={formState}
+        <QueryGroup
+            {...otherProps}
+            builderSchema={optionsWithType}
         />
     );
 };
@@ -114,8 +134,11 @@ export const QueryBuilder = (props: QueryBuilderProps) => {
 interface QueryGroupProps {
     name: string;
     formState: any;
+    builderSchema: EligibleBuilderSchemas;
     depth?: number;
     onRemove?: () => any;
+    possibleValueOptions?: {}
+    updateAndRemovePrioritisationErrors?: UpdateAndRemovePrioritisationErrors
 }
 
 export type FieldsPath = "query.items" | `query.items.${number}.items` | `query.items.${number}.items.${number}.items`
@@ -124,8 +147,11 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
     const {
         name,
         formState,
+        builderSchema,
         depth = 0,
         onRemove,
+        possibleValueOptions,
+        updateAndRemovePrioritisationErrors,
         ...props
     } = allProps
     const classes = useQueryBuilderStyles();
@@ -149,7 +175,7 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
                     : <Chip label="AND" variant="outlined" />}
 
                 {/* group could be added only on the very first level */}
-                {depth === 0 
+                {depth === 0
                     ? (
                         <Tooltip title="Add Logical Group">
                             <IconButton
@@ -165,19 +191,19 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
                         </Tooltip>
                     )
                     : (
-                    <Tooltip title="Add Condition">
-                        <IconButton
-                            onClick={() => {
-                                clearErrors(arrayPath);
-                                append([
-                                    { attribute: "", comparison: undefined, value: [] },
-                                ]);
-                            }}
-                        >
-                            <QueryConditionIcon />
-                        </IconButton>
-                    </Tooltip>
-                )}
+                        <Tooltip title="Add Condition">
+                            <IconButton
+                                onClick={() => {
+                                    clearErrors(arrayPath);
+                                    append([
+                                        { attribute: "", comparison: undefined, value: [] },
+                                    ]);
+                                }}
+                            >
+                                <QueryConditionIcon />
+                            </IconButton>
+                        </Tooltip>
+                    )}
 
                 {onRemove ? (
                     <Tooltip title="Remove This Group">
@@ -206,15 +232,21 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
                             key={field.id}
                             depth={depth + 1}
                             name={`${name}.${index}`}
+                            builderSchema={builderSchema}
                             formState={formState}
                             onRemove={() => remove(index)}
+                            possibleValueOptions={possibleValueOptions}
+                            updateAndRemovePrioritisationErrors={updateAndRemovePrioritisationErrors}
                         />
                     ) : (
                         <QueryCondition
                             key={field.id}
                             formState={formState}
                             name={`${name}.${index}`}
+                            builderSchema={builderSchema}
                             onRemove={() => remove(index)}
+                            possibleValueOptions={possibleValueOptions}
+                            updateAndRemovePrioritisationErrors={updateAndRemovePrioritisationErrors}
                         />
                     )
                 })}
@@ -226,15 +258,21 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
 interface QueryConditionProps {
     name: string;
     formState: any;
+    builderSchema: EligibleBuilderSchemas;
     onRemove: () => any;
+    possibleValueOptions?: {}
+    updateAndRemovePrioritisationErrors?: UpdateAndRemovePrioritisationErrors
 }
 
 const QueryCondition = (allProps: QueryConditionProps) => {
     const { name,
         formState,
+        builderSchema,
         onRemove,
+        possibleValueOptions,
+        updateAndRemovePrioritisationErrors,
         ...props } = allProps
-    
+
     const { control, watch, formState: { errors }, setValue, clearErrors } = formState
     const classes = useQueryBuilderStyles();
 
@@ -251,7 +289,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
     const operatorValue = watch(conditionOperatorName);
 
     // dynamic operator and values
-    const fieldTypeSchema = (exampleSchema as any)[fieldValue];
+    const fieldTypeSchema = (builderSchema as any)[fieldValue];
     const typeOperator = (typeOperatorMap as any)[fieldTypeSchema?.type];
     const valueOpts = (typeOperator as any)?.[operatorValue];
 
@@ -260,7 +298,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
         if (errorMessage !== undefined) {
             return errorMessage
         }
-        
+
         if (fieldTypeSchema.type === 'hour') {
             return "Enter value from 0 to 24"
         }
@@ -281,6 +319,78 @@ const QueryCondition = (allProps: QueryConditionProps) => {
         // nullify the operator and set of values
         nullifyValueAndClearErrors(conditionOperatorName)
         nullifyValueAndClearErrors(conditionValueName)
+    }
+
+    const getValueComponent = () => {
+        switch (fieldTypeSchema.type) {
+            case 'weekday':
+                return <Controller
+                    name={conditionValueName}
+                    control={control}
+                    render={({ field }) => (
+                        <WeekdaySelect
+                            field={field}
+                            label="Value"
+                            style={{ ml: 1.875, mt: 2, flex: 1 }}
+                            fieldError={conditionValueError}
+                        />
+                    )}
+                />
+            case 'priority_discrete':
+                const allPossibleOptions = (possibleValueOptions as any)?.[fieldValue] ?? []
+                return <QueryValueDiscreteSelect
+                    conditionValueName={conditionValueName}
+                    fieldError={conditionValueError}
+                    formState={formState}
+                    allPossibleOptions={allPossibleOptions}
+                    style={{ ml: 1.875, mt: 2, flex: 1 }}
+                    updateAndRemovePrioritisationErrors={updateAndRemovePrioritisationErrors!!}
+                />
+            default:
+                return valueOpts?.multiple
+                    ? (
+                        <Controller
+                            key={`${typeOperator.label}-multiple`}
+                            control={control}
+                            name={conditionValueName}
+                            defaultValue={[]}
+                            render={({
+                                field: { onChange, value }
+                            }) => {
+                                return <SliderWithInputs
+                                    value={value}
+                                    onChange={onChange}
+                                    conditionValueError={conditionValueError}
+                                />
+                            }}
+                        />
+                    )
+                    : (
+                        <Controller
+                            key={`${typeOperator.label}-single`}
+                            control={control}
+                            name={conditionValueName}
+                            defaultValue={""}
+                            rules={{ required: "Required" }}
+                            render={({
+                                field: { onChange, value }
+                            }) => (
+                                <TextField
+                                    label="Value"
+                                    margin="normal"
+                                    type="text"
+                                    onChange={onChange}
+                                    style={{ flex: 1, marginLeft: 15 }}
+                                    error={!!conditionValueError}
+                                    helperText={getHelperTextForInputValue()}
+                                    value={value}
+                                    variant="standard"
+                                />
+                            )}
+                        />
+                    )
+        }
+
     }
 
     return (
@@ -307,10 +417,9 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                         variant="standard"
                     >
                         <MenuItem value="">None</MenuItem>
-                        {Object.keys(exampleSchema).map((value, index, array) => {
-                            const item = (exampleSchema as any)[value];
+                        {Object.entries(builderSchema).map(([key, item]) => {
                             return (
-                                <MenuItem key={value} value={value}>
+                                <MenuItem key={key} value={key}>
                                     {item.label}
                                 </MenuItem>
                             );
@@ -319,101 +428,46 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                 )}
             />
 
-            {fieldValue === "" || !typeOperator ? null : (
-                <>
-                    <Controller
-                        key={typeOperator.label}
-                        control={control}
-                        name={conditionOperatorName}
-                        defaultValue={""}
-                        rules={{ required: "Required" }}
-                        render={({
-                            field: { onChange, value }
-                        }) => (
-                            <TextField
-                                select
-                                label="Operator"
-                                margin="normal"
-                                style={{ width: 220, marginLeft: 15 }}
-                                error={!!conditionOperatorError}
-                                helperText={conditionOperatorError?.message}
-                                onChange={onChange}
-                                value={value}
-                                variant="standard"
-                            >
-                                <MenuItem value="">None</MenuItem>
-                                {Object.keys(typeOperator).map((value, index, array) => {
-                                    const item = (typeOperator as any)[value];
-                                    return (
-                                        <MenuItem key={value} value={value}>
-                                            {item.label}
-                                        </MenuItem>
-                                    );
-                                })}
-                            </TextField>
-                        )}
-                    />
-
-                    {fieldTypeSchema.type === 'weekday' ?
+            {fieldValue === "" || !typeOperator
+                ? null
+                : (
+                    <>
                         <Controller
-                            name={conditionValueName}
+                            key={typeOperator.label}
                             control={control}
-                            render={({ field }) => (
-                                <WeekdaySelect
-                                    field={field}
-                                    label="Value"
-                                    style={{ ml: 1.875, mt: 2, flex: 1 }}
-                                    fieldError={conditionValueError}
-                                />
-                            )}
-                        />
-
-                    : valueOpts?.multiple ? (
-                        <Controller
-                            key={`${typeOperator.label}-multiple`}
-                            control={control}
-                            name={conditionValueName}
-                            defaultValue={[]}
-                            render={({
-                                field: { onChange, value }
-                            }) => {
-                                return <SliderWithInputs 
-                                    value={value}
-                                    onChange={onChange}
-                                    conditionValueError={conditionValueError}
-                                />
-                            }}
-                        />
-                    ) : (
-                        <Controller
-                            key={`${typeOperator.label}-single`}
-                            control={control}
-                            name={conditionValueName}
+                            name={conditionOperatorName}
                             defaultValue={""}
                             rules={{ required: "Required" }}
                             render={({
                                 field: { onChange, value }
                             }) => (
                                 <TextField
-                                    label="Value"
+                                    select
+                                    label="Operator"
                                     margin="normal"
-                                    type={fieldTypeSchema.type === "number" ? "number" : "text"}
-                                    onChange={(e) => {
-                                        fieldTypeSchema.type === "number"
-                                            ? onChange(Number(e.target.value))
-                                            : onChange(e.target.value);
-                                    }}
-                                    style={{ flex: 1, marginLeft: 15 }}
-                                    error={!!conditionValueError}
-                                    helperText={getHelperTextForInputValue()}
+                                    style={{ width: 220, marginLeft: 15 }}
+                                    error={!!conditionOperatorError}
+                                    helperText={conditionOperatorError?.message}
+                                    onChange={onChange}
                                     value={value}
                                     variant="standard"
-                                />
+                                >
+                                    <MenuItem value="">None</MenuItem>
+                                    {Object.keys(typeOperator).map((value, index, array) => {
+                                        const item = (typeOperator as any)[value];
+                                        return (
+                                            <MenuItem key={value} value={value}>
+                                                {item.label}
+                                            </MenuItem>
+                                        );
+                                    })}
+                                </TextField>
                             )}
                         />
-                    )}
-                </>
-            )}
+
+                        {getValueComponent()}
+                    </>
+                )}
 
             <span
                 style={{

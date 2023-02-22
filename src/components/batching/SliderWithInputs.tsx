@@ -11,19 +11,19 @@ const SliderWithInputs = (props: SliderWithInputsProps) => {
     const { value, onChange, conditionValueError } = props
 
     const handleInputChange = (
-            event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-            onChangeSlider: any,
-            oldRange: number[],
-            isFirst: boolean
-        ) => {
-            const newInputValue = Number(event.target.value)
+        event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+        onChangeSlider: any,
+        oldRange: number[],
+        isFirst: boolean
+    ) => {
+        const newInputValue = Number(event.target.value)
 
-            const newBetweenValue = isFirst 
-                ? [newInputValue, Number(oldRange[1])]
-                : [Number(oldRange[0]), newInputValue]
+        const newBetweenValue = isFirst
+            ? [newInputValue, Number(oldRange[1])]
+            : [Number(oldRange[0]), newInputValue]
 
-            onChangeSlider(newBetweenValue)
-        };
+        onChangeSlider(newBetweenValue)
+    };
 
     const getHelperTextForInputValue = () => {
         const errorMessage = conditionValueError?.message
@@ -53,7 +53,7 @@ const SliderWithInputs = (props: SliderWithInputsProps) => {
                         handleInputChange(e, onChange, value, true)
                     }}
                     variant="standard"
-                    label="Value (sec)"
+                    label="Value"
                     inputProps={{
                         min: 0,
                         max: Number.MAX_VALUE
@@ -79,7 +79,7 @@ const SliderWithInputs = (props: SliderWithInputsProps) => {
                         handleInputChange(e, onChange, value, false)
                     }}
                     variant="standard"
-                    label="Value (sec)"
+                    label="Value"
                     inputProps={{
                         min: 0,
                         max: Number.MAX_VALUE

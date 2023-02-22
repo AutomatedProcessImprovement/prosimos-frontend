@@ -3,24 +3,23 @@ import { useForm } from "react-hook-form";
 import { EventDistribution, JsonData } from "../formData";
 import { AllModelTasks, EventsFromModel, Gateways } from "../modelData";
 import { defaultTemplateSchedule, defaultArrivalTimeDistribution, defaultArrivalCalendarArr, defaultResourceProfiles } from "./defaultValues";
-import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, SUMMATION_ONE_MSG, INVALID_TIME_FORMAT } from "./../validationMessages";
 import { round } from "../../helpers/timeConversions";
-import { distributionValidation } from "../../yup-extended";
+import yup, { distributionValidation, stringOrNumberArr } from "../../yup-extended";
 
 const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsFromModel?: EventsFromModel, jsonData?: JsonData) => {
     const [data, setData] = useState({})
 
-    const taskValidationSchema = useMemo(() => (yup.object().shape({
+    const taskValidationSchema = useMemo(() => (yup.object({
         resource_profiles: yup.array()
             .of(
-                yup.object().shape({
+                yup.object({
                     id: yup.string(),
                     name: yup.string().required(REQUIRED_ERROR_MSG),
                     resource_list: yup.array()
                         .of(
-                            yup.object().shape({
+                            yup.object({
                                 id: yup.string(),
                                 name: yup.string().required(REQUIRED_ERROR_MSG),
                                 cost_per_hour: yup.number().required(REQUIRED_ERROR_MSG),
@@ -36,7 +35,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
         arrival_time_distribution: yup.object().shape(distributionValidation),
         arrival_time_calendar: yup.array()
             .of(
-                yup.object().shape({
+                yup.object({
                     from: yup.string().required(REQUIRED_ERROR_MSG),
                     to: yup.string().required(REQUIRED_ERROR_MSG),
                     beginTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
@@ -47,11 +46,11 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
             .min(1, MIN_LENGTH_REQUIRED_MSG("arrival calendar")),
         gateway_branching_probabilities: yup.array()
             .of(
-                yup.object().shape({
+                yup.object({
                     gateway_id: yup.string().required(),
                     probabilities: yup.array()
                         .of(
-                            yup.object().shape({
+                            yup.object({
                                 path_id: yup.string().required(),
                                 value: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG)
                             })
@@ -70,11 +69,11 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
             .required(),
         task_resource_distribution: yup.array()
             .of(
-                yup.object().shape({
+                yup.object({
                     task_id: yup.string().required(),
                     resources: yup.array()
                         .of(
-                            yup.object().shape({
+                            yup.object({
                                 resource_id: yup.string().required(REQUIRED_ERROR_MSG),
                                 ...distributionValidation
                             })
@@ -85,12 +84,12 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
             .required(),
         resource_calendars: yup.array()
             .of(
-                yup.object().shape({
+                yup.object({
                     id: yup.string(),
                     name: yup.string().required(REQUIRED_ERROR_MSG),
                     time_periods: yup.array()
                         .of(
-                            yup.object().shape({
+                            yup.object({
                                 from: yup.string().required(REQUIRED_ERROR_MSG),
                                 to: yup.string().required(REQUIRED_ERROR_MSG),
                                 beginTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
@@ -103,20 +102,20 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
             .required(),
         event_distribution: yup.array()
             .of(
-                yup.object().shape({
+                yup.object({
                     event_id: yup.string().required(REQUIRED_ERROR_MSG),
                     ...distributionValidation
                 })
             ),
         batch_processing: yup.array()
             .of(
-                yup.object().shape({
+                yup.object({
                     task_id: yup.string().required(REQUIRED_ERROR_MSG),
                     type: yup.string().required(REQUIRED_ERROR_MSG),
                     batch_frequency: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG),
                     size_distrib: yup.array()
                         .of(
-                            yup.object().shape({
+                            yup.object({
                                 key: yup.string().required(REQUIRED_ERROR_MSG),
                                 value: yup.number().required(REQUIRED_ERROR_MSG)
                             })
@@ -134,7 +133,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                         .uniqueKeyDistr(),
                     duration_distrib: yup.array()
                         .of(
-                            yup.object().shape({
+                            yup.object({
                                 key: yup.string().required(REQUIRED_ERROR_MSG),
                                 value: yup.number().required(REQUIRED_ERROR_MSG)
                             })
@@ -145,7 +144,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                         .of(
                             yup.array()
                                 .of((
-                                    yup.object().shape({
+                                    yup.object({
                                         attribute: yup.string().required(REQUIRED_ERROR_MSG),
                                         comparison: yup.string().required(REQUIRED_ERROR_MSG),
                                         // string for weekday and numeric string for all others
@@ -165,13 +164,15 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                                     })
                                 ) as any)
                                 .uniqueAttributes()
+                                .min(1, MIN_LENGTH_REQUIRED_MSG("condition inside a firing rule"))
                         )
+                        .min(1, MIN_LENGTH_REQUIRED_MSG("condition inside a firing rule"))
                 })
             )
             .uniqueTaskBatching(),
         case_attributes: yup.array()
             .of(
-                yup.object().shape({
+                yup.object({
                     name: yup.string()
                         .trim()
                         .matches(/^[a-zA-Z0-9-_,.`':]+$/g, "Invalid name, allowed characters: a-z A-Z 0-9 _ , . - : ` ' ")
@@ -184,7 +185,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                                 break
                             case "discrete":
                                 schema = yup.array().of(
-                                    yup.object().shape({
+                                    yup.object({
                                         key: yup.string().required(REQUIRED_ERROR_MSG),
                                         value: yup.number().required(REQUIRED_ERROR_MSG)
                                     })
@@ -205,11 +206,33 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                         return schema
                     })
                 })
+            ),
+        prioritisation_rules: yup.array()
+            .of(
+                yup.object({
+                    priority_level: yup.number()
+                        .min(1, "The lowest possible priority level is 1"),
+                    rules: yup.array()
+                        .of(
+                            yup.array()
+                                .of((
+                                    yup.object({
+                                        attribute: yup.string().required(REQUIRED_ERROR_MSG),
+                                        comparison: yup.string().required(REQUIRED_ERROR_MSG),
+                                        value: stringOrNumberArr
+                                    })
+                                ) as any)
+                                .uniqueAttributes()
+                                .min(1, MIN_LENGTH_REQUIRED_MSG("condition"))
+                        )
+                        .min(1, MIN_LENGTH_REQUIRED_MSG("condition"))
+                })
             )
+            .uniquePriorityLevel()
     })), []);
 
     const formState = useForm<JsonData>({
-        resolver: yupResolver(taskValidationSchema),
+        resolver: yupResolver<yup.AnyObjectSchema>(taskValidationSchema),
         mode: "onBlur" // validate on blur
     })
     const { reset } = formState

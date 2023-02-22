@@ -9,29 +9,43 @@ import AddButtonBase from "../toolbar/AddButtonBase";
 
 interface DiscreteValueOptionsProps {
     formState: UseFormReturn<JsonData, object>
-    // setErrorMessage: (value: string) => void
+    setErrorMessage: (value: string) => void
     itemIndex: number
+    referencedValuesByCaseAttr: Set<string>
 }
 
 const DiscreteValueOptions = (props: DiscreteValueOptionsProps) => {
-    const { formState: { control: formControl }, itemIndex } = props
+    const { formState: { control: formControl, getValues }, setErrorMessage, itemIndex, referencedValuesByCaseAttr } = props
     const [isRowAdded, setIsRowAdded] = useState(false)
     const classes = useSharedStyles()
     const objectFieldNamePart = `case_attributes.${itemIndex}.values` as AllowedDistrParamsName
 
     const { fields, append, remove } = useFieldArray({
-        keyName: 'key',
         control: formControl,
         name: objectFieldNamePart
     });
 
-    const onTimePeriodAdd = () => {
+    const onOptionAdd = () => {
         setIsRowAdded(true)
         append({
             key: "Option's Name",
             value: 0.5
         })
     };
+
+    const onOptionDelete = (optionValueIndex: number) => {
+        const optionName = getValues(`case_attributes.${itemIndex}.values.${optionValueIndex}.key`)
+
+        const isReferencedInPrioritisationRules = referencedValuesByCaseAttr.has(optionName)
+        if (isReferencedInPrioritisationRules) {
+            setErrorMessage(
+                "This value is referenced in one or many prioritisation rules. Remove those rules first"
+            )
+        }
+        else {
+            remove(optionValueIndex)
+        }
+    }
 
     return (
         <Grid item container xs={12}>
@@ -41,8 +55,9 @@ const DiscreteValueOptions = (props: DiscreteValueOptionsProps) => {
                 </Grid>
                 <Grid item xs={2} className={classes.centeredGrid}>
                     <AddButtonBase
-                        labelName="Add an option"
-                        onClick={onTimePeriodAdd}
+                        labelName="new option"
+                        onClick={onOptionAdd}
+                        tooltipText="Add new option"
                     />
                 </Grid>
             </Grid>
@@ -53,7 +68,7 @@ const DiscreteValueOptions = (props: DiscreteValueOptionsProps) => {
                 isRowAdded={isRowAdded}
                 setIsRowAdded={setIsRowAdded}
                 fields={fields}
-                remove={remove}
+                remove={onOptionDelete}
                 keyTextFieldProps={{
                     label: "Value",
                     type: "text"

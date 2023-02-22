@@ -8,6 +8,19 @@ export interface JsonData {
     event_distribution: EventDistribution[]
     batch_processing: BatchProcessing[]
     case_attributes: CaseAttributeDefinition[]
+    prioritisation_rules: PriorityRule[]
+}
+
+
+export interface PriorityRule {
+    priority_level: number
+    rules: CaseBasedRule[][]
+}
+
+export interface CaseBasedRule {
+    attribute: string
+    comparison: string
+    value: number | string | (number | "inf")[]
 }
 
 export interface BatchProcessing {
@@ -52,7 +65,7 @@ export interface ResourceInfo {
     cost_per_hour: number
     amount: number
     calendar: string
-    assignedTasks: string []
+    assignedTasks: string[]
 }
 
 export interface ProbabilityDistribution {

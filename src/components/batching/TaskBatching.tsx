@@ -15,10 +15,10 @@ interface TaskBatchingProps {
  * Component for rendering all task's details in regards to batching
  */
 const TaskBatching = (props: TaskBatchingProps) => {
-    const {formState: { control: formControl }, taskIndex, style} = props
+    const { formState: { control: formControl }, taskIndex, style } = props
 
     return (
-        <Grid container item 
+        <Grid container item
             style={{
                 ...style,
                 overflow: "scroll"
@@ -58,7 +58,7 @@ const TaskBatching = (props: TaskBatchingProps) => {
                 <Typography variant="h6" align="left"> Firing Rules </Typography>
                 <QueryBuilder
                     formState={props.formState}
-                    taskIndex={taskIndex}
+                    name={`batch_processing.${taskIndex}.firing_rules`}
                 />
             </Grid>
         </Grid>
