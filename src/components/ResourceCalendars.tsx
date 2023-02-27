@@ -10,6 +10,7 @@ import DeleteButtonToolbar from "./toolbar/DeleteButtonToolbar"
 import AddButtonToolbar from "./toolbar/AddButtonToolbar"
 import CalendarNameDialog from "./profiles/CalendarNameDialog"
 import { useSharedStyles } from "./sharedHooks/useSharedStyles"
+import { collectAllAssignedCalendars } from "./calendars/assignedCalendarsCollector"
 
 
 interface ResourceCalendarsProps {
@@ -18,13 +19,12 @@ interface ResourceCalendarsProps {
 }
 
 const ResourceCalendars = (props: ResourceCalendarsProps) => {
-    const { formState } = props
     const classes = useSharedStyles()
-    const { control: formControl } = formState
-    const { setErrorMessage } = props
+    const { formState: { control: formControl, getValues }, formState, setErrorMessage } = props
     const [currCalendarIndex, setCurrCalendarIndex] = useState<number>()
     const [currCalendarKey, setCurrCalendarKey] = useState<string>("")
     const [isNameDialogOpen, setIsNameDialogOpen] = useState<boolean>(false)
+    const [assignedCalendars, setAssignedCalendars] = useState<Set<string>>(new Set())
 
     const { fields: allCalendars, prepend: prependCalendarFields, remove: removeCalendarsFields } = useFieldArray({
         keyName: 'key',
@@ -32,9 +32,29 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
         name: "resource_calendars"
     })
 
-    const onAddNewCalendar = () => {
+    const onNameDialogOpen = () => {
         setIsNameDialogOpen(true)
     };
+
+    useEffect(() => {
+        const usedCalendars = collectAllAssignedCalendars(getValues("resource_profiles"))
+        if (usedCalendars !== assignedCalendars) {
+            setAssignedCalendars(usedCalendars)
+        }
+    }, [])
+
+    useEffect(() => {
+        // once we get the new number of calendars, we:
+        // either created a new one and redirect users to this newly created resource
+        // or loading the page for the first time and select the first calendar in the list as an active one
+        setCurrCalendarIndex(0)
+    }, [allCalendars])
+
+    useEffect(() => {
+        // once index of the selected calendar changed,
+        // we need to update the key accordingly
+        updateCurrKey(currCalendarIndex)
+    }, [currCalendarIndex])
 
     const onDeleteCalendars = () => {
         if (currCalendarIndex === undefined) {
@@ -47,15 +67,25 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
             return
         }
 
+        const calendarName = getValues(`resource_calendars.${currCalendarIndex}.name`)
+        if (assignedCalendars.has(calendarName)) {
+            setErrorMessage("Calendar is assigned to one or many resources. Remove those assignments first")
+            return
+        }
+
         removeCalendarsFields(currCalendarIndex)
         updateCurrCalendar(undefined)
     };
 
     const onNameDialogSave = (name: string) => {
+        // nullify selected option
+        updateCurrCalendar(undefined)
+
+        // add new calendar as the first one in the list
         const newDefaultResourceCalendar = defaultTemplateSchedule(false, name)
         prependCalendarFields(newDefaultResourceCalendar)
-        updateCurrCalendar(0)
-        setIsNameDialogOpen(false)
+
+        onNameDialogClose()
     };
 
     const onNameDialogClose = () => {
@@ -67,13 +97,19 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
         updateCurrCalendar(Number(selectedCalendarIndex))
     }
 
-    const updateCurrCalendar = (index: number | undefined) => {
+    const updateCurrCalendar = (index?: number) => {
+        // update index
         setCurrCalendarIndex(index)
 
-        if (index === undefined) {
+        // update key
+        updateCurrKey(index)
+    }
+
+    const updateCurrKey = (currIndex?: number) => {
+        if (currIndex === undefined) {
             setCurrCalendarKey("")
         } else {
-            const calendarKey = allCalendars[index]?.key || ""
+            const calendarKey = allCalendars[currIndex]?.key || ""
             setCurrCalendarKey(calendarKey)
         }
     }
@@ -111,7 +147,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
                 </Grid>
                 <Grid item xs={2} className={classes.centeredGrid}>
                     <AddButtonToolbar
-                        onClick={onAddNewCalendar}
+                        onClick={onNameDialogOpen}
                         labelName="new calendar"
                         variant="text"
                         tooltipText="Add new calendar"
@@ -119,12 +155,12 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
                 </Grid>
             </Grid>
             {(currCalendarIndex === undefined)
-                ? <Grid xs={12} className={classes.centeredGrid} sx={{ p: 2 }}>
+                ? <Grid item xs={12} className={classes.centeredGrid} sx={{ p: 2 }}>
                     <Typography>
                         Please select the calendar to see its time periods
                     </Typography>
                 </Grid>
-                : <Grid xs={12} sx={{ p: 2 }}>
+                : <Grid item xs={12} sx={{ p: 2 }}>
                     <TimePeriodList
                         key={`resource_calendars.${currCalendarKey}`}
                         formState={formState}
