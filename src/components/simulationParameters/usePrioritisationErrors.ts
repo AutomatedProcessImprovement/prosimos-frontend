@@ -37,11 +37,11 @@ const usePrioritisationErrors = (caseAttrsProps: CaseAttributeDefinition[], init
         initialRulesProps.forEach((priorityRule, ruleIndex) => {
             priorityRule.rules.forEach((orRule, orRuleIndex) => {
                 orRule.forEach((andRule, andRuleIndex) => {
-                    if (typeof andRule.value === "string") {
-                        // discrete attribute
-                        // TODO: change the if statement to type of the case attr
+                    const caseAttributeType = caseAttributes.find(i => i.name === andRule.attribute)?.type || ""
+                    if (caseAttributeType === "discrete") {
+                        // verify that provided discrete value is in the list of possible values
                         const caseAttrName = andRule.attribute
-                        const value = andRule.value
+                        const value = andRule.value as string
                         const validValuesArr = possibleValueOptions[caseAttrName] ?? []
                         if (!validValuesArr.includes(value)) {
                             const path = `prioritisation_rules.${ruleIndex}.rules.${orRuleIndex}.${andRuleIndex}.value`
