@@ -434,10 +434,12 @@ const SimulationParameters = () => {
         const isScenarioValid = await triggerScenario()
         setIsScenarioParamsValid(isScenarioValid)
 
-        // scenario params or json params 
-        // or values used for prioritisation rules 
-        // or all of them are not valid
-        if (!isValid || !isScenarioValid || !isPrioritisationRulesValid) {
+        const isJsonParamsValid = Object.keys(errors)?.length === 0
+
+        if (!isJsonParamsValid || !isScenarioValid || !isPrioritisationRulesValid) {
+            // scenario params or json params 
+            // or values used for prioritisation rules 
+            // or all of them are not valid
             return;
         }
 
