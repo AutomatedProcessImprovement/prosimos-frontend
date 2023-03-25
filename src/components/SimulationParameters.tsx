@@ -18,8 +18,6 @@ import useNewModel from './simulationParameters/useNewModel';
 import CallSplitIcon from '@mui/icons-material/CallSplit';
 import GroupsIcon from '@mui/icons-material/Groups';
 import DateRangeIcon from '@mui/icons-material/DateRange';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { getTaskByTaskId, simulate } from '../api/api';
 import SimulationResults, { SimulationResult } from './results/SimulationResults';
@@ -33,12 +31,16 @@ import Tooltip from '@mui/material/Tooltip';
 import AllIntermediateEvents from './interEvents/AllIntermediateEvents'
 import EventIcon from '@mui/icons-material/Event';
 import AllBatching from './batching/AllBatching';
-import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
 import useTabVisibility, { TABS } from './simulationParameters/useTabVisibility';
 import AllCaseAttributes from './caseAttributesGeneration/AllCaseAttributes';
 import AllPrioritisationItems from './prioritisation/AllPrioritisationItems';
 import { transformPrioritisationRules } from './prioritisation/prioritisationRulesTransformer';
 import usePrioritisationErrors from './simulationParameters/usePrioritisationErrors';
+import { ReactComponent as ResourceAllocationIcon } from '../icons/allocation.svg';
+import { ReactComponent as BatchIcon } from '../icons/batch.svg';
+import { ReactComponent as PrioritisationIcon } from '../icons/prioritisation.svg';
+import { ReactComponent as SimResultsIcon } from '../icons/sim_results.svg';
+import { ReactComponent as CaseAttributesIcon } from '../icons/case_attr.svg';
 
 const useStyles = makeStyles((theme: Theme) => ({
     simParamsGrid: {
@@ -366,7 +368,11 @@ const SimulationParameters = () => {
                 break
             case TABS.RESOURCE_ALLOCATION:
                 currError = errors.task_resource_distribution
-                Icon = <AssignmentIndIcon style={styles} />
+                Icon = <ResourceAllocationIcon style={{
+                    width: "24px",
+                    height: "24px",
+                    ...styles
+                }} />
                 break
             case TABS.BRANCHING_PROB:
                 currError = errors.gateway_branching_probabilities
@@ -378,24 +384,38 @@ const SimulationParameters = () => {
                 break
             case TABS.BATCHING:
                 currError = errors.batch_processing
-                Icon = <DynamicFeedIcon style={styles} />
+                Icon = <BatchIcon style={{
+                    width: "24px",
+                    height: "24px",
+                    ...styles
+                }} />
                 break
             case TABS.CASE_ATTRIBUTES:
                 currError = errors.case_attributes
-                // TODO: find appropriate icon
-                Icon = <DynamicFeedIcon style={styles} />
+                Icon = <CaseAttributesIcon style={{
+                    width: "24px",
+                    height: "24px",
+                    ...styles
+                }} />
                 break
             case TABS.CASE_BASED_PRIORITISATION:
                 const prioritisationErrors = isPrioritisationRulesValid
                     ? ""
                     : "Invalid Value"
                 currError = errors.prioritisation_rules || prioritisationErrors
-                // TODO: find appropriate icon
-                Icon = <DynamicFeedIcon style={styles} />
+                Icon = <PrioritisationIcon style={{
+                    width: "24px",
+                    height: "24px",
+                    ...styles
+                }} />
                 break
             case TABS.SIMULATION_RESULTS:
                 lastStep = true
-                Icon = <BarChartIcon style={styles} />
+                Icon = <SimResultsIcon style={{
+                    width: "24px",
+                    height: "24px",
+                    ...styles
+                }} />
                 break
             default:
                 return <></>
