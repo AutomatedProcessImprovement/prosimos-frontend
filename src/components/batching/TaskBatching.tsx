@@ -47,7 +47,7 @@ const TaskBatching = (props: TaskBatchingProps) => {
                     valueLabel="Probability"
                 />
                 <DistributionSection
-                    sectionLabel="Duration Distribution"
+                    sectionLabel="Duration Scaling"
                     formState={props.formState}
                     taskIndex={taskIndex}
                     objectFieldNamePart={`batch_processing.${taskIndex}.duration_distrib`}

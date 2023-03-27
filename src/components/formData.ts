@@ -26,7 +26,6 @@ export interface CaseBasedRule {
 export interface BatchProcessing {
     task_id: string
     type: string
-    batch_frequency: number
     firing_rules: FiringRule[][]
     size_distrib: BatchDistrib[]
     duration_distrib: BatchDistrib[]

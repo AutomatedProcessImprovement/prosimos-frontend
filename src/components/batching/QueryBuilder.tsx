@@ -19,7 +19,7 @@ import { makeStyles } from "@mui/styles";
 import QueryGroupIcon from '@mui/icons-material/AccountTreeRounded';
 import QueryConditionIcon from '@mui/icons-material/FunctionsRounded';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutlineRounded';
-import { batchingSchema, BatchingBuilderSchema, PrioritisationBuilderSchema, typeOperatorMap } from "./schemas";
+import { batchingSchema, PrioritisationBuilderSchema, typeOperatorMap, EligibleBuilderSchemas, getDefaultOption } from "./schemas";
 import { JsonData } from "../formData";
 import WeekdaySelect from "../calendars/WeekdaySelect";
 import SliderWithInputs from "./SliderWithInputs";
@@ -100,12 +100,11 @@ const useQueryBuilderStyles = makeStyles(
 interface QueryBuilderProps {
     formState: UseFormReturn<JsonData, object>;
     name: string;
-    builderSchema?: PrioritisationBuilderSchema;
+    builderSchema?: PrioritisationBuilderSchema; // we use default one for Batching
     possibleValueOptions?: {}
     updateAndRemovePrioritisationErrors?: UpdateAndRemovePrioritisationErrors
 }
 
-type EligibleBuilderSchemas = BatchingBuilderSchema | PrioritisationBuilderSchema
 
 export const QueryBuilder = (props: QueryBuilderProps) => {
     const { builderSchema, ...otherProps } = props
@@ -163,7 +162,7 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
         name: arrayPath
     });
 
-    const err = get(errors, arrayPath, null);
+    const err = get(errors, arrayPath, null)
 
     return (
         <div className={clsx({ [classes.item]: depth > 0 }, classes.group)}
@@ -194,9 +193,14 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
                         <Tooltip title="Add Condition">
                             <IconButton
                                 onClick={() => {
-                                    clearErrors(arrayPath);
+                                    clearErrors(arrayPath)
+
+                                    // either batch_size for batching
+                                    // or first case attr in the schema
+                                    const defaultAttrProp = getDefaultOption(builderSchema)
+
                                     append([
-                                        { attribute: "", comparison: undefined, value: [] },
+                                        { attribute: defaultAttrProp, comparison: undefined, value: [] },
                                     ]);
                                 }}
                             >

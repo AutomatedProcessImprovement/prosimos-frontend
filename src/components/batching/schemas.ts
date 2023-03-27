@@ -1,6 +1,6 @@
 const GREATER_THAN = "Greater Than"
 const GREATER_THAN_OR_EQUALS = "Greater Than or Equal To"
-const EQUALS = "Equals"
+export const EQUALS = "Equals"
 const LESS_THAN = "Less Than"
 const LESS_THAN_OR_EQUALS = "Less Than or Equal To"
 const BETWEEN = "Between"
@@ -93,16 +93,20 @@ type QueryBuilderSchema<T> = {
   };
 };
 
+const BATCH_SIZE_PROP_NAME = "size"
+
 type BatchingRuleTypes = "size" | "waiting_time" | "hour" | "weekday" | "priority"
-export type BatchingBuilderSchema = QueryBuilderSchema<BatchingRuleTypes>
+type BatchingBuilderSchema = QueryBuilderSchema<BatchingRuleTypes>
 
 type PrioritisationRuleTypes = string // every string is eligible because case attributes' names are dynamic
 export type PrioritisationBuilderSchema = QueryBuilderSchema<PrioritisationRuleTypes>
 
+export type EligibleBuilderSchemas = BatchingBuilderSchema | PrioritisationBuilderSchema
+
 export const batchingSchema: BatchingBuilderSchema = {
   size: {
     label: "Batch size",
-    type: "size"
+    type: BATCH_SIZE_PROP_NAME
   },
   ready_wt: {
     label: "Ready waiting time",
@@ -121,3 +125,15 @@ export const batchingSchema: BatchingBuilderSchema = {
     type: "weekday"
   }
 };
+
+export const getDefaultOption = (builderSchema: EligibleBuilderSchemas) => {
+  const sizeProp = builderSchema["BATCH_SIZE_PROP_NAME"]
+  if (sizeProp !== undefined) {
+    return sizeProp
+  }
+
+  // else find a first case attribute in the array
+  // and select it as a default one
+  const caseAttrProp = Object.entries(builderSchema)[0][0]
+  return caseAttrProp
+}
