@@ -164,6 +164,22 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
 
     const err = get(errors, arrayPath, null)
 
+    const onAddingNewEntity = (isAddingGroup: boolean) => {
+        // isAddingGroup: bool - adding either group or individual condition
+
+        clearErrors(arrayPath)
+
+        // either batch_size for batching
+        // or first case attr in the schema for prioritisation
+        const defaultAttrProp = getDefaultOption(builderSchema)
+
+        const condition = [
+            { attribute: defaultAttrProp, comparison: undefined, value: [] },
+        ]
+        const finalEntity = isAddingGroup ? [condition] : condition
+        append(finalEntity)
+    }
+
     return (
         <div className={clsx({ [classes.item]: depth > 0 }, classes.group)}
             {...props}
@@ -178,12 +194,7 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
                     ? (
                         <Tooltip title="Add Logical Group">
                             <IconButton
-                                onClick={() => {
-                                    clearErrors(arrayPath);
-                                    append([[
-                                        { attribute: "", comparison: undefined, value: [] },
-                                    ]]);
-                                }}
+                                onClick={() => onAddingNewEntity(true)}
                             >
                                 <QueryGroupIcon />
                             </IconButton>
@@ -192,17 +203,7 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
                     : (
                         <Tooltip title="Add Condition">
                             <IconButton
-                                onClick={() => {
-                                    clearErrors(arrayPath)
-
-                                    // either batch_size for batching
-                                    // or first case attr in the schema
-                                    const defaultAttrProp = getDefaultOption(builderSchema)
-
-                                    append([
-                                        { attribute: defaultAttrProp, comparison: undefined, value: [] },
-                                    ]);
-                                }}
+                                onClick={() => onAddingNewEntity(false)}
                             >
                                 <QueryConditionIcon />
                             </IconButton>
@@ -420,7 +421,6 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                         value={value}
                         variant="standard"
                     >
-                        <MenuItem value="">None</MenuItem>
                         {Object.entries(builderSchema).map(([key, item]) => {
                             return (
                                 <MenuItem key={key} value={key}>
@@ -456,7 +456,6 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                                     value={value}
                                     variant="standard"
                                 >
-                                    <MenuItem value="">None</MenuItem>
                                     {Object.keys(typeOperator).map((value, index, array) => {
                                         const item = (typeOperator as any)[value];
                                         return (
