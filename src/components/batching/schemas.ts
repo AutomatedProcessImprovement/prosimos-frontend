@@ -110,20 +110,21 @@ export const batchingSchema: BatchingBuilderSchema = {
     label: "Batch size",
     type: BATCH_SIZE_PROP_NAME
   },
-  ready_wt: {
-    label: "Ready waiting time",
-    type: "waiting_time"
-  },
   large_wt: {
-    label: "Large waiting time",
+    label: "Time since first",
     type: "waiting_time"
   },
+  ready_wt: {
+    label: "Time since last",
+    type: "waiting_time"
+  },
+
   daily_hour: {
-    label: "Daily hour",
+    label: "Hour of the day",
     type: "hour"
   },
   week_day: {
-    label: "Weekday",
+    label: "Day of the week",
     type: "weekday"
   }
 };
