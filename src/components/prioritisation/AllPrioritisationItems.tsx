@@ -41,7 +41,7 @@ const AllPrioritisationItems = (props: AllPrioritisationItemsProps) => {
     }, [])
 
     const onAddNewPrioritisationItem = () => {
-        prepend(defaultPrioritisationRule)
+        prepend(defaultPrioritisationRule(builderSchema))
     }
 
     const renderRow = ({ index, key, style }: any) => {

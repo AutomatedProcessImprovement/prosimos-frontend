@@ -1,3 +1,5 @@
+import { CaseBasedRule } from "../formData"
+
 const GREATER_THAN = "Greater Than"
 const GREATER_THAN_OR_EQUALS = "Greater Than or Equal To"
 export const EQUALS = "Equals"
@@ -126,14 +128,42 @@ export const batchingSchema: BatchingBuilderSchema = {
   }
 };
 
-export const getDefaultOption = (builderSchema: EligibleBuilderSchemas) => {
-  const sizeProp = builderSchema["BATCH_SIZE_PROP_NAME"]
-  if (sizeProp !== undefined) {
-    return sizeProp
+const getDefaultOption = (builderSchema: EligibleBuilderSchemas): [string, string] => {
+  // returns (attrName, attrType)
+  const sizeProp = BATCH_SIZE_PROP_NAME in builderSchema
+  if (sizeProp) {
+    return [BATCH_SIZE_PROP_NAME, builderSchema[BATCH_SIZE_PROP_NAME].type]
   }
 
   // else find a first case attribute in the array
   // and select it as a default one
-  const caseAttrProp = Object.entries(builderSchema)[0][0]
-  return caseAttrProp
+  const caseAttrProp = Object.entries(builderSchema)[0]
+  return [caseAttrProp[0], caseAttrProp[1].type]
+}
+
+const getComparison = (attrName: string) => {
+  const possibleOptions = (typeOperatorMap as any)[attrName]
+  const isEqualExist = "=" in possibleOptions
+  if (isEqualExist) {
+    return "="
+  } else {
+    // in case EQUALS operator is not available for the attribute
+    // we select the first one in the list of all available operators for this attribute
+    const firstFoundOperator = Object.keys(possibleOptions)[0]
+    return firstFoundOperator ?? ""
+  }
+}
+
+export const getRuleStatementsWithDefaultValues = (builderSchema: EligibleBuilderSchemas): CaseBasedRule[] => {
+  // ATTR: either batch_size for batching
+  // or first case attr in the schema for prioritisation
+  //
+  // COMPARISON: either EQUALS or the first one available in the list
+  const [defaultAttrProp, attrType] = getDefaultOption(builderSchema)
+  const comparison = getComparison(attrType)
+  const condition = [
+    { attribute: defaultAttrProp, comparison: comparison, value: [] } as CaseBasedRule,
+  ]
+
+  return condition
 }

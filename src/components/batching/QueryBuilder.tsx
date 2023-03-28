@@ -19,7 +19,7 @@ import { makeStyles } from "@mui/styles";
 import QueryGroupIcon from '@mui/icons-material/AccountTreeRounded';
 import QueryConditionIcon from '@mui/icons-material/FunctionsRounded';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutlineRounded';
-import { batchingSchema, PrioritisationBuilderSchema, typeOperatorMap, EligibleBuilderSchemas, getDefaultOption } from "./schemas";
+import { batchingSchema, PrioritisationBuilderSchema, typeOperatorMap, EligibleBuilderSchemas, getRuleStatementsWithDefaultValues } from "./schemas";
 import { JsonData } from "../formData";
 import WeekdaySelect from "../calendars/WeekdaySelect";
 import SliderWithInputs from "./SliderWithInputs";
@@ -169,13 +169,7 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
 
         clearErrors(arrayPath)
 
-        // either batch_size for batching
-        // or first case attr in the schema for prioritisation
-        const defaultAttrProp = getDefaultOption(builderSchema)
-
-        const condition = [
-            { attribute: defaultAttrProp, comparison: undefined, value: [] },
-        ]
+        const condition = getRuleStatementsWithDefaultValues(builderSchema)
         const finalEntity = isAddingGroup ? [condition] : condition
         append(finalEntity)
     }
