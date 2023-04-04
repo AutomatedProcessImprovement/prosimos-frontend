@@ -19,11 +19,11 @@ import { makeStyles } from "@mui/styles";
 import QueryGroupIcon from '@mui/icons-material/AccountTreeRounded';
 import QueryConditionIcon from '@mui/icons-material/FunctionsRounded';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutlineRounded';
-import { batchingSchema, BatchingBuilderSchema, PrioritisationBuilderSchema, typeOperatorMap } from "./schemas";
+import { batchingSchema, PrioritisationBuilderSchema, typeOperatorMap, EligibleBuilderSchemas, getRuleStatementsWithDefaultValues } from "./schemas";
 import { JsonData } from "../formData";
 import WeekdaySelect from "../calendars/WeekdaySelect";
-import SliderWithInputs from "./SliderWithInputs";
-import { ChangeEvent, useState, useEffect } from "react";
+import BetweenInputs from "./BetweenInputs";
+import { ChangeEvent, useState, useEffect, ChangeEventHandler } from "react";
 import QueryValueDiscreteSelect from "./QueryValueDiscreteSelect";
 import { UpdateAndRemovePrioritisationErrors } from "../simulationParameters/usePrioritisationErrors";
 
@@ -100,12 +100,11 @@ const useQueryBuilderStyles = makeStyles(
 interface QueryBuilderProps {
     formState: UseFormReturn<JsonData, object>;
     name: string;
-    builderSchema?: PrioritisationBuilderSchema;
+    builderSchema?: PrioritisationBuilderSchema; // we use default one for Batching
     possibleValueOptions?: {}
     updateAndRemovePrioritisationErrors?: UpdateAndRemovePrioritisationErrors
 }
 
-type EligibleBuilderSchemas = BatchingBuilderSchema | PrioritisationBuilderSchema
 
 export const QueryBuilder = (props: QueryBuilderProps) => {
     const { builderSchema, ...otherProps } = props
@@ -163,7 +162,17 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
         name: arrayPath
     });
 
-    const err = get(errors, arrayPath, null);
+    const err = get(errors, arrayPath, null)
+
+    const onAddingNewEntity = (isAddingGroup: boolean) => {
+        // isAddingGroup: bool - adding either group or individual condition
+
+        clearErrors(arrayPath)
+
+        const condition = getRuleStatementsWithDefaultValues(builderSchema)
+        const finalEntity = isAddingGroup ? [condition] : condition
+        append(finalEntity)
+    }
 
     return (
         <div className={clsx({ [classes.item]: depth > 0 }, classes.group)}
@@ -179,12 +188,7 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
                     ? (
                         <Tooltip title="Add Logical Group">
                             <IconButton
-                                onClick={() => {
-                                    clearErrors(arrayPath);
-                                    append([[
-                                        { attribute: "", comparison: undefined, value: [] },
-                                    ]]);
-                                }}
+                                onClick={() => onAddingNewEntity(true)}
                             >
                                 <QueryGroupIcon />
                             </IconButton>
@@ -193,12 +197,7 @@ export const QueryGroup = (allProps: QueryGroupProps) => {
                     : (
                         <Tooltip title="Add Condition">
                             <IconButton
-                                onClick={() => {
-                                    clearErrors(arrayPath);
-                                    append([
-                                        { attribute: "", comparison: undefined, value: [] },
-                                    ]);
-                                }}
+                                onClick={() => onAddingNewEntity(false)}
                             >
                                 <QueryConditionIcon />
                             </IconButton>
@@ -321,6 +320,15 @@ const QueryCondition = (allProps: QueryConditionProps) => {
         nullifyValueAndClearErrors(conditionValueName)
     }
 
+    const getLabelForValue = (fieldTypeSchema: string) => {
+        switch (fieldTypeSchema) {
+            case "waiting_time":
+                return "Value (sec)"
+            default:
+                return "Value"
+        }
+    }
+
     const getValueComponent = () => {
         switch (fieldTypeSchema.type) {
             case 'weekday':
@@ -357,10 +365,11 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                             render={({
                                 field: { onChange, value }
                             }) => {
-                                return <SliderWithInputs
+                                return <BetweenInputs
                                     value={value}
                                     onChange={onChange}
                                     conditionValueError={conditionValueError}
+                                    label={getLabelForValue(fieldTypeSchema.type)}
                                 />
                             }}
                         />
@@ -376,7 +385,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                                 field: { onChange, value }
                             }) => (
                                 <TextField
-                                    label="Value"
+                                    label={getLabelForValue(fieldTypeSchema.type)}
                                     margin="normal"
                                     type="text"
                                     onChange={onChange}
@@ -391,6 +400,17 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                     )
         }
 
+    }
+
+    const onOperatorComparisionChange = (
+        onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>,
+        newValue: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+        // nullify the previous value of the rule
+        nullifyValueAndClearErrors(conditionValueName)
+
+        // change the comparison operator
+        onChange(newValue)
     }
 
     return (
@@ -416,7 +436,6 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                         value={value}
                         variant="standard"
                     >
-                        <MenuItem value="">None</MenuItem>
                         {Object.entries(builderSchema).map(([key, item]) => {
                             return (
                                 <MenuItem key={key} value={key}>
@@ -448,11 +467,10 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                                     style={{ width: 220, marginLeft: 15 }}
                                     error={!!conditionOperatorError}
                                     helperText={conditionOperatorError?.message}
-                                    onChange={onChange}
+                                    onChange={e => onOperatorComparisionChange(onChange, e)}
                                     value={value}
                                     variant="standard"
                                 >
-                                    <MenuItem value="">None</MenuItem>
                                     {Object.keys(typeOperator).map((value, index, array) => {
                                         const item = (typeOperator as any)[value];
                                         return (

@@ -80,7 +80,7 @@ const AllBatching = (props: AllBatchingProps) => {
 
         setIsRowAdding(true)
 
-        const openRow = false
+        const openRow = true
         setRowOpenState([
             openRow,
             ...rowOpenState,

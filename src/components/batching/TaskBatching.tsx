@@ -1,6 +1,7 @@
 import { Grid, Typography } from "@mui/material";
 import { UseFormReturn, Controller } from "react-hook-form";
 import { JsonData } from "../formData";
+import BatchingProbability from "./BatchingProbability";
 import BatchingTypeSelect from "./BatchingTypeSelect";
 import DistributionSection from "./DistributionSection";
 import { QueryBuilder } from "./QueryBuilder";
@@ -39,15 +40,12 @@ const TaskBatching = (props: TaskBatchingProps) => {
                 />
             </Grid>
             <Grid container item xs={12} sx={{ mt: 2 }} spacing={2}>
-                <DistributionSection
-                    sectionLabel="Size Distribution"
+                <BatchingProbability
                     formState={props.formState}
                     taskIndex={taskIndex}
-                    objectFieldNamePart={`batch_processing.${taskIndex}.size_distrib`}
-                    valueLabel="Probability"
                 />
                 <DistributionSection
-                    sectionLabel="Duration Distribution"
+                    sectionLabel="Duration Scaling"
                     formState={props.formState}
                     taskIndex={taskIndex}
                     objectFieldNamePart={`batch_processing.${taskIndex}.duration_distrib`}

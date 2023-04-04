@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid";
-import { ProbabilityDistribution, ProbabilityDistributionForResource, ResourceInfo, ResourcePool, TimePeriod } from "../formData";
+import { EligibleBuilderSchemas, getRuleStatementsWithDefaultValues } from "../batching/schemas";
+import { PriorityRule, ProbabilityDistribution, ProbabilityDistributionForResource, ResourceInfo, ResourcePool, TimePeriod } from "../formData";
 
 const DEFAULT_SCHEDULE_NAME = "default schedule"
 
@@ -92,15 +93,11 @@ export const defaultContinuousCaseAttr = {
     }
 }
 
-export const defaultPrioritisationRule = {
-    priority_level: 1,
-    rules: [
-        [
-            {
-                attribute: "",
-                comparison: "",
-                value: ""
-            }
+export const defaultPrioritisationRule = (builderSchema: EligibleBuilderSchemas): PriorityRule => {
+    return {
+        priority_level: 1,
+        rules: [
+            getRuleStatementsWithDefaultValues(builderSchema)
         ]
-    ]
+    } as PriorityRule
 }

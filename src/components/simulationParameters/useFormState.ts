@@ -112,7 +112,6 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                 yup.object({
                     task_id: yup.string().required(REQUIRED_ERROR_MSG),
                     type: yup.string().required(REQUIRED_ERROR_MSG),
-                    batch_frequency: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG),
                     size_distrib: yup.array()
                         .of(
                             yup.object({
