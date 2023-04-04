@@ -5,6 +5,7 @@ import { EventsFromModel } from "../modelData";
 const BETWEEN_OPERATOR = "between"
 const LARGE_WT_ATTR = "large_wt"
 const READY_WT_ATTR = "ready_wt"
+const DAILY_HOUR_ATTR = "daily_hour"
 
 const useJsonFile = (jsonFile: any, eventsFromModel?: EventsFromModel) => {
     // shows num of elements that were present in the config but were absent in BPMN model
@@ -146,19 +147,26 @@ const updateRangesForBatchingRulesIfAny = (rawData: JsonData) => {
     }
 };
 
-export const _groupByEligibleForBetweenAndNot = (result: [FiringRule[], FiringRule[], FiringRule[]], current: FiringRule): [FiringRule[], FiringRule[], FiringRule[]] => {
-    const [ready_res, large_res, others] = result
-    if (current.attribute === READY_WT_ATTR) {
-        ready_res.push(current)
-    }
-    else if (current.attribute === LARGE_WT_ATTR) {
-        large_res.push(current)
-    }
-    else {
-        others.push(current)
+export const _groupByEligibleForBetweenAndNot = (
+    result: [FiringRule[], FiringRule[], FiringRule[], FiringRule[]], current: FiringRule
+): [FiringRule[], FiringRule[], FiringRule[], FiringRule[]] => {
+    const [ready_res, large_res, daily_hour_res, others] = result
+    switch (current.attribute) {
+        case READY_WT_ATTR:
+            ready_res.push(current)
+            break
+        case LARGE_WT_ATTR:
+            large_res.push(current)
+            break
+        case DAILY_HOUR_ATTR:
+            daily_hour_res.push(current)
+            break
+        default:
+            others.push(current)
+            break
     }
 
-    return [ready_res, large_res, others]
+    return [ready_res, large_res, daily_hour_res, others]
 }
 
 /**
@@ -168,10 +176,12 @@ export const _groupByEligibleForBetweenAndNot = (result: [FiringRule[], FiringRu
 const _transformMultiStatToBetweenOps = (firing_rules: FiringRule[][]) => {
     for (var or_rule_index in firing_rules) {
         const curr_and_rules = firing_rules[or_rule_index]
-        const [ready_wt_rules, large_wt_rules, others] = curr_and_rules.reduce(_groupByEligibleForBetweenAndNot, [[], [], []] as [FiringRule[], FiringRule[], FiringRule[]])
+        const [ready_wt_rules, large_wt_rules, daily_hour_rules, others] =
+            curr_and_rules.reduce(_groupByEligibleForBetweenAndNot, [[], [], [], []] as [FiringRule[], FiringRule[], FiringRule[], FiringRule[]])
 
         let ready_wt_new_rule = undefined
         let large_wt_new_rule = undefined
+        let daily_hour_new_rule = undefined
 
         if (ready_wt_rules.length > 0) {
             ready_wt_new_rule = getNewReadyWtRules(ready_wt_rules)
@@ -181,10 +191,15 @@ const _transformMultiStatToBetweenOps = (firing_rules: FiringRule[][]) => {
             large_wt_new_rule = getNewLargeWtRules(large_wt_rules)
         }
 
+        if (daily_hour_rules.length > 0) {
+            daily_hour_new_rule = getNewDailyHourRules(daily_hour_rules)
+        }
+
         const new_and_rule = [
             ...others,
             ...(ready_wt_new_rule ? ready_wt_new_rule : []),
-            ...(large_wt_new_rule ? large_wt_new_rule : [])
+            ...(large_wt_new_rule ? large_wt_new_rule : []),
+            ...(daily_hour_new_rule ? daily_hour_new_rule : [])
         ]
 
         // assign a new set of rules as the final one
@@ -203,7 +218,7 @@ const _getMinAndMaxRules = (rules: FiringRule[]): [string, string] | undefined =
         // we always need to have an upper boundary
         return undefined
 
-    return [minValueResult?.toString(), maxValueFromRules.toString()]
+    return [String(minValueResult), String(maxValueFromRules)]
 }
 
 const _getLowerAndUpperBoundary = (acc: [number | undefined, number | undefined], curr: FiringRule) => {
@@ -284,6 +299,33 @@ const getNewLargeWtRules = (large_wt_rules: FiringRule[]) => {
     }
 
     return ready_wt_new_rule
+}
+
+const getNewDailyHourRules = (daily_hour_rules: FiringRule[]) => {
+    let daily_hour_new_rule = undefined
+
+    const equalRule = _isEqualOperator(daily_hour_rules, "=")
+    if (equalRule !== undefined) {
+        daily_hour_new_rule = [equalRule]
+    } else {
+        const minValue = daily_hour_rules.find((v: FiringRule) => _isEqualAny(v.comparison, ['>', '>=']))?.value
+        const maxValue = daily_hour_rules.find((v: FiringRule) => _isEqualAny(v.comparison, ['<', '<=']))?.value
+
+        if (maxValue === undefined) {
+            console.log(`Invalid setup for ${DAILY_HOUR_ATTR} rules ${daily_hour_rules}`)
+        }
+
+        const minValueResult = isNaN(Number(minValue)) ? 0 : minValue!
+        const value = [String(minValueResult), String(maxValue!)]
+
+        daily_hour_new_rule = [{
+            attribute: DAILY_HOUR_ATTR,
+            comparison: BETWEEN_OPERATOR,
+            value: value
+        }]
+    }
+
+    return daily_hour_new_rule
 }
 
 const _isEqualAny = (value: string, possible_options: string[]) => {

@@ -35,20 +35,8 @@ export const typeOperatorMap = {
     }
   },
   hour: {
-    "<": {
-      label: LESS_THAN
-    },
-    "<=": {
-      label: LESS_THAN_OR_EQUALS
-    },
     "=": {
       label: EQUALS
-    },
-    ">": {
-      label: GREATER_THAN
-    },
-    ">=": {
-      label: GREATER_THAN_OR_EQUALS
     },
     "between": {
       label: BETWEEN,

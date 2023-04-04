@@ -226,8 +226,8 @@ const SimulationParameters = () => {
         return copiedValues
     };
 
-    const _groupByEligibleForBetweenAndNot = (result: [FiringRule[], FiringRule[], FiringRule[]], current: FiringRule): [FiringRule[], FiringRule[], FiringRule[]] => {
-        const [ready_res, large_res, others] = result
+    const _groupByEligibleForBetweenAndNot = (result: [FiringRule[], FiringRule[], FiringRule[], FiringRule[]], current: FiringRule): [FiringRule[], FiringRule[], FiringRule[], FiringRule[]] => {
+        const [ready_res, large_res, daily_hour_res, others] = result
         if (current.comparison === "between") {
             if (current.attribute === "ready_wt") {
                 ready_res.push(current)
@@ -235,19 +235,24 @@ const SimulationParameters = () => {
             else if (current.attribute === "large_wt") {
                 large_res.push(current)
             }
+            else if (current.attribute === "daily_hour") {
+                daily_hour_res.push(current)
+            }
         } else {
             others.push(current)
         }
 
-        return [ready_res, large_res, others]
+        return [ready_res, large_res, daily_hour_res, others]
     }
 
     const _transformBetweenOperatorsPerTask = (curr_task_batch_rules: FiringRule[][]) => {
         for (var or_rule_index in curr_task_batch_rules) {
             const curr_and_rules = curr_task_batch_rules[or_rule_index]
-            const [ready_wt_rules, large_wt_rules, others] = curr_and_rules.reduce(_groupByEligibleForBetweenAndNot, [[], [], []] as [FiringRule[], FiringRule[], FiringRule[]])
+            const [ready_wt_rules, large_wt_rules, daily_hour_rules, others] = curr_and_rules.reduce(_groupByEligibleForBetweenAndNot, [[], [], [], []] as [FiringRule[], FiringRule[], FiringRule[], FiringRule[]])
             let new_ready_rules: FiringRule[] | undefined = undefined
             let new_large_rules: FiringRule[] | undefined = undefined
+            let new_daily_hour_rules: FiringRule[] | undefined = undefined
+
             if (ready_wt_rules.length > 0) {
                 new_ready_rules = transformFromBetweenToRange(ready_wt_rules)
             }
@@ -256,13 +261,18 @@ const SimulationParameters = () => {
                 new_large_rules = transformFromBetweenToRange(large_wt_rules)
             }
 
+            if (daily_hour_rules.length > 0) {
+                new_daily_hour_rules = transformFromBetweenToRange(daily_hour_rules)
+            }
+
             curr_task_batch_rules[or_rule_index] = [
                 ...others,
                 ...(new_ready_rules ? new_ready_rules : []),
-                ...(new_large_rules ? new_large_rules : [])
+                ...(new_large_rules ? new_large_rules : []),
+                ...(new_daily_hour_rules ? new_daily_hour_rules : [])
             ]
         }
-    };
+    }
 
     const onSnackbarClose = () => {
         setErrorMessage("")
