@@ -23,7 +23,7 @@ import { batchingSchema, PrioritisationBuilderSchema, typeOperatorMap, EligibleB
 import { JsonData } from "../formData";
 import WeekdaySelect from "../calendars/WeekdaySelect";
 import BetweenInputs from "./BetweenInputs";
-import { ChangeEvent, useState, useEffect } from "react";
+import { ChangeEvent, useState, useEffect, ChangeEventHandler } from "react";
 import QueryValueDiscreteSelect from "./QueryValueDiscreteSelect";
 import { UpdateAndRemovePrioritisationErrors } from "../simulationParameters/usePrioritisationErrors";
 
@@ -402,6 +402,17 @@ const QueryCondition = (allProps: QueryConditionProps) => {
 
     }
 
+    const onOperatorComparisionChange = (
+        onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>,
+        newValue: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+        // nullify the previous value of the rule
+        nullifyValueAndClearErrors(conditionValueName)
+
+        // change the comparison operator
+        onChange(newValue)
+    }
+
     return (
         <div className={clsx(classes.item, classes.cond)}
             {...props}
@@ -456,7 +467,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                                     style={{ width: 220, marginLeft: 15 }}
                                     error={!!conditionOperatorError}
                                     helperText={conditionOperatorError?.message}
-                                    onChange={onChange}
+                                    onChange={e => onOperatorComparisionChange(onChange, e)}
                                     value={value}
                                     variant="standard"
                                 >
