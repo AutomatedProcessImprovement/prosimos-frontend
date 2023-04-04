@@ -26,12 +26,6 @@ export const typeOperatorMap = {
     }
   },
   waiting_time: {
-    "<": {
-      label: LESS_THAN
-    },
-    "<=": {
-      label: LESS_THAN_OR_EQUALS
-    },
     "=": {
       label: EQUALS
     },

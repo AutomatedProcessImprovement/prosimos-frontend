@@ -11,7 +11,7 @@ import ResourceCalendars from './ResourceCalendars';
 import ResourceAllocation from './resource_allocation/ResourceAllocation';
 import CaseCreation from './caseCreation/CaseCreation';
 import useBpmnFile from './simulationParameters/useBpmnFile';
-import useJsonFile from './simulationParameters/useJsonFile';
+import useJsonFile, { transformFromBetweenToRange } from './simulationParameters/useJsonFile';
 import useFormState from './simulationParameters/useFormState';
 import CustomizedSnackbar from './results/CustomizedSnackbar';
 import useNewModel from './simulationParameters/useNewModel';
@@ -249,30 +249,11 @@ const SimulationParameters = () => {
             let new_ready_rules: FiringRule[] | undefined = undefined
             let new_large_rules: FiringRule[] | undefined = undefined
             if (ready_wt_rules.length > 0) {
-                // expect one BETWEEN rule
-                const values = (ready_wt_rules[0]!.value as string[]).map(x => Number(x))
-
-                const min_value = Math.min(...values)
-                const max_value = Math.max(...values)
-                const attr = ready_wt_rules[0].attribute
-
-                new_ready_rules = [
-                    { attribute: attr, comparison: ">=", value: String(min_value) } as FiringRule,
-                    { attribute: attr, comparison: "<=", value: String(max_value) } as FiringRule
-                ]
+                new_ready_rules = transformFromBetweenToRange(ready_wt_rules)
             }
-            else if (large_wt_rules.length > 0) {
-                // expect one BETWEEN rule
-                const values = (large_wt_rules[0]!.value as string[]).map(x => Number(x))
 
-                const min_value = Math.min(...values)
-                const max_value = Math.max(...values)
-                const attr = large_wt_rules[0].attribute
-
-                new_large_rules = [
-                    { attribute: attr, comparison: ">=", value: String(min_value) } as FiringRule,
-                    { attribute: attr, comparison: "<=", value: String(max_value) } as FiringRule
-                ]
+            if (large_wt_rules.length > 0) {
+                new_large_rules = transformFromBetweenToRange(large_wt_rules)
             }
 
             curr_task_batch_rules[or_rule_index] = [
