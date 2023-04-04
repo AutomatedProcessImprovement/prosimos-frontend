@@ -22,7 +22,7 @@ import RemoveIcon from '@mui/icons-material/RemoveCircleOutlineRounded';
 import { batchingSchema, PrioritisationBuilderSchema, typeOperatorMap, EligibleBuilderSchemas, getRuleStatementsWithDefaultValues } from "./schemas";
 import { JsonData } from "../formData";
 import WeekdaySelect from "../calendars/WeekdaySelect";
-import SliderWithInputs from "./SliderWithInputs";
+import BetweenInputs from "./BetweenInputs";
 import { ChangeEvent, useState, useEffect } from "react";
 import QueryValueDiscreteSelect from "./QueryValueDiscreteSelect";
 import { UpdateAndRemovePrioritisationErrors } from "../simulationParameters/usePrioritisationErrors";
@@ -356,7 +356,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                             render={({
                                 field: { onChange, value }
                             }) => {
-                                return <SliderWithInputs
+                                return <BetweenInputs
                                     value={value}
                                     onChange={onChange}
                                     conditionValueError={conditionValueError}

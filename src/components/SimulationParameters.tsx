@@ -232,7 +232,7 @@ const SimulationParameters = () => {
             if (current.attribute === "ready_wt") {
                 ready_res.push(current)
             }
-            else if (current.attribute === "ready_wt") {
+            else if (current.attribute === "large_wt") {
                 large_res.push(current)
             }
         } else {
@@ -262,13 +262,14 @@ const SimulationParameters = () => {
                 ]
             }
             else if (large_wt_rules.length > 0) {
-                // expect two AND rules here
-                const values = ready_wt_rules.map(x => Number(x.value))
+                // expect one BETWEEN rule
+                const values = (large_wt_rules[0]!.value as string[]).map(x => Number(x))
+
                 const min_value = Math.min(...values)
                 const max_value = Math.max(...values)
-                const attr = ready_wt_rules[0].attribute
+                const attr = large_wt_rules[0].attribute
 
-                new_ready_rules = [
+                new_large_rules = [
                     { attribute: attr, comparison: ">=", value: String(min_value) } as FiringRule,
                     { attribute: attr, comparison: "<=", value: String(max_value) } as FiringRule
                 ]

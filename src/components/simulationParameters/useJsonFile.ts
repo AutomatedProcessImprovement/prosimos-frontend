@@ -139,7 +139,7 @@ const updateRangesForBatchingRulesIfAny = (rawData: JsonData) => {
     const batching_info = rawData.batch_processing // array per task
     for (var task_batch_info_index in batching_info) {
         const curr_task_batch_rules = batching_info[task_batch_info_index].firing_rules
-        _transform_between_operators(curr_task_batch_rules)
+        _transformMultiStatToBetweenOps(curr_task_batch_rules)
     }
 };
 
@@ -148,7 +148,7 @@ export const _groupByEligibleForBetweenAndNot = (result: [FiringRule[], FiringRu
     if (current.attribute === "ready_wt") {
         ready_res.push(current)
     }
-    else if (current.attribute === "ready_wt") {
+    else if (current.attribute === "large_wt") {
         large_res.push(current)
     }
     else {
@@ -158,7 +158,8 @@ export const _groupByEligibleForBetweenAndNot = (result: [FiringRule[], FiringRu
     return [ready_res, large_res, others]
 }
 
-const _transform_between_operators = (firing_rules: FiringRule[][]) => {
+const _transformMultiStatToBetweenOps = (firing_rules: FiringRule[][]) => {
+    // on load, change rules from pair of two with >= and <= to between
     for (var or_rule_index in firing_rules) {
         const curr_and_rules = firing_rules[or_rule_index]
         const [ready_wt_rules, large_wt_rules, others] = curr_and_rules.reduce(_groupByEligibleForBetweenAndNot, [[], [], []] as [FiringRule[], FiringRule[], FiringRule[]])
@@ -179,9 +180,9 @@ const _transform_between_operators = (firing_rules: FiringRule[][]) => {
         }
 
         if (large_wt_rules.length >= 2) {
-            const result = _get_min_and_max_rules(ready_wt_rules)
+            const result = _get_min_and_max_rules(large_wt_rules)
             if (result === undefined) {
-                console.log(`Invalid setup for ready_wt rules ${ready_wt_rules}`)
+                console.log(`Invalid setup for large_wt rules ${large_wt_rules}`)
             }
 
             large_wt_new_rule = [{
