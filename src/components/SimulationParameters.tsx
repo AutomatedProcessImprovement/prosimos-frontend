@@ -336,6 +336,7 @@ const SimulationParameters = () => {
                 return <AllPrioritisationItems
                     formState={formState}
                     updateAndRemovePrioritisationErrors={[updateErrors, removeErrorByPath]}
+                    setErrorMessage={setErrorMessage}
                 />
             case TABS.SIMULATION_RESULTS:
                 if (!!currSimulatedOutput)

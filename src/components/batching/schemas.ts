@@ -118,7 +118,6 @@ export const batchingSchema: BatchingBuilderSchema = {
     label: "Time since last",
     type: "waiting_time"
   },
-
   daily_hour: {
     label: "Hour of the day",
     type: "hour"
@@ -167,4 +166,9 @@ export const getRuleStatementsWithDefaultValues = (builderSchema: EligibleBuilde
   ]
 
   return condition
+}
+
+export const isSchemaNotEmpty = (schema: PrioritisationBuilderSchema) => {
+  // verifying that at least one case attribute is defined
+  return Object.keys(schema).length > 0
 }

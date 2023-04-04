@@ -1,7 +1,7 @@
 import { Grid } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
-import { PrioritisationBuilderSchema } from "../batching/schemas";
+import { isSchemaNotEmpty, PrioritisationBuilderSchema } from "../batching/schemas";
 import { JsonData } from "../formData";
 import { defaultPrioritisationRule } from "../simulationParameters/defaultValues";
 import { UpdateAndRemovePrioritisationErrors } from "../simulationParameters/usePrioritisationErrors";
@@ -13,10 +13,11 @@ import PrioritisationVirtualizedList from "./PrioritisationVirtualizedList";
 interface AllPrioritisationItemsProps {
     formState: UseFormReturn<JsonData, object>
     updateAndRemovePrioritisationErrors: UpdateAndRemovePrioritisationErrors
+    setErrorMessage: (value: string) => void
 }
 
 const AllPrioritisationItems = (props: AllPrioritisationItemsProps) => {
-    const { formState: { control: formControl, getValues }, formState, updateAndRemovePrioritisationErrors } = props
+    const { formState: { control: formControl, getValues }, formState, updateAndRemovePrioritisationErrors, setErrorMessage } = props
     const [builderSchema, setBuilderSchema] = useState<PrioritisationBuilderSchema>({})
     const [discreteOptionsByCaseAttributeName, setDiscreteOptionsByCaseAttributeName] = useState<ValueOptionsByAttrName>({})
 
@@ -41,7 +42,13 @@ const AllPrioritisationItems = (props: AllPrioritisationItemsProps) => {
     }, [])
 
     const onAddNewPrioritisationItem = () => {
-        prepend(defaultPrioritisationRule(builderSchema))
+        const isBuilderSchemaNotEmpty = isSchemaNotEmpty(builderSchema)
+        if (isBuilderSchemaNotEmpty) {
+            prepend(defaultPrioritisationRule(builderSchema))
+        } else {
+            // show warning
+            setErrorMessage("At least one case attribute should be defined")
+        }
     }
 
     const renderRow = ({ index, key, style }: any) => {
