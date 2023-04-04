@@ -320,6 +320,15 @@ const QueryCondition = (allProps: QueryConditionProps) => {
         nullifyValueAndClearErrors(conditionValueName)
     }
 
+    const getLabelForValue = (fieldTypeSchema: string) => {
+        switch (fieldTypeSchema) {
+            case "waiting_time":
+                return "Value (sec)"
+            default:
+                return "Value"
+        }
+    }
+
     const getValueComponent = () => {
         switch (fieldTypeSchema.type) {
             case 'weekday':
@@ -360,6 +369,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                                     value={value}
                                     onChange={onChange}
                                     conditionValueError={conditionValueError}
+                                    label={getLabelForValue(fieldTypeSchema.type)}
                                 />
                             }}
                         />
@@ -375,7 +385,7 @@ const QueryCondition = (allProps: QueryConditionProps) => {
                                 field: { onChange, value }
                             }) => (
                                 <TextField
-                                    label="Value"
+                                    label={getLabelForValue(fieldTypeSchema.type)}
                                     margin="normal"
                                     type="text"
                                     onChange={onChange}

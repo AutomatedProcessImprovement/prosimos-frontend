@@ -5,10 +5,11 @@ interface BetweenInputsProps {
     value: number[]
     onChange: any
     conditionValueError: any
+    label: string
 }
 
 const BetweenInputs = (props: BetweenInputsProps) => {
-    const { value, onChange, conditionValueError } = props
+    const { value, onChange, conditionValueError, label } = props
     const [minValueError, setMinValueError] = useState("")
     const [maxValueError, setMaxValueError] = useState("")
     const [isMinValueError, setIsMinValueError] = useState(false)
@@ -97,7 +98,7 @@ const BetweenInputs = (props: BetweenInputsProps) => {
                         handleInputChange(e, onChange, value, true)
                     }}
                     variant="standard"
-                    label="Value"
+                    label={label}
                     inputProps={{
                         min: 0,
                         max: Number.MAX_VALUE
@@ -114,7 +115,7 @@ const BetweenInputs = (props: BetweenInputsProps) => {
                         handleInputChange(e, onChange, value, false)
                     }}
                     variant="standard"
-                    label="Value"
+                    label={label}
                     inputProps={{
                         min: 0,
                         max: Number.MAX_VALUE
