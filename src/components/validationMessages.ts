@@ -8,4 +8,6 @@ export const SHOULD_BE_NUMBER_MSG = "Should be a number"
 export const SHOULD_BE_GREATER_0_MSG = "Should be greater than 0"
 export const INVALID_TIME_FORMAT = "Invalid time"
 
-export const UNIQUE_KEYS = "Keys should be unique"
+export const UNIQUE_KEYS = (entity_name: string) => {
+    return `${entity_name} should be unique`
+}

@@ -60,10 +60,13 @@ yup.addMethod(yup.array, "uniqueAttributes", function () { return validateArrayU
 yup.addMethod(yup.array, "uniqueTaskBatching", function () { return validateArrayUniqueness(this, "task_id", "Only one batch setup per task is allowed") });
 
 // quarantees the uniqueness of keys per distribution map
-yup.addMethod(yup.array, "uniqueKeyDistr", function () { return validateArrayUniqueness(this, "key", UNIQUE_KEYS) });
+yup.addMethod(yup.array, "uniqueKeyDistr", function () { return validateArrayUniqueness(this, "key", UNIQUE_KEYS("Keys")) });
 
-// quarantees the uniqueness of keys per distribution map
-yup.addMethod(yup.array, "uniquePriorityLevel", function () { return validateArrayUniqueness(this, "priority_level", UNIQUE_KEYS) });
+// quarantees the uniqueness of priority levels per distribution map
+yup.addMethod(yup.array, "uniquePriorityLevel", function () { return validateArrayUniqueness(this, "priority_level", UNIQUE_KEYS("Priority levels")) });
+
+// quarantees the uniqueness of "id" property per array
+yup.addMethod(yup.array, "uniqueId", function () { return validateArrayUniqueness(this, "id", UNIQUE_KEYS("Id properties")) });
 
 export const distributionValidation = {
   distribution_name: yup.string().required(REQUIRED_ERROR_MSG),
@@ -103,6 +106,7 @@ declare module "yup" {
     uniqueTaskBatching(): ArraySchema<T>;
     uniqueKeyDistr(): ArraySchema<T>;
     uniquePriorityLevel(): ArraySchema<T>;
+    uniqueId(): ArraySchema<T>;
   }
 }
 
