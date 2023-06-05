@@ -286,43 +286,43 @@ const TimePeriodList = (props: TimePeriodListProps) => {
     // })
 
 
-    // const filteredTimePeriods = useMemo(() => {
-    //     const daysAsNumbers: DayNumbers = {
-    //       "MONDAY": 1,
-    //       "TUESDAY": 2,
-    //       "WEDNESDAY": 3,
-    //       "THURSDAY": 4,
-    //       "FRIDAY": 5,
-    //       "SATURDAY": 6,
-    //       "SUNDAY": 7,
-    //     };
-      
-    //     const filterRange = weekdayFilter.map((weekday) => daysAsNumbers[weekday]);
-      
-    //     return currTimePeriods.map((period) => {
-    //       const periodRange = [];
-    //       let fromDay = daysAsNumbers[period.from];
-    //       let toDay = daysAsNumbers[period.to];
-      
-    //       for (let i = fromDay; i <= toDay; i++) {
-    //         periodRange.push(i);
-    //       }
-      
-    //       const isDisplayed = periodRange.some((val) => filterRange.includes(val));
-      
-    //       return { ...period, isDisplayed };
-    //     });
-    //   }, [currTimePeriods, weekdayFilter]);
-      
     const filteredTimePeriods = useMemo(() => {
-        return currTimePeriods.map(period => {
-          const isDisplayed = weekdayFilter.includes(period.from);
-          return {
-            ...period,
-            isDisplayed
-          };
+        const daysAsNumbers: DayNumbers = {
+          "MONDAY": 1,
+          "TUESDAY": 2,
+          "WEDNESDAY": 3,
+          "THURSDAY": 4,
+          "FRIDAY": 5,
+          "SATURDAY": 6,
+          "SUNDAY": 7,
+        };
+      
+        const filterRange = weekdayFilter.map((weekday) => daysAsNumbers[weekday]);
+      
+        return currTimePeriods.map((period) => {
+          const periodRange = [];
+          let fromDay = daysAsNumbers[period.from];
+          let toDay = daysAsNumbers[period.to];
+      
+          for (let i = fromDay; i <= toDay; i++) {
+            periodRange.push(i);
+          }
+      
+          const isDisplayed = periodRange.every(val => filterRange.includes(val));
+      
+          return { ...period, isDisplayed };
         });
       }, [currTimePeriods, weekdayFilter]);
+      
+    // const filteredTimePeriods = useMemo(() => {
+    //     return currTimePeriods.map(period => {
+    //       const isDisplayed = weekdayFilter.includes(period.from);
+    //       return {
+    //         ...period,
+    //         isDisplayed
+    //       };
+    //     });
+    //   }, [currTimePeriods, weekdayFilter]);
 
 
     useEffect(() => {

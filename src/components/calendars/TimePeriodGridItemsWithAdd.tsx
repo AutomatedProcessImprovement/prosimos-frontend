@@ -35,9 +35,9 @@ const TimePeriodGridItemsWithAdd = <FieldValues,>(props: TimePeriodGridItemsWith
         }
     }, [fields, isRowAdded]);
 
-    const displayedTimePeriods = useMemo(() => {
-        return fields.filter((item: any) => item.isDisplayed !== false);
-      }, [fields]);
+    // const displayedTimePeriods = useMemo(() => {
+    //     return fields.filter((item: any) => item.isDisplayed !== false);
+    //   }, [fields]);
 
     const renderRow = ({ index, key, style }: any) => {
         const isWithoutDeleteButton = (fields.length === 1 && index === 0)
