@@ -319,9 +319,25 @@ const TimePeriodList = (props: TimePeriodListProps) => {
         remove(index)
     };
 
+    // const onTimePeriodAdd = () => {
+    //     append(defaultWorkWeekTimePeriod)
+    // };
+
     const onTimePeriodAdd = () => {
-        append(defaultWorkWeekTimePeriod)
-    };
+        const isMondayToFriday = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"].every(weekday =>
+          weekdayFilter.includes(weekday)
+        );
+      
+        if (!isMondayToFriday) {
+            let newWrokWeekTimePeriod = defaultWorkWeekTimePeriod
+            newWrokWeekTimePeriod.from = weekdayFilter[0];
+            newWrokWeekTimePeriod.to = weekdayFilter[0];
+            append(newWrokWeekTimePeriod)
+        } else {
+            append(defaultWorkWeekTimePeriod);
+        }
+      };
+      
 
     return <TimePeriodGridItemsWithAdd
         key={`resource_calendars.${calendarKey}.time_periods`}
