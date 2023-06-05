@@ -46,7 +46,7 @@ const TimePeriodGridItemsWithAdd = <FieldValues,>(props: TimePeriodGridItemsWith
         const newStyle = {
             ...style,
             position:"unset",
-            margin: "1rem 0 0 0"
+            margin: "10px 0 0 0"
         }
 
         return (
