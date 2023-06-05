@@ -1,5 +1,4 @@
 import { Grid } from "@mui/material";
-import { FieldArrayPath, FieldArrayWithId } from "react-hook-form";
 import { UseFormReturn } from "react-hook-form";
 import AddButtonBase from "../toolbar/AddButtonBase";
 import TimePeriodGridItem from "./TimePeriodGridItem";
@@ -34,10 +33,6 @@ const TimePeriodGridItemsWithAdd = <FieldValues,>(props: TimePeriodGridItemsWith
             setIsRowAdded(false)
         }
     }, [fields, isRowAdded]);
-
-    // const displayedTimePeriods = useMemo(() => {
-    //     return fields.filter((item: any) => item.isDisplayed !== false);
-    //   }, [fields]);
 
     const renderRow = ({ index, key, style }: any) => {
         const isWithoutDeleteButton = (fields.length === 1 && index === 0)

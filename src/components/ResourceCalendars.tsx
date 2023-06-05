@@ -281,11 +281,6 @@ const TimePeriodList = (props: TimePeriodListProps) => {
         name: `resource_calendars.${index}.time_periods`
     })
 
-    // const filteredTimePeriods = currTimePeriods.filter((period) => {
-    //     return weekdayFilter.includes(period.from)
-    // })
-
-
     const filteredTimePeriods = useMemo(() => {
         const daysAsNumbers: DayNumbers = {
           "MONDAY": 1,
@@ -313,18 +308,7 @@ const TimePeriodList = (props: TimePeriodListProps) => {
           return { ...period, isDisplayed };
         });
       }, [currTimePeriods, weekdayFilter]);
-      
-    // const filteredTimePeriods = useMemo(() => {
-    //     return currTimePeriods.map(period => {
-    //       const isDisplayed = weekdayFilter.includes(period.from);
-    //       return {
-    //         ...period,
-    //         isDisplayed
-    //       };
-    //     });
-    //   }, [currTimePeriods, weekdayFilter]);
-
-
+    
     useEffect(() => {
         if (index !== calendarIndex) {
             setIndex(calendarIndex)
