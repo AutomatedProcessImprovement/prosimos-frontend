@@ -307,7 +307,7 @@ const TimePeriodList = (props: TimePeriodListProps) => {
       
           return { ...period, isDisplayed };
         });
-      }, [currTimePeriods, weekdayFilter]);
+      }, [currTimePeriods, weekdayFilter, append]);
     
     useEffect(() => {
         if (index !== calendarIndex) {
@@ -318,10 +318,6 @@ const TimePeriodList = (props: TimePeriodListProps) => {
     const onTimePeriodRemove = (index: number) => {
         remove(index)
     };
-
-    // const onTimePeriodAdd = () => {
-    //     append(defaultWorkWeekTimePeriod)
-    // };
 
     const onTimePeriodAdd = () => {
         const isMondayToFriday = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"].every(weekday =>
