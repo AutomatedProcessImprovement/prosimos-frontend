@@ -5,6 +5,7 @@ import TimePeriodGridItem from "./TimePeriodGridItem";
 import { List, AutoSizer } from 'react-virtualized';
 import { useEffect, useState, useRef, useMemo } from "react";
 import { ModelType } from "./ModelType";
+import { relative } from "path";
 
 interface TimePeriodGridItemsWithAddProps<FieldValues> {
     fields: any//FieldArrayWithId<FieldValues, FieldArrayPath<FieldValues>, "key">[]
@@ -38,12 +39,18 @@ const TimePeriodGridItemsWithAdd = <FieldValues,>(props: TimePeriodGridItemsWith
         const isWithoutDeleteButton = (fields.length === 1 && index === 0)
         const item = fields[index]
 
-        if (!item.isDisplayed) {
+        if (item.isDisplayed === false && item.isDisplayed !== undefined) {
             return null;
-          }
+        }
+
+        const newStyle = {
+            ...style,
+            position:"unset",
+            margin: "1rem 0 0 0"
+        }
 
         return (
-            <Grid item xs={12} key={`resource_calendar_${index}`} style={style}>
+            <Grid item xs={12} key={`resource_calendar_${index}`} style={newStyle}>
                 <TimePeriodGridItem
                     key={item.key}
                     formState={props.formState}
