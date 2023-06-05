@@ -8,7 +8,7 @@ import { JsonData, ResourceCalendar } from "../formData";
 import { UpdateResourceCalendarRequest } from "./ResourceProfilesTable";
 import { defaultWorkWeekTimePeriod } from "../simulationParameters/defaultValues";
 import TimePeriodGridItemsWithAdd from "../calendars/TimePeriodGridItemsWithAdd";
-import { INVALID_TIME_FORMAT } from "./../validationMessages";
+import { INVALID_TIME_FORMAT, SHOULD_BE_GREATER_0_MSG, SHOULD_BE_LESS_OR_EQ_1_MSG } from "./../validationMessages";
 
 export interface ModalInfo {
     poolIndex: number
@@ -45,7 +45,8 @@ const ModifyCalendarDialog = (props: ModifyCalendarDialogProps) => {
                         from: yup.string(),
                         to: yup.string(),
                         beginTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
-                        endTime: yup.string().timeFormat(INVALID_TIME_FORMAT)
+                        endTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
+                        probability: yup.number().min(0, SHOULD_BE_LESS_OR_EQ_1_MSG).max(1, SHOULD_BE_GREATER_0_MSG)
                     })
                 )
         })

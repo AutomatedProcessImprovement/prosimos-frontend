@@ -41,3 +41,20 @@ const isPlural = (num: number, timeUnit: string) => {
 export const round = (num: number, digits: number): number => {
     return +(num).toFixed(digits) 
 };
+
+
+export enum TimeUnit {
+    SECONDS = 1,
+    MINUTES = 60,
+    HOURS = 3600,
+    DAYS = 86400,
+    WEEKS = 604800,
+    MONTHS = 2628000,
+    YEARS = 31536000
+  }
+
+export const convertTime = (value: number, from: TimeUnit, to: TimeUnit): number => {
+    const timeInSeconds = value * from;
+    const convertedTime = timeInSeconds / to;
+    return convertedTime;
+}

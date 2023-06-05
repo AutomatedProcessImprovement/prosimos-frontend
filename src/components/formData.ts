@@ -1,4 +1,7 @@
+import { ModelType } from "./calendars/ModelType"
+
 export interface JsonData {
+    model_type: ModelType
     resource_profiles: ResourcePool[]
     arrival_time_distribution: ProbabilityDistribution
     arrival_time_calendar: TimePeriod[]
@@ -9,8 +12,13 @@ export interface JsonData {
     batch_processing: BatchProcessing[]
     case_attributes: CaseAttributeDefinition[]
     prioritisation_rules: PriorityRule[]
+    granule_size?: GranuleSize
 }
 
+export interface GranuleSize {
+    value: number,
+    time_unit: string
+}
 
 export interface PriorityRule {
     priority_level: number
@@ -81,6 +89,7 @@ export interface TimePeriod {
     to: string
     beginTime: string
     endTime: string
+    probability?: number
 }
 
 export interface ResourceCalendar {
