@@ -66,7 +66,7 @@ const TimePeriodGridItemsWithAdd = <FieldValues,>(props: TimePeriodGridItemsWith
 
     return (
         <Grid item xs={12} container spacing={2}>
-            <Grid item container xs={12} style={{ minHeight: "60vh" }}>
+            <Grid item container xs={12} style={{ minHeight: "30vh" }}>
                 <AutoSizer>
                     {({ width, height }) => {
                         return <List
