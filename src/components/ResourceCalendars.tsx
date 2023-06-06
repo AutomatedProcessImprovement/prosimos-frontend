@@ -1,4 +1,4 @@
-import { Grid, MenuItem, TextField, Typography } from "@mui/material"
+import { Button, Grid, MenuItem, TextField, Typography } from "@mui/material"
 import { useState, useEffect } from "react"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { GranuleSize, JsonData } from './formData'
@@ -16,6 +16,8 @@ import CalendarFuzzyGranuleDialog from "./calendars/CalendarFuzzyGranuleDialog"
 import { TimeUnit, convertTime, daysOfWeek } from "../helpers/timeConversions"
 import WeekdayFilterCheckbox from "./calendars/WeekdayFilterCheckbox"
 import TimePeriodList from "./calendars/TimePeriodList"
+import ButtonToolbarBase from "./toolbar/ButtonToolbarBase"
+import EditIcon from '@mui/icons-material/Edit';
 
 
 interface ResourceCalendarsProps {
@@ -44,6 +46,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
     })
 
     const {modelType, handleModelTypeChange} = props
+    
 
     const onNameDialogOpen = () => {
         setIsNameDialogOpen(true)
@@ -159,6 +162,11 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
         setIsChangeModelTypeDialogOpen(false)
     }
 
+    const handleEditGranuleChangeButtonClick = () => {
+        setNextModelType(ModelType.FUZZY)
+        setIsChangeModelTypeDialogOpen(true)
+    }
+
     const updateCurrCalendar = (index?: number) => {
         // update index
         setCurrCalendarIndex(index)
@@ -179,8 +187,8 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
     return (
         <Grid container width="100%" spacing={2}>
             <Grid container item xs={12}>
-                <Grid container item xs={4}>
-                    <Grid item xs={9}>
+                <Grid container item xs={3}>
+                    <Grid item xs={10}>
                         <TextField
                             sx={{ width: "100%" }}
                             label="Calendar"
@@ -201,7 +209,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
                         </TextField>
                     </Grid>
                 </Grid>
-                <Grid container item xs={3}>
+                <Grid container item xs={2}>
                     <Grid item xs={9} className={classes.centeredGrid}>   
                     <WeekdayFilterCheckbox
                         label="Weekday"
@@ -210,13 +218,26 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
                     />           
                     </Grid>
                 </Grid>
-                <Grid item xs={1} className={classes.centeredGrid}>   
-                    <ModelTypeSelect
-                        label="Model type"
-                        value={modelType}
-                        onChange={onModelTypeChangeDialogOpen}
-                    />             
+                <Grid container item xs={3} spacing={2}>
+                    <Grid item xs={4} className={classes.centeredGrid}>   
+                        <ModelTypeSelect
+                            label="Model type"
+                            value={modelType}
+                            onChange={onModelTypeChangeDialogOpen}
+                        />             
+                    </Grid>
+                    { modelType === ModelType.FUZZY &&
+                    <Grid item xs={6} className={classes.centeredGrid}>   
+                            <ButtonToolbarBase
+                                onClick={handleEditGranuleChangeButtonClick}
+                                labelName="Edit granule size"
+                                startIcon={<EditIcon/>}
+                                variant="text"
+                                tooltipText="Edit granule size"
+                            />
+                    </Grid>}
                 </Grid>
+
                 <Grid item xs={2} className={classes.centeredGrid}>
                     <DeleteButtonToolbar
                         onClick={onDeleteCalendars}
@@ -264,7 +285,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
             />}
             {isChangeModelTypeDialogOpen && nextModelType === ModelType.FUZZY && <CalendarFuzzyGranuleDialog 
                 modalOpen={isChangeModelTypeDialogOpen}
-                message="In order to swtich to FUZZY you need to specify granule size"
+                message="Specify granule size for the Fuzzy model."
                 onConfirm={handleTimeAndValueSubmission}
                 onCancel={onModelTypeChangeDialogClose}
             />}
