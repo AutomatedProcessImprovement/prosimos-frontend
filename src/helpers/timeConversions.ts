@@ -58,3 +58,5 @@ export const convertTime = (value: number, from: TimeUnit, to: TimeUnit): number
     const convertedTime = timeInSeconds / to;
     return convertedTime;
 }
+
+export const daysOfWeek = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];

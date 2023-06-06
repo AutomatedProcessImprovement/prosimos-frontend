@@ -15,7 +15,7 @@ import { ModelType } from "./calendars/ModelType"
 import ModelTypeSelect from "./calendars/ModelTypeSelect"
 import { ConfirmationDialog } from "./calendars/ConfirmationDialog"
 import CalendarFuzzyGranuleDialog from "./calendars/CalendarFuzzyGranuleDialog"
-import { TimeUnit, convertTime } from "../helpers/timeConversions"
+import { TimeUnit, convertTime, daysOfWeek } from "../helpers/timeConversions"
 import WeekdayFilterCheckbox from "./calendars/WeekdayFilterCheckbox"
 
 
@@ -40,8 +40,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
     const [currCalendarKey, setCurrCalendarKey] = useState<string>("")
     const [isNameDialogOpen, setIsNameDialogOpen] = useState<boolean>(false)
     const [assignedCalendars, setAssignedCalendars] = useState<Set<string>>(new Set())
-    const weekdays = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
-    const [weekdayFilter, setWeekdayFilter] = useState<Array<string>>(weekdays);
+    const [weekdayFilter, setWeekdayFilter] = useState<Array<string>>(daysOfWeek);
 
     const { fields: allCalendars, prepend: prependCalendarFields, remove: removeCalendarsFields } = useFieldArray({
         keyName: 'key',
@@ -117,7 +116,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
 
         const selected = event.target.value as string[];
         if (selected.length > 0) {
-            const sortedSelected = weekdays.filter(day => selected.includes(day));
+            const sortedSelected = daysOfWeek.filter(day => selected.includes(day));
             setWeekdayFilter(sortedSelected);
         }
     }
@@ -330,7 +329,7 @@ const TimePeriodList = (props: TimePeriodListProps) => {
     };
 
     const onTimePeriodAdd = () => {
-        const isMondayToFriday = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"].every(weekday =>
+        const isMondayToFriday = daysOfWeek.slice(0, 5).every(weekday =>
           weekdayFilter.includes(weekday)
         );
       

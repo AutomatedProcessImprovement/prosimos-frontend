@@ -1,4 +1,5 @@
 import { FormControl, InputLabel, Select, MenuItem, Checkbox, ListItemText, FormHelperText } from '@mui/material';
+import { daysOfWeek } from '../../helpers/timeConversions';
 
 interface WeekdayFilterProps {
   label?: string;
@@ -7,8 +8,6 @@ interface WeekdayFilterProps {
 }
 
 const WeekdayFilterCheckbox = (props: WeekdayFilterProps) => {
-  const daysOfWeek = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
-
   return (
     <FormControl variant="standard" fullWidth>
       <InputLabel>{props.label || "Select at least one weekday"}</InputLabel>
