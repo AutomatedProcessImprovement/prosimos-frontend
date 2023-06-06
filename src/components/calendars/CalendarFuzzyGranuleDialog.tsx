@@ -1,4 +1,4 @@
-import { Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Button, Select, MenuItem } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Button, MenuItem, Select } from "@mui/material";
 import { useEffect, useState } from "react";
 
 interface CalendarFuzzyGranuleDialogProps {
@@ -38,36 +38,37 @@ const CalendarFuzzyGranuleDialog = (props: CalendarFuzzyGranuleDialogProps) => {
         <Dialog open={modalOpen} onClose={onCancel} fullWidth maxWidth="sm">
             <DialogTitle>{title ?? "Confirmation"}</DialogTitle>
             <DialogContent>
-            <DialogContentText>{message}</DialogContentText>
+                <DialogContentText>{message}</DialogContentText>
             </DialogContent>
-            <DialogContent>
-            <Select
-                label="Select time unit"
-                fullWidth
-                value={timeUnit}
-                onChange={onTimeUnitChange}
-                >
-                <MenuItem value="seconds">Seconds</MenuItem>
-                <MenuItem value="minutes">Minutes</MenuItem>
-                <MenuItem value="hours">Hours</MenuItem>
-            </Select>
+            <DialogContent>          
+                <Select
+                    label="Select time unit"
+                    value={timeUnit}
+                    variant="standard"
+                    required
+                    fullWidth
+                    onChange={onTimeUnitChange}
+                    >
+                    <MenuItem value="seconds">Seconds</MenuItem>
+                    <MenuItem value="minutes">Minutes</MenuItem>
+                    <MenuItem value="hours">Hours</MenuItem>
+                </Select>
             <DialogContent>
             </DialogContent>
-
-            <TextField
-                autoFocus
-                label="Time value"
-                type="number"
-                required
-                fullWidth
-                variant="standard"
-                value={timeValue}
-                onChange={(e) => setTimeValue(parseInt(e.target.value))}
-            />
+                <TextField
+                    label="Time value"
+                    type="number"
+                    value={timeValue}
+                    variant="standard"
+                    required
+                    autoFocus
+                    fullWidth
+                    onChange={(e) => setTimeValue(parseInt(e.target.value))}
+                />
             </DialogContent>
             <DialogActions>
-            <Button onClick={onCancel}>Cancel</Button>
-            <Button onClick={() => onConfirm(timeUnit, timeValue)}>Submit</Button>
+                <Button onClick={onCancel}>Cancel</Button>
+                <Button onClick={() => onConfirm(timeUnit, timeValue)}>Submit</Button>
             </DialogActions>
         </Dialog>
     )
