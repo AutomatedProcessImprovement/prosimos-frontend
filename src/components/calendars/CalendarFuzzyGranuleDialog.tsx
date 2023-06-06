@@ -59,6 +59,10 @@ const CalendarFuzzyGranuleDialog = (props: CalendarFuzzyGranuleDialogProps) => {
                     label="Time value"
                     type="number"
                     value={timeValue}
+                    inputProps={{
+                        step: "1",
+                        min: "1",
+                    }}  
                     variant="standard"
                     required
                     autoFocus
