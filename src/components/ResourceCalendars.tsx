@@ -21,13 +21,7 @@ import TimePeriodList from "./calendars/TimePeriodList"
 interface ResourceCalendarsProps {
     formState: UseFormReturn<JsonData, object>
     modelType: ModelType
-    nextModelType?: ModelType
     handleModelTypeChange: (modelType: ModelType, granuleSize?:GranuleSize) => void
-    onModelTypeChangeDialogOpen?: (event: any) => void
-    onModelTypeChangeDialogClose: () => void
-    isChangeModelTypeDialogOpen?: boolean
-    isFuzzyDialogOpen?: boolean
-    setIsFuzzyDialogOpen?: (value: boolean, modelType: ModelType) => void
     setErrorMessage: (value: string) => void
 }
 
@@ -39,6 +33,9 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
     const [isNameDialogOpen, setIsNameDialogOpen] = useState<boolean>(false)
     const [assignedCalendars, setAssignedCalendars] = useState<Set<string>>(new Set())
     const [weekdayFilter, setWeekdayFilter] = useState<Array<string>>(daysOfWeek);
+    const [nextModelType, setNextModelType] = useState<ModelType>()
+    const [isChangeModelTypeDialogOpen, setIsChangeModelTypeDialogOpen] = useState(false);
+
 
     const { fields: allCalendars, prepend: prependCalendarFields, remove: removeCalendarsFields } = useFieldArray({
         keyName: 'key',
@@ -46,9 +43,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
         name: "resource_calendars"
     })
 
-    const {modelType, nextModelType, handleModelTypeChange} = props
-    const {isChangeModelTypeDialogOpen} = props
-    const {onModelTypeChangeDialogOpen, onModelTypeChangeDialogClose} = props
+    const {modelType, handleModelTypeChange} = props
 
     const onNameDialogOpen = () => {
         setIsNameDialogOpen(true)
@@ -110,6 +105,16 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
         setIsNameDialogOpen(false)
     };
 
+    const onModelTypeChangeDialogOpen = (event:any) => {
+        setIsChangeModelTypeDialogOpen(true)
+        const nextModelType = event.target.value
+        setNextModelType(nextModelType) 
+    }
+
+    const onModelTypeChangeDialogClose = () => {
+        setIsChangeModelTypeDialogOpen(false)
+    }
+
     const handleWeekdayFilterChange = (event: any) => {
 
         const selected = event.target.value as string[];
@@ -142,10 +147,16 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
         if(isValidTimeInSeconds(timeInSeconds, timeInDay)) {
             const granuleSize = createGranuleSize(timeUnit, timeValue);
             handleModelTypeChange(nextModelType || ModelType.FUZZY, granuleSize)
+            setIsChangeModelTypeDialogOpen(false)
         } else {
             setErrorMessage("Invalid granule size. The size should be greater than 1 second, less than 1 day, and 1 day should be divisible by this size without a remainder.")
         }
     } 
+
+    const handleCrispSubmission = (nextModelType: ModelType) => {
+        handleModelTypeChange(nextModelType)
+        setIsChangeModelTypeDialogOpen(false)
+    }
 
     const updateCurrCalendar = (index?: number) => {
         // update index
@@ -247,10 +258,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
             {isChangeModelTypeDialogOpen && nextModelType === ModelType.CRISP && <ConfirmationDialog 
                 modalOpen={isChangeModelTypeDialogOpen}
                 message="Are you sure you want to change model type?"
-                onConfirm={ () => { 
-                    console.error(`NEXT MODEL TYPE: ${nextModelType}`)
-                    handleModelTypeChange(nextModelType)
-                }}
+                onConfirm={ () => { handleCrispSubmission(nextModelType) }}
                 onCancel={onModelTypeChangeDialogClose}
             />}
             {isChangeModelTypeDialogOpen && nextModelType === ModelType.FUZZY && <CalendarFuzzyGranuleDialog 

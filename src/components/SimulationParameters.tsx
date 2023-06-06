@@ -107,10 +107,8 @@ const SimulationParameters = () => {
     const [isPollingEnabled, setIsPollingEnabled] = useState(false)
     const [pendingTaskId, setPendingTaskId] = useState("")
     const [modelType, setModelType] = useState(ModelType.CRISP)
-    const [nextModelType, setNextModelType] = useState<ModelType>()
 
 
-    const [isChangeModelTypeDialogOpen, setIsChangeModelTypeDialogOpen] = useState(false);
 
 
     const scenarioState = useForm<ScenarioProperties>({
@@ -217,16 +215,6 @@ const SimulationParameters = () => {
         setFileDownloadUrl(fileDownloadUrl)
     };
 
-    const onModelTypeChangeDialogOpen = (event:any) => {
-        setIsChangeModelTypeDialogOpen(true)
-        const nextModelType = event.target.value
-        setNextModelType(nextModelType) 
-    }
-
-    const onModelTypeChangeDialogClose = () => {
-        setIsChangeModelTypeDialogOpen(false)
-    }
-
     const handleModelTypeChange = (selectedModelType: ModelType, granuleSize?:GranuleSize) => {
         switch(selectedModelType) {
             case ModelType.CRISP: 
@@ -239,7 +227,6 @@ const SimulationParameters = () => {
         }
         setModelType(selectedModelType)
         formState.setValue("model_type", selectedModelType)
-        setIsChangeModelTypeDialogOpen(false)
     }
 
     const getBlobBasedOnExistingInput = (): Blob => {
@@ -328,11 +315,7 @@ const SimulationParameters = () => {
                 return <ResourceCalendars
                     formState={formState}
                     modelType={modelType}
-                    nextModelType={nextModelType}
                     handleModelTypeChange={handleModelTypeChange}
-                    onModelTypeChangeDialogOpen={onModelTypeChangeDialogOpen}
-                    onModelTypeChangeDialogClose={onModelTypeChangeDialogClose}
-                    isChangeModelTypeDialogOpen={isChangeModelTypeDialogOpen}
                     setErrorMessage={setErrorMessage}
                 />
             case TABS.RESOURCES:
