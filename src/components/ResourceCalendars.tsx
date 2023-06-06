@@ -148,7 +148,8 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
             const granuleSize = createGranuleSize(timeUnit, timeValue);
             handleModelTypeChange(nextModelType || ModelType.FUZZY, granuleSize)
             setIsChangeModelTypeDialogOpen(false)
-        } else {
+        } 
+        else {
             setErrorMessage("Invalid granule size. The size should be greater than 1 second, less than 1 day, and 1 day should be divisible by this size without a remainder.")
         }
     } 

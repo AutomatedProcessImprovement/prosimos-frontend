@@ -92,12 +92,6 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
                     
                     name={`${objectFieldName}.probability` as Path<FieldValues>}
                     control={formControl}
-                    rules={{ 
-                        required: REQUIRED_ERROR_MSG,
-                        min: { value: 0, message: SHOULD_BE_GREATER_0_MSG },
-                        max: { value: 1, message: SHOULD_BE_LESS_OR_EQ_1_MSG }
-
-                    }}
                     render={({ field: {onChange, value} }) => (
                         <TextField
                             type="number"
