@@ -248,7 +248,6 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
                             time_unit: timeUnit, 
                             value: timeValue
                         }
-                        console.error(`NEXT MODEL TYPE: ${nextModelType}`)
                         handleModelTypeChange(nextModelType, granuleSize)
                     } else {
                         setErrorMessage("Invalid granule size. The size should be greater than 1 second, less than 1 day, and 1 day should be divisible by this size without a remainder.")
