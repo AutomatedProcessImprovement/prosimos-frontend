@@ -127,6 +127,29 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
         updateCurrCalendar(Number(selectedCalendarIndex))
     }
 
+    const isValidTimeInSeconds = (timeInSeconds: number, oneDayInSeconds: number): boolean => {
+        return timeInSeconds > 0 && timeInSeconds <= oneDayInSeconds && oneDayInSeconds % timeInSeconds === 0;
+    }
+    
+    const createGranuleSize = (timeUnit: string, timeValue: number): GranuleSize => {
+        return {
+            time_unit: timeUnit, 
+            value: timeValue
+        };
+    }
+
+    const handleTimeAndValueSubmission = (timeUnit: string, timeValue: number) => {
+        const timeInSeconds = convertTime(timeValue, TimeUnit[timeUnit.toUpperCase() as keyof typeof TimeUnit], TimeUnit.SECONDS);
+        const timeInDay = TimeUnit.DAYS
+
+        if(isValidTimeInSeconds(timeInSeconds, timeInDay)) {
+            const granuleSize = createGranuleSize(timeUnit, timeValue);
+            handleModelTypeChange(nextModelType || ModelType.FUZZY, granuleSize)
+        } else {
+            setErrorMessage("Invalid granule size. The size should be greater than 1 second, less than 1 day, and 1 day should be divisible by this size without a remainder.")
+        }
+    } 
+
     const updateCurrCalendar = (index?: number) => {
         // update index
         setCurrCalendarIndex(index)
@@ -240,19 +263,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
             {isChangeModelTypeDialogOpen && nextModelType === ModelType.FUZZY && <CalendarFuzzyGranuleDialog 
                 modalOpen={isChangeModelTypeDialogOpen}
                 message="In order to swtich to FUZZY you need to specify granule size"
-                onConfirm={ (timeUnit, timeValue) => { 
-                    const timeInSeconds = convertTime(timeValue, TimeUnit[timeUnit.toUpperCase() as keyof typeof TimeUnit], TimeUnit.SECONDS);
-                    const oneDayInSeconds = convertTime(1, TimeUnit.DAYS, TimeUnit.SECONDS);
-                    if(timeInSeconds > 0 && timeInSeconds <= oneDayInSeconds && oneDayInSeconds % timeInSeconds === 0) {
-                        const granuleSize: GranuleSize = {
-                            time_unit: timeUnit, 
-                            value: timeValue
-                        }
-                        handleModelTypeChange(nextModelType, granuleSize)
-                    } else {
-                        setErrorMessage("Invalid granule size. The size should be greater than 1 second, less than 1 day, and 1 day should be divisible by this size without a remainder.")
-                    }
-                }}
+                onConfirm={handleTimeAndValueSubmission}
                 onCancel={onModelTypeChangeDialogClose}
             />}
         </Grid>
