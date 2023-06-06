@@ -1,11 +1,9 @@
 import { Grid, MenuItem, TextField, Typography } from "@mui/material"
-import { useState, useEffect, useMemo } from "react"
-import { Controller, FieldArrayWithId, useFieldArray, UseFormReturn } from "react-hook-form"
-import TimePeriodGridItemsWithAdd from "./calendars/TimePeriodGridItemsWithAdd"
+import { useState, useEffect } from "react"
+import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { GranuleSize, JsonData } from './formData'
 import { defaultTemplateSchedule } from './simulationParameters/defaultValues'
 import { MIN_LENGTH_REQUIRED_MSG } from './validationMessages'
-import { defaultWorkWeekTimePeriod } from "./simulationParameters/defaultValues";
 import DeleteButtonToolbar from "./toolbar/DeleteButtonToolbar"
 import AddButtonToolbar from "./toolbar/AddButtonToolbar"
 import CalendarNameDialog from "./profiles/CalendarNameDialog"
@@ -17,6 +15,7 @@ import { ConfirmationDialog } from "./calendars/ConfirmationDialog"
 import CalendarFuzzyGranuleDialog from "./calendars/CalendarFuzzyGranuleDialog"
 import { TimeUnit, convertTime, daysOfWeek } from "../helpers/timeConversions"
 import WeekdayFilterCheckbox from "./calendars/WeekdayFilterCheckbox"
+import TimePeriodList from "./calendars/TimePeriodList"
 
 
 interface ResourceCalendarsProps {
@@ -233,11 +232,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
                         key={`resource_calendars.${currCalendarKey}`}
                         formState={formState}
                         modelType={modelType}
-                        nextModelType={nextModelType}
                         weekdayFilter={weekdayFilter}
-                        handleModelTypeChange={handleModelTypeChange}
-                        onModelTypeChangeDialogClose={onModelTypeChangeDialogClose}
-                        setErrorMessage={setErrorMessage}
                         calendarIndex={currCalendarIndex}
                         calendarKey={currCalendarKey}
                     />
@@ -268,92 +263,5 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
         </Grid>
     )
 }
-
-interface TimePeriodListProps extends ResourceCalendarsProps {
-    calendarIndex: number
-    calendarKey: string
-    modelType: ModelType    
-    nextModelType: any
-    weekdayFilter: Array<string>
-    handleModelTypeChange: (modelType: ModelType) => void
-}
-
-type DayNumbers = { [key: string]: number };
-const TimePeriodList = (props: TimePeriodListProps) => {
-    const { formState, calendarIndex, calendarKey, modelType, weekdayFilter } = props
-    const { control } = formState
-    const [index, setIndex] = useState<number>(calendarIndex)
-
-    const { fields: currTimePeriods, append, remove } = useFieldArray({
-        keyName: 'key',
-        control: control,
-        name: `resource_calendars.${index}.time_periods`
-    })
-
-    const filteredTimePeriods = useMemo(() => {
-        const daysAsNumbers: DayNumbers = {
-          "MONDAY": 1,
-          "TUESDAY": 2,
-          "WEDNESDAY": 3,
-          "THURSDAY": 4,
-          "FRIDAY": 5,
-          "SATURDAY": 6,
-          "SUNDAY": 7,
-        };
-      
-        const filterRange = weekdayFilter.map((weekday) => daysAsNumbers[weekday]);
-      
-        return currTimePeriods.map((period) => {
-          const periodRange = [];
-          let fromDay = daysAsNumbers[period.from];
-          let toDay = daysAsNumbers[period.to];
-      
-          for (let i = fromDay; i <= toDay; i++) {
-            periodRange.push(i);
-          }
-      
-          const isDisplayed = periodRange.every(val => filterRange.includes(val));
-      
-          return { ...period, isDisplayed };
-        });
-      }, [currTimePeriods, weekdayFilter, append]);
-    
-    useEffect(() => {
-        if (index !== calendarIndex) {
-            setIndex(calendarIndex)
-        }
-    }, [calendarIndex, index])
-
-    const onTimePeriodRemove = (index: number) => {
-        remove(index)
-    };
-
-    const onTimePeriodAdd = () => {
-        const isMondayToFriday = daysOfWeek.slice(0, 5).every(weekday =>
-          weekdayFilter.includes(weekday)
-        );
-      
-        if (!isMondayToFriday) {
-            let newWrokWeekTimePeriod = defaultWorkWeekTimePeriod
-            newWrokWeekTimePeriod.from = weekdayFilter[0];
-            newWrokWeekTimePeriod.to = weekdayFilter[0];
-            append(newWrokWeekTimePeriod)
-        } else {
-            append(defaultWorkWeekTimePeriod);
-        }
-      };
-      
-
-    return <TimePeriodGridItemsWithAdd
-        key={`resource_calendars.${calendarKey}.time_periods`}
-        fields={filteredTimePeriods}
-        formState={formState}
-        modelType={modelType}
-        objectFieldNamePart={`resource_calendars.${calendarIndex}.time_periods` as unknown as keyof JsonData}
-        onTimePeriodRemove={onTimePeriodRemove}
-        onTimePeriodAdd={onTimePeriodAdd}
-    />
-}
-
 
 export default ResourceCalendars;
