@@ -26,7 +26,6 @@ interface ResourceCalendarsProps {
     onModelTypeChangeDialogOpen?: (event: any) => void
     onModelTypeChangeDialogClose: () => void
     isChangeModelTypeDialogOpen?: boolean
-    setIsChangeModelTypeDialogOpen?: (value: boolean) => void
     isFuzzyDialogOpen?: boolean
     setIsFuzzyDialogOpen?: (value: boolean, modelType: ModelType) => void
     setErrorMessage: (value: string) => void
@@ -48,7 +47,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
     })
 
     const {modelType, nextModelType, handleModelTypeChange} = props
-    const {isChangeModelTypeDialogOpen, setIsChangeModelTypeDialogOpen} = props
+    const {isChangeModelTypeDialogOpen} = props
     const {onModelTypeChangeDialogOpen, onModelTypeChangeDialogClose} = props
 
     const onNameDialogOpen = () => {

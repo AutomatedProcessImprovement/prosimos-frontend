@@ -111,7 +111,6 @@ const SimulationParameters = () => {
 
 
     const [isChangeModelTypeDialogOpen, setIsChangeModelTypeDialogOpen] = useState(false);
-    const [isFuzzyDialogOpen, setIsFuzzyDialogOpen] = useState(false);
 
 
     const scenarioState = useForm<ScenarioProperties>({
@@ -229,7 +228,6 @@ const SimulationParameters = () => {
     }
 
     const handleModelTypeChange = (selectedModelType: ModelType, granuleSize?:GranuleSize) => {
-        console.warn(`SELECTED MODEL TYPE: ${selectedModelType}`)
         switch(selectedModelType) {
             case ModelType.CRISP: 
                 formState.setValue("granule_size", undefined)
