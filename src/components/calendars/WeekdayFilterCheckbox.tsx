@@ -8,6 +8,11 @@ interface WeekdayFilterProps {
 }
 
 const WeekdayFilterCheckbox = (props: WeekdayFilterProps) => {
+
+  const formatDay = (day:string) => {
+    return day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
+  };
+
   return (
     <FormControl variant="standard" fullWidth>
       <InputLabel>{props.label || "Select at least one weekday"}</InputLabel>
@@ -19,7 +24,7 @@ const WeekdayFilterCheckbox = (props: WeekdayFilterProps) => {
           Array.isArray(selected) ? 
             selected
               .sort((a, b) => daysOfWeek.indexOf(a) - daysOfWeek.indexOf(b))
-              .map((day) => day.charAt(0) + day.slice(1).toLowerCase())
+              .map((day) => formatDay(day))
               .join(', ') 
             : selected
         )}
@@ -27,7 +32,7 @@ const WeekdayFilterCheckbox = (props: WeekdayFilterProps) => {
         {daysOfWeek.map((day) => (
           <MenuItem key={day} value={day}>
             <Checkbox checked={props.value.indexOf(day) > -1} />
-            <ListItemText primary={day.charAt(0) + day.slice(1).toLowerCase()} />
+            <ListItemText primary={formatDay(day)} />
           </MenuItem>
         ))}
       </Select>
