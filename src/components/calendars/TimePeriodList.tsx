@@ -70,10 +70,10 @@ const TimePeriodList = (props: TimePeriodListProps) => {
         );
       
         if (!isMondayToFriday) {
-            let newWrokWeekTimePeriod = defaultWorkWeekTimePeriod
-            newWrokWeekTimePeriod.from = weekdayFilter[0];
-            newWrokWeekTimePeriod.to = weekdayFilter[0];
-            append(newWrokWeekTimePeriod)
+            let newWorkWeekTimePeriod = defaultWorkWeekTimePeriod
+            newWorkWeekTimePeriod.from = weekdayFilter[0];
+            newWorkWeekTimePeriod.to = weekdayFilter[0];
+            append(newWorkWeekTimePeriod)
         } else {
             append(defaultWorkWeekTimePeriod);
         }
