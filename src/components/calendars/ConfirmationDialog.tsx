@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 
 interface ConfirmationPopupProperties {
     title?: String
     message: String,
     modalOpen: boolean,
-    onConfirm: any
+    onConfirm: () => void
     onCancel: () => void
 }
 
