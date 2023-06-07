@@ -3,9 +3,8 @@ import { UseFormReturn } from "react-hook-form";
 import AddButtonBase from "../toolbar/AddButtonBase";
 import TimePeriodGridItem from "./TimePeriodGridItem";
 import { List, AutoSizer } from 'react-virtualized';
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ModelType } from "./ModelType";
-import { relative } from "path";
 
 interface TimePeriodGridItemsWithAddProps<FieldValues> {
     fields: any//FieldArrayWithId<FieldValues, FieldArrayPath<FieldValues>, "key">[]

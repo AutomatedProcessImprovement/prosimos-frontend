@@ -1,4 +1,4 @@
-import { FormControl, InputLabel, Select, MenuItem, Checkbox, ListItemText, FormHelperText } from '@mui/material';
+import { FormControl, InputLabel, Select, MenuItem, Checkbox, ListItemText } from '@mui/material';
 import { DAYS_OF_WEEK } from '../../helpers/timeConversions';
 
 interface WeekdayFilterProps {

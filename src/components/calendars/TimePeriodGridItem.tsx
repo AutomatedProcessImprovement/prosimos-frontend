@@ -1,7 +1,7 @@
 import { IconButton, TextField } from "@mui/material";
 import { Grid } from "@mui/material";
 import { Controller, Path, UseFormReturn } from "react-hook-form";
-import { REQUIRED_ERROR_MSG, SHOULD_BE_GREATER_0_MSG, SHOULD_BE_LESS_OR_EQ_1_MSG } from "../validationMessages";
+import { REQUIRED_ERROR_MSG } from "../validationMessages";
 import TimePickerController from "./TimePickerController";
 import WeekdaySelect from "./WeekdaySelect";
 import DeleteIcon from '@mui/icons-material/Delete';
