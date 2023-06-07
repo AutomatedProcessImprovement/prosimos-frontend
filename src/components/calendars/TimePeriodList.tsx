@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import TimePeriodGridItemsWithAdd from "./TimePeriodGridItemsWithAdd"
 import { JsonData } from "../formData"
 import { defaultWorkWeekTimePeriod } from "../simulationParameters/defaultValues"
-import { daysOfWeek } from "../../helpers/timeConversions"
+import { DAYS_OF_WEEK } from "../../helpers/timeConversions"
 import { ModelType } from "./ModelType"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
 
@@ -65,7 +65,7 @@ const TimePeriodList = (props: TimePeriodListProps) => {
     };
 
     const onTimePeriodAdd = () => {
-        const isMondayToFriday = daysOfWeek.slice(0, 5).every(weekday =>
+        const isMondayToFriday = DAYS_OF_WEEK.slice(0, 5).every(weekday =>
           weekdayFilter.includes(weekday)
         );
       

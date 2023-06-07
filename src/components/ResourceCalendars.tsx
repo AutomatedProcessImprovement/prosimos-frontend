@@ -13,7 +13,7 @@ import { ModelType } from "./calendars/ModelType"
 import ModelTypeSelect from "./calendars/ModelTypeSelect"
 import { ConfirmationDialog } from "./calendars/ConfirmationDialog"
 import CalendarFuzzyGranuleDialog from "./calendars/CalendarFuzzyGranuleDialog"
-import { TimeUnit, convertTime, daysOfWeek } from "../helpers/timeConversions"
+import { TimeUnit, convertTime, DAYS_OF_WEEK } from "../helpers/timeConversions"
 import WeekdayFilterCheckbox from "./calendars/WeekdayFilterCheckbox"
 import TimePeriodList from "./calendars/TimePeriodList"
 import ButtonToolbarBase from "./toolbar/ButtonToolbarBase"
@@ -34,7 +34,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
     const [currCalendarKey, setCurrCalendarKey] = useState<string>("")
     const [isNameDialogOpen, setIsNameDialogOpen] = useState<boolean>(false)
     const [assignedCalendars, setAssignedCalendars] = useState<Set<string>>(new Set())
-    const [weekdayFilter, setWeekdayFilter] = useState<Array<string>>(daysOfWeek);
+    const [weekdayFilter, setWeekdayFilter] = useState<Array<string>>(DAYS_OF_WEEK);
     const [nextModelType, setNextModelType] = useState<ModelType>()
     const [isChangeModelTypeDialogOpen, setIsChangeModelTypeDialogOpen] = useState(false);
 
@@ -122,7 +122,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
 
         const selected = event.target.value as string[];
         if (selected.length > 0) {
-            const sortedSelected = daysOfWeek.filter(day => selected.includes(day));
+            const sortedSelected = DAYS_OF_WEEK.filter(day => selected.includes(day));
             setWeekdayFilter(sortedSelected);
         }
     }

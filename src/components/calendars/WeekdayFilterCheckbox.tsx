@@ -1,5 +1,5 @@
 import { FormControl, InputLabel, Select, MenuItem, Checkbox, ListItemText, FormHelperText } from '@mui/material';
-import { daysOfWeek } from '../../helpers/timeConversions';
+import { DAYS_OF_WEEK } from '../../helpers/timeConversions';
 
 interface WeekdayFilterProps {
   label?: string;
@@ -23,13 +23,13 @@ const WeekdayFilterCheckbox = (props: WeekdayFilterProps) => {
         renderValue={(selected) => (
           Array.isArray(selected) ? 
             selected
-              .sort((a, b) => daysOfWeek.indexOf(a) - daysOfWeek.indexOf(b))
+              .sort((a, b) => DAYS_OF_WEEK.indexOf(a) - DAYS_OF_WEEK.indexOf(b))
               .map((day) => formatDay(day))
               .join(', ') 
             : selected
         )}
       >
-        {daysOfWeek.map((day) => (
+        {DAYS_OF_WEEK.map((day) => (
           <MenuItem key={day} value={day}>
             <Checkbox checked={props.value.indexOf(day) > -1} />
             <ListItemText primary={formatDay(day)} />
