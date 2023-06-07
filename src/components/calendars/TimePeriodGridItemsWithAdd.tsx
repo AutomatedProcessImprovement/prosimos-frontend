@@ -37,16 +37,18 @@ const TimePeriodGridItemsWithAdd = <FieldValues,>(props: TimePeriodGridItemsWith
     const renderRow = ({ index, key, style }: any) => {
         const isWithoutDeleteButton = (fields.length === 1 && index === 0)
         const item = fields[index]
+        let newStyle = style
 
-        if (item.isDisplayed === false && item.isDisplayed !== undefined) {
+        if (item.isDisplayed === false) {
             return null;
+        } else if (item.isDisplayed ) {
+            newStyle = {
+                ...style,
+                top: item.displayIndex * 70
+            }
         }
 
-        const newStyle = {
-            ...style,
-            position:"unset",
-            margin: "10px 0 0 0"
-        }
+
 
         return (
             <Grid item xs={12} key={`resource_calendar_${index}`} style={newStyle}>

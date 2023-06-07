@@ -38,6 +38,8 @@ const TimePeriodList = (props: TimePeriodListProps) => {
         };
       
         const filterRange = weekdayFilter.map((weekday) => daysAsNumbers[weekday]);
+
+        let displayIndex = 0;
       
         return currTimePeriods.map((period) => {
           const periodRange = [];
@@ -49,10 +51,17 @@ const TimePeriodList = (props: TimePeriodListProps) => {
           }
       
           const isDisplayed = periodRange.every(val => filterRange.includes(val));
+          let modifiedPeriod
+          if (isDisplayed) {
+            modifiedPeriod = { ...period, isDisplayed, displayIndex };
+            displayIndex++;
+          } else {
+            modifiedPeriod = { ...period, isDisplayed };
+          }
       
-          return { ...period, isDisplayed };
+          return modifiedPeriod;
         });
-      }, [currTimePeriods, weekdayFilter, append]);
+      }, [currTimePeriods, weekdayFilter, append]);    
     
     useEffect(() => {
         if (index !== calendarIndex) {
