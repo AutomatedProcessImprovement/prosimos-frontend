@@ -1,17 +1,14 @@
-import { useEffect, useState } from "react";
 import { MenuItem, TextField } from "@mui/material";
 import { ModelType } from "./ModelType";
 
-const ModelTypeSelect = (props: any) => {
-    const [errorMessage, setErrorMessage] = useState("")
+interface ModelTypeSelectProps {
+    label: string,
+    value: ModelType
+    onChange: (event:any) => void
+    style?:any
+}
 
-    useEffect(() => {
-        const propsMessage = props.fieldError?.message
-        if (propsMessage && propsMessage !== errorMessage) {
-            setErrorMessage(propsMessage)
-        }
-    }, [errorMessage, props.fieldError])
-
+const ModelTypeSelect = (props: ModelTypeSelectProps) => {
     return (
         <TextField 
             sx={props.style ? props.style : { width: "100%" }}
