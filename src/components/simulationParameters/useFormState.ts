@@ -97,9 +97,9 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                                 beginTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
                                 endTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
                                 probability: yup.number().when('model_type', {
-                                        is: ModelType.FUZZY,
-                                        then: yup.number().required(REQUIRED_ERROR_MSG),
-                                        otherwise: yup.mixed().strip(),
+                                    is: ModelType.FUZZY,
+                                    then: yup.number().required(REQUIRED_ERROR_MSG),
+                                    otherwise: yup.number().strip(),
                                 }),
                             })
                         )
