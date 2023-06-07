@@ -4,7 +4,7 @@ import { EventDistribution, JsonData } from "../formData";
 import { AllModelTasks, EventsFromModel, Gateways } from "../modelData";
 import { defaultTemplateSchedule, defaultArrivalTimeDistribution, defaultArrivalCalendarArr, defaultResourceProfiles } from "./defaultValues";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, SUMMATION_ONE_MSG, INVALID_TIME_FORMAT, SHOULD_BE_LESS_OR_EQ_1_MSG, SHOULD_BE_GREATER_0_MSG } from "./../validationMessages";
+import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, SUMMATION_ONE_MSG, INVALID_TIME_FORMAT } from "./../validationMessages";
 import { round } from "../../helpers/timeConversions";
 import yup, { distributionValidation, stringOrNumberArr } from "../../yup-extended";
 import { ModelType } from "../calendars/ModelType";
