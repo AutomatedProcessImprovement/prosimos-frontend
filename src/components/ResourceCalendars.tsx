@@ -144,8 +144,8 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
     }
 
     const handleTimeAndValueSubmission = (timeUnit: string, timeValue: number) => {
-        const timeInSeconds = convertTime(timeValue, TimeUnit[timeUnit.toUpperCase() as keyof typeof TimeUnit], TimeUnit.SECONDS);
-        const timeInDay = TimeUnit.DAYS
+        const timeInSeconds = convertTime(timeValue, TimeUnit[timeUnit.toUpperCase() as keyof typeof TimeUnit], TimeUnit.Seconds);
+        const timeInDay = TimeUnit.Days
 
         if(isValidTimeInSeconds(timeInSeconds, timeInDay)) {
             const granuleSize = createGranuleSize(timeUnit, timeValue);

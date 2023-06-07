@@ -44,13 +44,13 @@ export const round = (num: number, digits: number): number => {
 
 
 export enum TimeUnit {
-    SECONDS = 1,
-    MINUTES = 60,
-    HOURS = 3600,
-    DAYS = 86400,
-    WEEKS = 604800,
-    MONTHS = 2628000,
-    YEARS = 31536000
+    Seconds = 1,
+    Minutes = 60,
+    Hours = 3600,
+    Days = 86400,
+    Weeks = 604800,
+    Months = 2628000,
+    Years = 31536000
   }
 
 export const convertTime = (value: number, from: TimeUnit, to: TimeUnit): number => {
