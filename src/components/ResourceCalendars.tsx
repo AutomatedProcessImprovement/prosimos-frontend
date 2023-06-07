@@ -144,7 +144,9 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
     }
 
     const handleTimeAndValueSubmission = (timeUnit: string, timeValue: number) => {
-        const timeInSeconds = convertTime(timeValue, TimeUnit[timeUnit.toUpperCase() as keyof typeof TimeUnit], TimeUnit.Seconds);
+        const titleCaseTimeUnit = timeUnit.charAt(0).toUpperCase() + timeUnit.slice(1).toLowerCase();
+
+        const timeInSeconds = convertTime(timeValue, TimeUnit[titleCaseTimeUnit as keyof typeof TimeUnit], TimeUnit.Seconds);
         const timeInDay = TimeUnit.Days
 
         if(isValidTimeInSeconds(timeInSeconds, timeInDay)) {
@@ -288,6 +290,8 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
                 message="Specify granule size for the Fuzzy model."
                 onConfirm={handleTimeAndValueSubmission}
                 onCancel={onModelTypeChangeDialogClose}
+                currentTimeUnit={formState.getValues("granule_size.time_unit")}
+                currentTimeValue={formState.getValues("granule_size.value")}
             />}
         </Grid>
     )

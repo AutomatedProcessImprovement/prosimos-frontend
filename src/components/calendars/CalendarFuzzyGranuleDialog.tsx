@@ -8,11 +8,15 @@ interface CalendarFuzzyGranuleDialogProps {
     title?: string
     message: string
     isDialogTextShown?: boolean
+    currentTimeUnit?:string
+    currentTimeValue?:number
 }
 
 const CalendarFuzzyGranuleDialog = (props: CalendarFuzzyGranuleDialogProps) => {
-    const [timeUnit, setTimeUnit] = useState<string>("seconds");
-    const [timeValue, setTimeValue] = useState<number>(1);
+    const {currentTimeUnit, currentTimeValue} = props
+
+    const [timeUnit, setTimeUnit] = useState<string>(currentTimeUnit || "seconds");
+    const [timeValue, setTimeValue] = useState<number>(currentTimeValue || 1);
 
     const {message, modalOpen, onCancel, onConfirm } = props
     const [title, setTitle] = useState<string>()
