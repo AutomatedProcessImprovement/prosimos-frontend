@@ -222,6 +222,12 @@ const SimulationParameters = () => {
             break;
 
             case ModelType.FUZZY:
+                let calendars = formState.getValues("resource_calendars")
+                calendars.map(calendar => {
+                    return calendar.time_periods.map(timePeriod => {
+                        return timePeriod.probability = timePeriod.probability || 1
+                    })
+                })
                 formState.setValue("granule_size", granuleSize)
             break;
         }
