@@ -49,16 +49,17 @@ const TimeDistribution = (props: TimeDistributionProps) => {
             setCurrSelectedFunc(newDistrFunc)
         }
 
-        const distrFunc = currSelectedFunc ?? newDistrFunc
-
-        if (distrFunc === DISTR_FUNC.triang && label === MODE_SEC) {
-            if (num < 0 || num > 1)
-                setErrorMessage("Mode should be in the range [0, 1]")
-            else
-                onChange(num)
-        } else {
-            onChange(num)
-        }
+        onChange(num)
+        // TODO: to return back when triang is supported
+        // const distrFunc = currSelectedFunc ?? newDistrFunc
+        // if (distrFunc === DISTR_FUNC.triang && label === MODE_SEC) {
+        //     if (num < 0 || num > 1)
+        //         setErrorMessage("Mode should be in the range [0, 1]")
+        //     else
+        //         onChange(num)
+        // } else {
+        //     onChange(num)
+        // }
     };
 
     return (

@@ -13,7 +13,7 @@ export enum DISTR_FUNC {
     norm = "norm",
     expon = "expon",
     gamma = "gamma",
-    triang = "triang",
+    // triang = "triang",
     uniform = "uniform",
     lognorm = "lognorm"
 }
@@ -22,16 +22,17 @@ const MEAN_SEC = "Mean (sec)"
 export const MODE_SEC = "Mode (sec)"
 const STD_DEV_SEC = "Std deviation (sec)"
 const VARIANCE_SEC = "Variance (sec)"
-const SHIFT_SEC = "Shift (sec)"
+const SHIFT_SEC = "Shift (sec)" // TODO: to be supported later
 const MIN_SEC = "Min (sec)"
 const MAX_SEC = "Max (sec)"
 
 export const distrFuncWithLabelNames: { [key in DISTR_FUNC]: any[] } = {
     [DISTR_FUNC.fix]: [MEAN_SEC],
     [DISTR_FUNC.norm]: [MEAN_SEC, STD_DEV_SEC, MIN_SEC, MAX_SEC],
-    [DISTR_FUNC.expon]: [MEAN_SEC, SHIFT_SEC, MIN_SEC, MAX_SEC],
+    [DISTR_FUNC.expon]: [MEAN_SEC, MIN_SEC, MAX_SEC],
     [DISTR_FUNC.uniform]: [MIN_SEC, MAX_SEC],
     [DISTR_FUNC.gamma]: [MEAN_SEC, VARIANCE_SEC, MIN_SEC, MAX_SEC],
-    [DISTR_FUNC.triang]: [MODE_SEC, MIN_SEC, MAX_SEC],
     [DISTR_FUNC.lognorm]: [MEAN_SEC, VARIANCE_SEC, MIN_SEC, MAX_SEC]
+    // TODO: to be supported later
+    // [DISTR_FUNC.triang]: [MODE_SEC, MIN_SEC, MAX_SEC]
 }
