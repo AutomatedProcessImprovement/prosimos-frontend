@@ -8,14 +8,15 @@ export type AllowedDistrParamsName = "arrival_time_distribution.distribution_par
     | `event_distribution.${number}.distribution_params`
     | `case_attributes.${number}.values.distribution_params`
 
+// ordered by alphabet
 export enum DISTR_FUNC {
-    fix = "fix",
-    norm = "norm",
     expon = "expon",
+    fix = "fix",
     gamma = "gamma",
+    lognorm = "lognorm",
+    norm = "norm",
     // triang = "triang",
     uniform = "uniform",
-    lognorm = "lognorm"
 }
 
 const MEAN_SEC = "Mean (sec)"
