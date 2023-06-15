@@ -62,6 +62,51 @@ const TimeDistribution = (props: TimeDistributionProps) => {
         // }
     };
 
+    /**
+     * This functions ignore number of parameters in provided .json file.
+     * Meaning, we show number of parameters, required by the distribution function.
+     * So, if some parameters are missed in .json file, they will remain empty.
+     * 
+     * @returns list of textfield used for filling in the parameters for distribution function
+     */
+    const getDistrFuncWithParams = () => {
+        const paramsList = distrFuncWithLabelNames[currSelectedFunc!]
+        
+        return Array.from(Array(paramsList.length).keys()).map((paramIndex) => {
+            const errors = distrErrors?.distribution_params?.[paramIndex]
+            const labelName = paramsList[paramIndex]
+
+            return (
+                <Grid item xs={3} key={`${objectNamePath}_distribution_params_${paramIndex}`}>
+                    <Controller
+                        name={`${objectNamePath}.distribution_params.${paramIndex}.value` as unknown as keyof JsonData}
+                        control={formControl}
+                        rules={{ required: REQUIRED_ERROR_MSG }}
+                        render={({
+                            field: { onChange, value }
+                        }) => {
+                            return <TextField
+                                type="number"
+                                value={value}
+                                label={labelName}
+                                onChange={(e) => {
+                                    onNumberFieldChange(Number(e.target.value), labelName, onChange)
+                                }}
+                                inputProps={{
+                                    step: "any",
+                                    min: 0
+                                }}
+                                error={errors?.value !== undefined}
+                                helperText={errors?.value?.message || ""}
+                                variant="standard"
+                            />
+                        }}
+                    />
+                </Grid>
+            )
+        })
+    }
+
     return (
         <Grid container spacing={2}>
             <Grid container item xs={4}>
@@ -83,39 +128,7 @@ const TimeDistribution = (props: TimeDistributionProps) => {
                 </Grid>
             </Grid>
             <Grid container item xs={8} spacing={2}>
-                {currSelectedFunc && fields.map((item, paramIndex) => {
-                    const errors = distrErrors?.distribution_params?.[paramIndex]
-                    const labelName = distrFuncWithLabelNames[currSelectedFunc!][paramIndex]
-
-                    return (
-                        <Grid item xs={3} key={`${objectNamePath}_distribution_params_${paramIndex}`}>
-                            <Controller
-                                name={`${objectNamePath}.distribution_params.${paramIndex}.value` as unknown as keyof JsonData}
-                                control={formControl}
-                                rules={{ required: REQUIRED_ERROR_MSG }}
-                                render={({
-                                    field: { onChange, value }
-                                }) => {
-                                    return <TextField
-                                        type="number"
-                                        value={value}
-                                        label={labelName}
-                                        onChange={(e) => {
-                                            onNumberFieldChange(Number(e.target.value), labelName, onChange)
-                                        }}
-                                        inputProps={{
-                                            step: "any",
-                                            min: 0
-                                        }}
-                                        error={errors?.value !== undefined}
-                                        helperText={errors?.value?.message || ""}
-                                        variant="standard"
-                                    />
-                                }}
-                            />
-                        </Grid>
-                    )
-                })}
+                {currSelectedFunc && getDistrFuncWithParams()}
             </Grid>
         </Grid>
     )
