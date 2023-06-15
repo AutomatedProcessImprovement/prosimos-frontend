@@ -56,17 +56,18 @@ const TaskStatistics = (props: TaskStatisticsProps) => {
     }, [data])
 
     const getGroupedValues = (row: any, keyName: string) => {
+        const metric_name = row["Name"]
         const values = [
-            { value: secondsToNearest(row[`Min ${keyName}`] as string), measure: "min" },
-            { value: secondsToNearest(row[`Avg ${keyName}`] as string), measure: "avg" },
-            { value: secondsToNearest(row[`Max ${keyName}`] as string), measure: "max" },
+            { value: secondsToNearest(row[`Min ${keyName}`] as string), measure: "min", key: `${metric_name}_${keyName}_min` },
+            { value: secondsToNearest(row[`Avg ${keyName}`] as string), measure: "avg", key: `${metric_name}_${keyName}_avg` },
+            { value: secondsToNearest(row[`Max ${keyName}`] as string), measure: "max", key: `${metric_name}_${keyName}_max` },
         ]
 
         return (
             <React.Fragment key={`${keyName}_groupedValues`}>
-                {values.map(({ value, measure}) => {
+                {values.map(({ value, measure, key }) => {
                     const CellComponent = (measure === "max") ? TableCellRightBorder : TableCell
-                    return <CellComponent colSpan={2} align="center" >{value}</CellComponent>
+                    return <CellComponent key={key} colSpan={2} align="center" >{value}</CellComponent>
                 })}
             </React.Fragment>
         )
