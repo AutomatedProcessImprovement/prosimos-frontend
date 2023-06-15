@@ -178,7 +178,7 @@ const SimulationParameters = () => {
                         if (taskResponseJson["success"] === false) {
                             setErrorMessage(`Simulation Task: ${taskResponseJson['errorMessage']}`)
                         } else {
-                            setCurrSimulatedOutput(taskResponseJson.TaskResponse)
+                            setCurrSimulatedOutput(taskResponseJson)
 
                             // redirect to results step
                             setActiveStep(TABS.SIMULATION_RESULTS)
