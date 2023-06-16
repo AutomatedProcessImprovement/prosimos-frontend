@@ -48,8 +48,6 @@ const TimePeriodGridItemsWithAdd = <FieldValues,>(props: TimePeriodGridItemsWith
             }
         }
 
-
-
         return (
             <Grid item xs={12} key={`resource_calendar_${index}`} style={newStyle}>
                 <TimePeriodGridItem

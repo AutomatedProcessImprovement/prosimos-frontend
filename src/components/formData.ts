@@ -96,6 +96,7 @@ export interface ResourceCalendar {
     id: string
     name: string
     time_periods: TimePeriod[]
+    workload_ratio?: TimePeriod[]
 }
 
 export interface CalendarMap {

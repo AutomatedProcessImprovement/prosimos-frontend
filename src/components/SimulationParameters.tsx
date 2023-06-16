@@ -216,18 +216,26 @@ const SimulationParameters = () => {
     };
 
     const handleModelTypeChange = (selectedModelType: ModelType, granuleSize?:GranuleSize) => {
+        let calendars = formState.getValues("resource_calendars")
+
         switch(selectedModelType) {
             case ModelType.CRISP: 
                 formState.setValue("granule_size", undefined)
+                calendars.map(calendar => {
+                    calendar.workload_ratio = undefined
+                    return calendar
+                })
             break;
 
             case ModelType.FUZZY:
-                let calendars = formState.getValues("resource_calendars")
                 calendars.map(calendar => {
-                    return calendar.time_periods.map(timePeriod => {
+                    calendar.workload_ratio = calendar.time_periods
+                    calendar.time_periods.map(timePeriod => {
                         return timePeriod.probability = timePeriod.probability || 1
                     })
+                    return calendar
                 })
+                formState.setValue("resource_calendars", calendars)
                 formState.setValue("granule_size", granuleSize)
             break;
         }
