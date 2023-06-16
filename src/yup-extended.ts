@@ -77,7 +77,7 @@ export const distributionValidation = {
       })
     )
     .required()
-    .min(2, "At least two required parameters should be provided")
+    .min(1, "At least two required parameters should be provided")
 }
 
 const stringSchema = yup.string()

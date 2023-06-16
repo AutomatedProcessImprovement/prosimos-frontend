@@ -168,21 +168,24 @@ const SimulationParameters = () => {
             getTaskByTaskId(pendingTaskId)
                 .then((result: any) => {
                     const dataJson = result.data
-
                     if (dataJson.TaskStatus === "SUCCESS") {
                         setIsPollingEnabled(false)
-                        setCurrSimulatedOutput(dataJson.TaskResponse)
-
-                        // redirect to results step
-                        setActiveStep(TABS.SIMULATION_RESULTS)
 
                         // hide info message
                         onSnackbarClose()
+
+                        const taskResponseJson = dataJson.TaskResponse
+                        if (taskResponseJson["success"] === false) {
+                            setErrorMessage(`Simulation Task: ${taskResponseJson['errorMessage']}`)
+                        } else {
+                            setCurrSimulatedOutput(taskResponseJson)
+
+                            // redirect to results step
+                            setActiveStep(TABS.SIMULATION_RESULTS)
+                        }
                     }
                     else if (dataJson.TaskStatus === "FAILURE") {
                         setIsPollingEnabled(false)
-
-                        console.log(dataJson)
                         setErrorMessage("Simulation Task failed")
                     }
                 })
