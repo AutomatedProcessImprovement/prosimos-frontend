@@ -2,6 +2,7 @@ import * as yup from "yup";
 import { AnyObject, Maybe } from "yup/lib/types";
 import moment from "moment";
 import { REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, UNIQUE_KEYS } from "./components/validationMessages";
+import { DISTR_FUNC, getNumOfParamsPerDistr } from "./components/distributions/constants";
 
 const isStrArrUnique = (wordsArr: string[] | undefined): boolean => {
   // returns whether the provided array of string contains only unique words
@@ -68,16 +69,20 @@ yup.addMethod(yup.array, "uniquePriorityLevel", function () { return validateArr
 // quarantees the uniqueness of "id" property per array
 yup.addMethod(yup.array, "uniqueId", function () { return validateArrayUniqueness(this, "id", UNIQUE_KEYS("Id properties")) });
 
+const valueArray = yup.array()
+  .of(
+    yup.object().shape({
+      value: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG)
+    })
+  )
+  .required()
+
 export const distributionValidation = {
   distribution_name: yup.string().required(REQUIRED_ERROR_MSG),
-  distribution_params: yup.array()
-    .of(
-      yup.object().shape({
-        value: yup.number().typeError(SHOULD_BE_NUMBER_MSG).required(REQUIRED_ERROR_MSG)
-      })
-    )
-    .required()
-    .min(1, "At least two required parameters should be provided")
+  distribution_params: yup.mixed().when('distribution_name', (distr_name, schema) => {
+    const valueDistr = distr_name as DISTR_FUNC
+    return valueArray.min(getNumOfParamsPerDistr(valueDistr), `Missed required parameters for ${distr_name}`)
+  })
 }
 
 const stringSchema = yup.string()

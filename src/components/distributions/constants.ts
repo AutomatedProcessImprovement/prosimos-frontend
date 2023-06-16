@@ -37,3 +37,12 @@ export const distrFuncWithLabelNames: { [key in DISTR_FUNC]: any[] } = {
     // TODO: to be supported later
     // [DISTR_FUNC.triang]: [MODE_SEC, MIN_SEC, MAX_SEC]
 }
+
+export const getNumOfParamsPerDistr = (distr_func: DISTR_FUNC) => {
+    const paramsArr = distrFuncWithLabelNames[distr_func]
+    if (paramsArr === undefined) {
+        return 0
+    }
+
+    return paramsArr.length
+}

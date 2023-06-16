@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Grid, TextField } from "@mui/material";
+import { Grid, TextField, FormHelperText } from "@mui/material";
 import { Controller, FieldError, useFieldArray, UseFormReturn } from "react-hook-form";
 import { JsonData } from "../formData";
 import { REQUIRED_ERROR_MSG } from "../validationMessages";
 import DistrFuncSelect from "./DistrFuncSelect";
-import { AllowedObjectName, AllowedDistrParamsName, DISTR_FUNC, distrFuncWithLabelNames, MODE_SEC } from "./constants";
+import { AllowedObjectName, AllowedDistrParamsName, DISTR_FUNC, distrFuncWithLabelNames, MODE_SEC, getNumOfParamsPerDistr } from "./constants";
 
 interface TimeDistributionProps {
     formState: UseFormReturn<JsonData, object>
@@ -32,7 +32,7 @@ const TimeDistribution = (props: TimeDistributionProps) => {
         setCurrSelectedFunc(newDistrFunc)
 
         // calculate the number of parameters
-        const newDefaultParamsLength = distrFuncWithLabelNames[newDistrFunc].length
+        const newDefaultParamsLength = getNumOfParamsPerDistr(newDistrFunc)
         const newDefaultParams = new Array(newDefaultParamsLength).fill(0)
         replace(newDefaultParams)
 
@@ -81,7 +81,6 @@ const TimeDistribution = (props: TimeDistributionProps) => {
                     <Controller
                         name={`${objectNamePath}.distribution_params.${paramIndex}.value` as unknown as keyof JsonData}
                         control={formControl}
-                        rules={{ required: REQUIRED_ERROR_MSG }}
                         render={({
                             field: { onChange, value }
                         }) => {
@@ -127,8 +126,15 @@ const TimeDistribution = (props: TimeDistributionProps) => {
                     />
                 </Grid>
             </Grid>
-            <Grid container item xs={8} spacing={2}>
-                {currSelectedFunc && getDistrFuncWithParams()}
+            <Grid container item xs={8}>
+                <Grid container item spacing={2}>
+                    {currSelectedFunc && getDistrFuncWithParams()}
+                </Grid>
+                <Grid>
+                    <FormHelperText
+                        error={distrErrors?.distribution_params !== undefined}
+                    >{(distrErrors?.distribution_params as any)?.message || " "}</FormHelperText>
+                </Grid>
             </Grid>
         </Grid>
     )
