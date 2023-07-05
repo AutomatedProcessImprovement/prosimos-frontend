@@ -1,15 +1,17 @@
 import { Grid } from "@mui/material";
-import { FieldArrayPath, FieldArrayWithId } from "react-hook-form";
 import { UseFormReturn } from "react-hook-form";
 import AddButtonBase from "../toolbar/AddButtonBase";
 import TimePeriodGridItem from "./TimePeriodGridItem";
 import { List, AutoSizer } from 'react-virtualized';
 import { useEffect, useState, useRef } from "react";
+import { ModelType } from "./ModelType";
 
 interface TimePeriodGridItemsWithAddProps<FieldValues> {
-    fields: FieldArrayWithId<FieldValues, FieldArrayPath<FieldValues>, "key">[]
+    fields: any//FieldArrayWithId<FieldValues, FieldArrayPath<FieldValues>, "key">[]
     formState: UseFormReturn<FieldValues, object>
     objectFieldNamePart: keyof FieldValues
+    modelType?: ModelType
+    intersections?: any
     onTimePeriodRemove: (index: number) => void
     onTimePeriodAdd: () => void
 }
@@ -36,17 +38,29 @@ const TimePeriodGridItemsWithAdd = <FieldValues,>(props: TimePeriodGridItemsWith
     const renderRow = ({ index, key, style }: any) => {
         const isWithoutDeleteButton = (fields.length === 1 && index === 0)
         const item = fields[index]
+        let newStyle = style
+
+        if (item.isDisplayed === false) {
+            return null;
+        } else if (item.isDisplayed ) {
+            newStyle = {
+                ...style,
+                top: item.displayIndex * 70
+            }
+        }
 
         return (
-            <Grid item xs={12} key={`resource_calendar_${index}`} style={style}>
+            <Grid item xs={12} key={`resource_calendar_${index}`} style={newStyle}>           
                 <TimePeriodGridItem
                     key={item.key}
                     formState={props.formState}
+                    modelType={props.modelType}
                     objectFieldName={`${objectFieldNamePart}.${index}`}
                     isWithDeleteButton={!isWithoutDeleteButton}
                     timePeriodIndex={index}
                     onDelete={props.onTimePeriodRemove}
-                />
+                    intersections={props.intersections ? props.intersections[index] : null}
+                />   
             </Grid>
         )
     };

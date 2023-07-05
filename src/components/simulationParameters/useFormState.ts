@@ -7,11 +7,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { MIN_LENGTH_REQUIRED_MSG, REQUIRED_ERROR_MSG, SHOULD_BE_NUMBER_MSG, SUMMATION_ONE_MSG, INVALID_TIME_FORMAT } from "./../validationMessages";
 import { round } from "../../helpers/timeConversions";
 import yup, { distributionValidation, stringOrNumberArr } from "../../yup-extended";
+import { ModelType } from "../calendars/ModelType";
 
 const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsFromModel?: EventsFromModel, jsonData?: JsonData) => {
     const [data, setData] = useState({})
 
     const taskValidationSchema = useMemo(() => (yup.object({
+        model_type: yup.string(),
         resource_profiles: yup.array()
             .of(
                 yup.object({
@@ -95,6 +97,11 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                                 to: yup.string().required(REQUIRED_ERROR_MSG),
                                 beginTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
                                 endTime: yup.string().timeFormat(INVALID_TIME_FORMAT),
+                                probability: yup.number().when('model_type', {
+                                    is: ModelType.FUZZY,
+                                    then: yup.number().required(REQUIRED_ERROR_MSG),
+                                    otherwise: yup.number().strip(),
+                                }),
                             })
                         )
                         .required()
@@ -228,7 +235,11 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                         .min(1, MIN_LENGTH_REQUIRED_MSG("condition"))
                 })
             )
-            .uniquePriorityLevel()
+            .uniquePriorityLevel(),
+        granule_size: yup.object({
+            value: yup.number(),
+            time_unit: yup.string()
+        })
     })), []);
 
     const formState = useForm<JsonData>({

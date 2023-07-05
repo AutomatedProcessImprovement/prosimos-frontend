@@ -1,21 +1,36 @@
-import { Grid, MenuItem, TextField, Typography } from "@mui/material"
-import { useState, useEffect } from "react"
+import { Button, Grid, MenuItem, Select, TextField, Typography } from "@mui/material"
+import { useState, useEffect, Dispatch, SetStateAction } from "react"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
-import TimePeriodGridItemsWithAdd from "./calendars/TimePeriodGridItemsWithAdd"
-import { JsonData } from './formData'
+import { GranuleSize, JsonData } from './formData'
 import { defaultTemplateSchedule } from './simulationParameters/defaultValues'
 import { MIN_LENGTH_REQUIRED_MSG } from './validationMessages'
-import { defaultWorkWeekTimePeriod } from "./simulationParameters/defaultValues";
 import DeleteButtonToolbar from "./toolbar/DeleteButtonToolbar"
 import AddButtonToolbar from "./toolbar/AddButtonToolbar"
 import CalendarNameDialog from "./profiles/CalendarNameDialog"
 import { useSharedStyles } from "./sharedHooks/useSharedStyles"
 import { collectAllAssignedCalendars } from "./calendars/assignedCalendarsCollector"
+import { ModelType } from "./calendars/ModelType"
+import ModelTypeSelect from "./calendars/ModelTypeSelect"
+import { ConfirmationDialog } from "./calendars/ConfirmationDialog"
+import CalendarFuzzyGranuleDialog from "./calendars/CalendarFuzzyGranuleDialog"
+import { TimeUnit, convertTime, DAYS_OF_WEEK } from "../helpers/timeConversions"
+import WeekdayFilterCheckbox from "./calendars/WeekdayFilterCheckbox"
+import TimePeriodList from "./calendars/TimePeriodList"
+import ButtonToolbarBase from "./toolbar/ButtonToolbarBase"
+import EditIcon from '@mui/icons-material/Edit';
+import WorkloadRatioList from "./calendars/WorkloadRatioList"
 
+export enum CalendarType {
+    TimePeriods = "time_periods",
+    WorkloadRatio = "workload_ratio"
+}
 
 interface ResourceCalendarsProps {
     formState: UseFormReturn<JsonData, object>
+    modelType: ModelType
+    handleModelTypeChange: (modelType: ModelType, granuleSize?:GranuleSize) => void
     setErrorMessage: (value: string) => void
+    setIsResourceCalendarsTimePeriodsValid: Dispatch<SetStateAction<boolean>>
 }
 
 const ResourceCalendars = (props: ResourceCalendarsProps) => {
@@ -25,12 +40,19 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
     const [currCalendarKey, setCurrCalendarKey] = useState<string>("")
     const [isNameDialogOpen, setIsNameDialogOpen] = useState<boolean>(false)
     const [assignedCalendars, setAssignedCalendars] = useState<Set<string>>(new Set())
+    const [weekdayFilter, setWeekdayFilter] = useState<Array<string>>(DAYS_OF_WEEK);
+    const [nextModelType, setNextModelType] = useState<ModelType>()
+    const [isChangeModelTypeDialogOpen, setIsChangeModelTypeDialogOpen] = useState(false);
+    const [calendarType, setCalendarType] = useState<CalendarType>(CalendarType.TimePeriods)
 
     const { fields: allCalendars, prepend: prependCalendarFields, remove: removeCalendarsFields } = useFieldArray({
         keyName: 'key',
         control: formControl,
         name: "resource_calendars"
     })
+
+    const {modelType, handleModelTypeChange} = props
+    
 
     const onNameDialogOpen = () => {
         setIsNameDialogOpen(true)
@@ -40,7 +62,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
         const usedCalendars = collectAllAssignedCalendars(getValues("resource_profiles"))
         if (usedCalendars !== assignedCalendars) {
             setAssignedCalendars(usedCalendars)
-        }
+        }        
     }, [])
 
     useEffect(() => {
@@ -92,9 +114,73 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
         setIsNameDialogOpen(false)
     };
 
+    const onModelTypeChangeDialogOpen = (event:any) => {
+        setIsChangeModelTypeDialogOpen(true)
+        const nextModelType = event.target.value
+        setNextModelType(nextModelType) 
+    }
+
+    const onModelTypeChangeDialogClose = () => {
+        setIsChangeModelTypeDialogOpen(false)
+    }
+
+    const handleWeekdayFilterChange = (event: any) => {
+        const selected = event.target.value as string[];
+        if (selected.length > 0) {
+            const sortedSelected = DAYS_OF_WEEK.filter(day => selected.includes(day));
+            setWeekdayFilter(sortedSelected);
+        }
+    }
+
     const handleCalendarSelectChange = (event: any) => {
         const selectedCalendarIndex = event.target.value
         updateCurrCalendar(Number(selectedCalendarIndex))
+    }
+
+    const isValidTimeInSeconds = (timeInSeconds: number, oneDayInSeconds: number): boolean => {
+        return timeInSeconds > 0 && timeInSeconds <= oneDayInSeconds && oneDayInSeconds % timeInSeconds === 0;
+    }
+    
+    const createGranuleSize = (timeUnit: string, timeValue: number): GranuleSize => {
+        return {
+            time_unit: timeUnit, 
+            value: timeValue
+        };
+    }
+
+    const handleTimeAndValueSubmission = (timeUnit: string, timeValue: number) => {
+        const titleCaseTimeUnit = timeUnit.charAt(0).toUpperCase() + timeUnit.slice(1).toLowerCase();
+
+        const timeInSeconds = convertTime(timeValue, TimeUnit[titleCaseTimeUnit as keyof typeof TimeUnit], TimeUnit.Seconds);
+        const timeInDay = TimeUnit.Days
+
+        if(isValidTimeInSeconds(timeInSeconds, timeInDay)) {
+            const granuleSize = createGranuleSize(timeUnit, timeValue);
+            handleModelTypeChange(nextModelType || ModelType.FUZZY, granuleSize)
+            setIsChangeModelTypeDialogOpen(false)
+            setCalendarType(CalendarType.TimePeriods)
+        } 
+        else {
+            setErrorMessage("Invalid granule size. The size should be greater than 1 second, less than 1 day, and 1 day should be divisible by this size without a remainder.")
+        }
+    } 
+
+    const handleCalendarTypeToggle = () => {
+        setCalendarType(prevType =>
+            prevType === CalendarType.TimePeriods
+              ? CalendarType.WorkloadRatio
+              : CalendarType.TimePeriods
+          );
+    }
+
+    const handleCrispSubmission = (nextModelType: ModelType) => {
+        handleModelTypeChange(nextModelType)
+        setIsChangeModelTypeDialogOpen(false)
+    }
+
+    const handleEditGranuleChangeButtonClick = () => {
+        setNextModelType(ModelType.FUZZY)
+        setIsChangeModelTypeDialogOpen(true)
     }
 
     const updateCurrCalendar = (index?: number) => {
@@ -112,13 +198,13 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
             const calendarKey = allCalendars[currIndex]?.key || ""
             setCurrCalendarKey(calendarKey)
         }
-    }
+    } 
 
     return (
         <Grid container width="100%" spacing={2}>
             <Grid container item xs={12}>
-                <Grid container item xs={8} className={classes.centeredGrid}>
-                    <Grid item xs={8}>
+                <Grid container item xs={3}>
+                    <Grid item xs={10}>
                         <TextField
                             sx={{ width: "100%" }}
                             label="Calendar"
@@ -139,6 +225,35 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
                         </TextField>
                     </Grid>
                 </Grid>
+                <Grid container item xs={2}>
+                    <Grid item xs={9} className={classes.centeredGrid}>   
+                    <WeekdayFilterCheckbox
+                        label="Weekday"
+                        value={weekdayFilter}
+                        onChange={handleWeekdayFilterChange}
+                    />           
+                    </Grid>
+                </Grid>
+                <Grid container item xs={3} spacing={2}>
+                    <Grid item xs={4} className={classes.centeredGrid}>   
+                        <ModelTypeSelect
+                            label="Model type"
+                            value={modelType}
+                            onChange={onModelTypeChangeDialogOpen}
+                        />             
+                    </Grid>
+                    { modelType === ModelType.FUZZY &&
+                    <Grid item xs={6} className={classes.centeredGrid}>   
+                            <ButtonToolbarBase
+                                onClick={handleEditGranuleChangeButtonClick}
+                                labelName="Edit granule size"
+                                startIcon={<EditIcon/>}
+                                variant="text"
+                                tooltipText="Edit granule size"
+                            />
+                    </Grid>}
+                </Grid>
+
                 <Grid item xs={2} className={classes.centeredGrid}>
                     <DeleteButtonToolbar
                         onClick={onDeleteCalendars}
@@ -161,13 +276,38 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
                     </Typography>
                 </Grid>
                 : <Grid item xs={12} sx={{ p: 2 }}>
-                    <TimePeriodList
-                        key={`resource_calendars.${currCalendarKey}`}
-                        formState={formState}
-                        setErrorMessage={setErrorMessage}
-                        calendarIndex={currCalendarIndex}
-                        calendarKey={currCalendarKey}
-                    />
+                    {modelType === ModelType.FUZZY && <Select
+                        style={{marginBottom:"1rem", fontSize:"20px"}}
+                        value={calendarType}
+                        variant="standard"
+                        required
+                        onChange={handleCalendarTypeToggle}
+                        >
+                        <MenuItem value={CalendarType.TimePeriods}>Availability Probabilities Calendar</MenuItem>
+                        <MenuItem value={CalendarType.WorkloadRatio}>Workload Ratio Calendar</MenuItem>
+                    </Select>}
+
+                    {calendarType === CalendarType.TimePeriods &&
+                        <TimePeriodList
+                            key={`resource_calendars.${currCalendarKey}`}
+                            formState={formState}
+                            modelType={modelType}
+                            weekdayFilter={weekdayFilter}
+                            calendarIndex={currCalendarIndex}
+                            calendarKey={currCalendarKey}
+                            setIsResourceCalendarsTimePeriodsValid={props.setIsResourceCalendarsTimePeriodsValid}
+                        />}
+                        
+                    {modelType === ModelType.FUZZY && calendarType === CalendarType.WorkloadRatio &&
+                        <WorkloadRatioList
+                            key={`resource_calendars.${currCalendarKey}`}
+                            formState={formState}
+                            modelType={modelType}
+                            weekdayFilter={weekdayFilter}
+                            calendarIndex={currCalendarIndex}
+                            calendarKey={currCalendarKey}
+                            setIsResourceCalendarsTimePeriodsValid={props.setIsResourceCalendarsTimePeriodsValid}
+                        />}
                 </Grid>
             }
             {isNameDialogOpen && <CalendarNameDialog
@@ -177,48 +317,25 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
                 dialogTitle="Create Calendar"
                 isDialogTextShown={false}
             />}
+            {isChangeModelTypeDialogOpen && nextModelType === ModelType.CRISP && <ConfirmationDialog 
+                modalOpen={isChangeModelTypeDialogOpen}
+                message="Are you sure you want to change model type?"
+                onConfirm={ () => {
+                    setCalendarType(CalendarType.TimePeriods)
+                    handleCrispSubmission(nextModelType) 
+                }}
+                onCancel={onModelTypeChangeDialogClose}
+            />}
+            {isChangeModelTypeDialogOpen && nextModelType === ModelType.FUZZY && <CalendarFuzzyGranuleDialog 
+                modalOpen={isChangeModelTypeDialogOpen}
+                message="Specify granule size for the Fuzzy model."
+                onConfirm={handleTimeAndValueSubmission}
+                onCancel={onModelTypeChangeDialogClose}
+                currentTimeUnit={formState.getValues("granule_size.time_unit")}
+                currentTimeValue={formState.getValues("granule_size.value")}
+            />}
         </Grid>
     )
-}
-
-interface TimePeriodListProps extends ResourceCalendarsProps {
-    calendarIndex: number
-    calendarKey: string
-}
-
-const TimePeriodList = (props: TimePeriodListProps) => {
-    const { formState, calendarIndex, calendarKey } = props
-    const { control } = formState
-    const [index, setIndex] = useState<number>(calendarIndex)
-
-    const { fields: currTimePeriods, append, remove } = useFieldArray({
-        keyName: 'key',
-        control: control,
-        name: `resource_calendars.${index}.time_periods`
-    })
-
-    useEffect(() => {
-        if (index !== calendarIndex) {
-            setIndex(calendarIndex)
-        }
-    }, [calendarIndex, index])
-
-    const onTimePeriodRemove = (index: number) => {
-        remove(index)
-    };
-
-    const onTimePeriodAdd = () => {
-        append(defaultWorkWeekTimePeriod)
-    };
-
-    return <TimePeriodGridItemsWithAdd
-        key={`resource_calendars.${calendarKey}.time_periods`}
-        fields={currTimePeriods}
-        formState={formState}
-        objectFieldNamePart={`resource_calendars.${calendarIndex}.time_periods` as unknown as keyof JsonData}
-        onTimePeriodRemove={onTimePeriodRemove}
-        onTimePeriodAdd={onTimePeriodAdd}
-    />
 }
 
 export default ResourceCalendars;

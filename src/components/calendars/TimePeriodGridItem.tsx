@@ -1,4 +1,4 @@
-import { IconButton } from "@mui/material";
+import { IconButton, TextField, Badge } from "@mui/material";
 import { Grid } from "@mui/material";
 import { Controller, Path, UseFormReturn } from "react-hook-form";
 import { REQUIRED_ERROR_MSG } from "../validationMessages";
@@ -6,6 +6,10 @@ import TimePickerController from "./TimePickerController";
 import WeekdaySelect from "./WeekdaySelect";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useState, useEffect } from "react";
+import { ModelType } from "./ModelType";
+import CancelIcon from '@mui/icons-material/Cancel';
+import Tooltip from '@material-ui/core/Tooltip';
+import { TimePeriod } from "../formData";
 
 interface TimePeriodGridItemProps<FieldValues> {
     formState: UseFormReturn<FieldValues, object>
@@ -13,11 +17,14 @@ interface TimePeriodGridItemProps<FieldValues> {
     timePeriodIndex?: number
     isWithDeleteButton: boolean
     onDelete?: (index: number) => void
+    modelType?: ModelType
+    intersections?: Array<TimePeriod>
 }
 
 const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldValues>) => {
-    const { formState: { control: formControl, formState: { errors } }, objectFieldName, isWithDeleteButton, timePeriodIndex, onDelete } = props
+    const { formState: { control: formControl, formState: { errors } },objectFieldName, isWithDeleteButton, timePeriodIndex, onDelete, modelType } = props
     const [currErrors, setCurrErrors] = useState({})
+    const columnWidth = modelType === ModelType.CRISP ? 2.5 : 2
 
     useEffect(() => {
         if (Object.keys(errors).length !== 0) {
@@ -38,7 +45,7 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
 
     return (
         <Grid container spacing={2}>
-            <Grid item xs={2.5}>
+            <Grid item xs={columnWidth}>
                 <Controller
                     name={`${objectFieldName}.from` as Path<FieldValues>}
                     control={formControl}
@@ -52,7 +59,7 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
                     )}
                 />
             </Grid>
-            <Grid item xs={2.5}>
+            <Grid item xs={columnWidth}>
                 <Controller
                     name={`${objectFieldName}.to` as Path<FieldValues>}
                     control={formControl}
@@ -66,7 +73,7 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
                     )}
                 />
             </Grid>
-            <Grid item xs={2.5}>
+            <Grid item xs={columnWidth}>
                 <TimePickerController
                     name={`${objectFieldName}.beginTime` as Path<FieldValues>}
                     formState={props.formState}
@@ -74,7 +81,7 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
                     fieldError={(currErrors as any)?.beginTime}
                 />
             </Grid>
-            <Grid item xs={2.5}>
+            <Grid item xs={columnWidth}>
                 <TimePickerController
                     name={`${objectFieldName}.endTime` as Path<FieldValues>}
                     formState={props.formState}
@@ -82,6 +89,31 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
                     fieldError={(currErrors as any)?.endTime}
                 />
             </Grid>
+            
+            { modelType === ModelType.FUZZY && 
+            <Grid item xs={columnWidth}>
+                <Controller
+                    name={`${objectFieldName}.probability` as Path<FieldValues>}
+                    control={formControl}
+                    render={({ field: {onChange, value} }) => (
+                        <TextField
+                            type="number"
+                            value={value}
+                            label="Probability"
+                            inputProps={{
+                                step: "0.00001",
+                                min: "0",
+                                max: "1"
+                            }}  
+                            onChange={(e) => {
+                                onChange(Number(e.target.value))
+                            }}        
+                            variant="standard"    
+                            fullWidth              
+                        />
+                    )}
+                />
+            </Grid>}
             {isWithDeleteButton && <Grid item xs={2} style={{
                 textAlign: 'center',
                 display: 'flex',
@@ -94,6 +126,15 @@ const TimePeriodGridItem = <FieldValues,>(props: TimePeriodGridItemProps<FieldVa
                 >
                     <DeleteIcon />
                 </IconButton>
+                {props.intersections && props.intersections.length !== 0 && <Tooltip
+                    title={`This time period has intersections:\n${JSON.stringify(props.intersections)}`}
+                >
+                    <Badge
+                        style={{marginLeft:"1rem"}}
+                        badgeContent={<CancelIcon color="error" ></CancelIcon>}
+                        overlap="circular">
+                    </Badge>
+                </Tooltip>  }
             </Grid>}
         </Grid>
     )

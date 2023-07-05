@@ -8,7 +8,8 @@ export const defaultWorkWeekTimePeriod = {
     from: "MONDAY",
     to: "FRIDAY",
     beginTime: "09:00:00.000",
-    endTime: "17:00:00.000"
+    endTime: "17:00:00.000",
+    probability: 1
 }
 
 export const defaultTemplateSchedule = (withWeekends: boolean, userDefinedName?: string) => {
@@ -19,7 +20,8 @@ export const defaultTemplateSchedule = (withWeekends: boolean, userDefinedName?:
             from: "SATURDAY",
             to: "SATURDAY",
             beginTime: "09:00:00.000",
-            endTime: "13:00:00.000"
+            endTime: "13:00:00.000",
+            probability: 1
         })
     }
 

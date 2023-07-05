@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import moment from 'moment';
 import { useTheme } from '@material-ui/core/styles';
 import { AlertColor, Badge, Button, ButtonGroup, Grid, Step, StepButton, StepIcon, Stepper, Theme } from '@mui/material';
-import { BatchProcessing, FiringRule, JsonData, ScenarioProperties } from './formData';
+import { BatchProcessing, FiringRule, GranuleSize, JsonData, ScenarioProperties, TimePeriod } from './formData';
 import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
 import ResourcePools from './ResourcePools';
 import ResourceCalendars from './ResourceCalendars';
@@ -41,6 +41,8 @@ import { ReactComponent as BatchIcon } from '../icons/batch.svg';
 import { ReactComponent as PrioritisationIcon } from '../icons/prioritisation.svg';
 import { ReactComponent as SimResultsIcon } from '../icons/sim_results.svg';
 import { ReactComponent as CaseAttributesIcon } from '../icons/case_attr.svg';
+import { ModelType } from './calendars/ModelType';
+import { hasIntersection } from '../helpers/timeConversions';
 
 const useStyles = makeStyles((theme: Theme) => ({
     simParamsGrid: {
@@ -105,6 +107,8 @@ const SimulationParameters = () => {
     const [currSimulatedOutput, setCurrSimulatedOutput] = useState<SimulationResult | null>(null)
     const [isPollingEnabled, setIsPollingEnabled] = useState(false)
     const [pendingTaskId, setPendingTaskId] = useState("")
+    const [modelType, setModelType] = useState(ModelType.CRISP)
+
 
     const scenarioState = useForm<ScenarioProperties>({
         mode: "onBlur",
@@ -125,6 +129,7 @@ const SimulationParameters = () => {
     const [isScenarioParamsValid, setIsScenarioParamsValid] = useState(true)
     const { isPrioritisationRulesValid, updateErrors, removeErrorByPath } = usePrioritisationErrors(getValues("case_attributes"), getValues("prioritisation_rules"))
     const { visibleTabs, getIndexOfTab } = useTabVisibility(eventsFromModel)
+    const [isResourceCalendarsTimePeriodsValid, setIsResourceCalendarsTimePeriodsValid] = useState(true)
 
     const { onUploadNewModel } = useNewModel()
 
@@ -137,8 +142,20 @@ const SimulationParameters = () => {
             console.log(errors)
             setErrorMessage("There are validation errors")
         }
+
+        if(isResourceCalendarsTimePeriodsValid === false || areAllTimePeriodsValid() === false) {
+            formState.setError(`resource_calendars`, {
+                message: `Intersection detected, please correct the time periods`,
+            })
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isSubmitted, submitCount]);
+
+    useEffect(() => {
+        if (jsonData && jsonData.model_type) {
+            setModelType(jsonData.model_type);
+        } 
+    }, [jsonData]);
 
     useEffect(() => {
         if (missedElemNum > 0) {
@@ -206,6 +223,59 @@ const SimulationParameters = () => {
         const fileDownloadUrl = URL.createObjectURL(blob)
         setFileDownloadUrl(fileDownloadUrl)
     };
+
+    const handleModelTypeChange = (selectedModelType: ModelType, granuleSize?:GranuleSize) => {
+        let calendars = formState.getValues("resource_calendars")
+
+        switch(selectedModelType) {
+            case ModelType.CRISP: 
+                formState.setValue("granule_size", undefined)
+                calendars.map(calendar => {
+                    calendar.workload_ratio = undefined
+                    return calendar
+                })
+            break;
+
+            case ModelType.FUZZY:
+                calendars.map(calendar => {
+                    calendar.workload_ratio = calendar.time_periods
+                    calendar.time_periods.map(timePeriod => {
+                        return timePeriod.probability = timePeriod.probability || 1
+                    })
+                    return calendar
+                })
+                formState.setValue("resource_calendars", calendars)
+                formState.setValue("granule_size", granuleSize)
+            break;
+        }
+        setModelType(selectedModelType)
+        formState.setValue("model_type", selectedModelType)
+    }
+
+    const areAllTimePeriodsValid = () => {
+        const checkCalendarIntersections = (timePeriods:TimePeriod[]) => {
+            for(let i = 0; i < timePeriods.length; i++) {        
+                for(let j = i + 1; j < timePeriods.length; j++) {
+                    if(hasIntersection(timePeriods[i], timePeriods[j])) {
+                        return false
+                    }
+                }
+            }
+            return true
+        }
+
+        let calendars = formState.getValues("resource_calendars")
+        if(calendars) {
+            for(let calendar of calendars) {
+                if (!checkCalendarIntersections(calendar.time_periods) || 
+                    !checkCalendarIntersections(calendar.workload_ratio || [])) {
+                    return false
+                }
+            }
+        }
+
+        return true
+    }
 
     const getBlobBasedOnExistingInput = (): Blob => {
         const values = getValues() as JsonData
@@ -292,6 +362,9 @@ const SimulationParameters = () => {
             case TABS.RESOURCE_CALENDARS:
                 return <ResourceCalendars
                     formState={formState}
+                    modelType={modelType}
+                    setIsResourceCalendarsTimePeriodsValid={setIsResourceCalendarsTimePeriodsValid}
+                    handleModelTypeChange={handleModelTypeChange}
                     setErrorMessage={setErrorMessage}
                 />
             case TABS.RESOURCES:
@@ -451,12 +524,17 @@ const SimulationParameters = () => {
         setIsScenarioParamsValid(isScenarioValid)
 
         const isJsonParamsValid = Object.keys(errors)?.length === 0
-
         if (!isJsonParamsValid || !isScenarioValid || !isPrioritisationRulesValid) {
             // scenario params or json params 
             // or values used for prioritisation rules 
             // or all of them are not valid
             return;
+        }
+
+        if(isResourceCalendarsTimePeriodsValid === false || areAllTimePeriodsValid() === false) {
+            formState.setError(`resource_calendars`, {
+                message: `Intersection detected, please correct the time periods`,
+            })
         }
 
         setInfoMessage("Simulation started...")
