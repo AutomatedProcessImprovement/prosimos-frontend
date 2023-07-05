@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import moment from 'moment';
 import { useTheme } from '@material-ui/core/styles';
 import { AlertColor, Badge, Button, ButtonGroup, Grid, Step, StepButton, StepIcon, Stepper, Theme } from '@mui/material';
-import { BatchProcessing, FiringRule, GranuleSize, JsonData, ScenarioProperties } from './formData';
+import { BatchProcessing, FiringRule, GranuleSize, JsonData, ScenarioProperties, TimePeriod } from './formData';
 import AllGatewaysProbabilities from './gateways/AllGatewaysProbabilities';
 import ResourcePools from './ResourcePools';
 import ResourceCalendars from './ResourceCalendars';
@@ -42,6 +42,7 @@ import { ReactComponent as PrioritisationIcon } from '../icons/prioritisation.sv
 import { ReactComponent as SimResultsIcon } from '../icons/sim_results.svg';
 import { ReactComponent as CaseAttributesIcon } from '../icons/case_attr.svg';
 import { ModelType } from './calendars/ModelType';
+import { hasIntersection } from '../helpers/timeConversions';
 
 const useStyles = makeStyles((theme: Theme) => ({
     simParamsGrid: {
@@ -109,8 +110,6 @@ const SimulationParameters = () => {
     const [modelType, setModelType] = useState(ModelType.CRISP)
 
 
-
-
     const scenarioState = useForm<ScenarioProperties>({
         mode: "onBlur",
         defaultValues: {
@@ -130,6 +129,7 @@ const SimulationParameters = () => {
     const [isScenarioParamsValid, setIsScenarioParamsValid] = useState(true)
     const { isPrioritisationRulesValid, updateErrors, removeErrorByPath } = usePrioritisationErrors(getValues("case_attributes"), getValues("prioritisation_rules"))
     const { visibleTabs, getIndexOfTab } = useTabVisibility(eventsFromModel)
+    const [isResourceCalendarsTimePeriodsValid, setIsResourceCalendarsTimePeriodsValid] = useState(true)
 
     const { onUploadNewModel } = useNewModel()
 
@@ -141,6 +141,12 @@ const SimulationParameters = () => {
         if (!isScenarioParamsValid || !isJsonParamsValid) {
             console.log(errors)
             setErrorMessage("There are validation errors")
+        }
+
+        if(isResourceCalendarsTimePeriodsValid === false || areAllTimePeriodsValid() === false) {
+            formState.setError(`resource_calendars`, {
+                message: `Intersection detected, please correct the time periods`,
+            })
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isSubmitted, submitCount]);
@@ -243,6 +249,31 @@ const SimulationParameters = () => {
         formState.setValue("model_type", selectedModelType)
     }
 
+    const areAllTimePeriodsValid = () => {
+        const checkCalendarIntersections = (timePeriods:TimePeriod[]) => {
+            for(let i = 0; i < timePeriods.length; i++) {        
+                for(let j = i + 1; j < timePeriods.length; j++) {
+                    if(hasIntersection(timePeriods[i], timePeriods[j])) {
+                        return false
+                    }
+                }
+            }
+            return true
+        }
+
+        let calendars = formState.getValues("resource_calendars")
+        if(calendars) {
+            for(let calendar of calendars) {
+                if (!checkCalendarIntersections(calendar.time_periods) || 
+                    !checkCalendarIntersections(calendar.workload_ratio || [])) {
+                    return false
+                }
+            }
+        }
+
+        return true
+    }
+
     const getBlobBasedOnExistingInput = (): Blob => {
         const values = getValues() as JsonData
         const newTransformedValuesAfterBatching = transformBetweenOperations(values)
@@ -329,6 +360,7 @@ const SimulationParameters = () => {
                 return <ResourceCalendars
                     formState={formState}
                     modelType={modelType}
+                    setIsResourceCalendarsTimePeriodsValid={setIsResourceCalendarsTimePeriodsValid}
                     handleModelTypeChange={handleModelTypeChange}
                     setErrorMessage={setErrorMessage}
                 />
@@ -489,12 +521,17 @@ const SimulationParameters = () => {
         setIsScenarioParamsValid(isScenarioValid)
 
         const isJsonParamsValid = Object.keys(errors)?.length === 0
-
         if (!isJsonParamsValid || !isScenarioValid || !isPrioritisationRulesValid) {
             // scenario params or json params 
             // or values used for prioritisation rules 
             // or all of them are not valid
             return;
+        }
+
+        if(isResourceCalendarsTimePeriodsValid === false || areAllTimePeriodsValid() === false) {
+            formState.setError(`resource_calendars`, {
+                message: `Intersection detected, please correct the time periods`,
+            })
         }
 
         setInfoMessage("Simulation started...")

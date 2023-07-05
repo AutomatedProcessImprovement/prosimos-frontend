@@ -1,5 +1,5 @@
 import { Button, Grid, MenuItem, Select, TextField, Typography } from "@mui/material"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Dispatch, SetStateAction } from "react"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { GranuleSize, JsonData } from './formData'
 import { defaultTemplateSchedule } from './simulationParameters/defaultValues'
@@ -30,6 +30,7 @@ interface ResourceCalendarsProps {
     modelType: ModelType
     handleModelTypeChange: (modelType: ModelType, granuleSize?:GranuleSize) => void
     setErrorMessage: (value: string) => void
+    setIsResourceCalendarsTimePeriodsValid: Dispatch<SetStateAction<boolean>>
 }
 
 const ResourceCalendars = (props: ResourceCalendarsProps) => {
@@ -294,6 +295,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
                             weekdayFilter={weekdayFilter}
                             calendarIndex={currCalendarIndex}
                             calendarKey={currCalendarKey}
+                            setIsResourceCalendarsTimePeriodsValid={props.setIsResourceCalendarsTimePeriodsValid}
                         />}
                         
                     {modelType === ModelType.FUZZY && calendarType === CalendarType.WorkloadRatio &&
@@ -304,6 +306,7 @@ const ResourceCalendars = (props: ResourceCalendarsProps) => {
                             weekdayFilter={weekdayFilter}
                             calendarIndex={currCalendarIndex}
                             calendarKey={currCalendarKey}
+                            setIsResourceCalendarsTimePeriodsValid={props.setIsResourceCalendarsTimePeriodsValid}
                         />}
                 </Grid>
             }

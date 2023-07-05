@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react"
 import TimePeriodGridItemsWithAdd from "./TimePeriodGridItemsWithAdd"
 import { JsonData } from "../formData"
 import { defaultWorkWeekTimePeriod } from "../simulationParameters/defaultValues"
-import { DAYS_OF_WEEK } from "../../helpers/timeConversions"
+import { DAYS_AS_NUMBERS, DAYS_OF_WEEK, hasIntersection } from "../../helpers/timeConversions"
 import { ModelType } from "./ModelType"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
 
@@ -12,13 +12,41 @@ interface TimePeriodListProps {
     calendarKey: string
     modelType: ModelType    
     weekdayFilter: Array<string>
+    setIsResourceCalendarsTimePeriodsValid: Dispatch<SetStateAction<boolean>>
 }
 
-type DayNumbers = { [key: string]: number };
 const TimePeriodList = (props: TimePeriodListProps) => {
     const { formState, calendarIndex, calendarKey, modelType, weekdayFilter } = props
     const { control } = formState
     const [index, setIndex] = useState<number>(calendarIndex)
+    const [intersections, setIntersections] = useState({});    
+
+    const checkIntersections = (time_periods:any) => {
+      let newIntersections:any = []
+      props.setIsResourceCalendarsTimePeriodsValid(true)
+
+      for(let i = 0; i < time_periods.length; i++) {
+        newIntersections[i] = newIntersections[i] || []
+
+        for(let j = i + 1; j < time_periods.length; j++) {
+          if(hasIntersection(time_periods[i], time_periods[j])) {
+            newIntersections[i].push(time_periods[j]);
+            newIntersections[j] = newIntersections[j] || []
+            newIntersections[j].push(time_periods[i]);
+            props.setIsResourceCalendarsTimePeriodsValid(false)
+          }
+        }
+      }
+      setIntersections(newIntersections)
+    };
+
+  useEffect(() => {
+      const unsub = formState.watch(({ resource_calendars }) => {
+          checkIntersections(resource_calendars?.[calendarIndex]?.time_periods);
+      });
+      return () => unsub.unsubscribe();
+  }, [formState.watch, calendarIndex, checkIntersections]);
+
 
     const { fields: currTimePeriods, append, remove } = useFieldArray({
         keyName: 'key',
@@ -27,24 +55,14 @@ const TimePeriodList = (props: TimePeriodListProps) => {
     })
 
     const filteredTimePeriods = useMemo(() => {
-        const daysAsNumbers: DayNumbers = {
-          "MONDAY": 1,
-          "TUESDAY": 2,
-          "WEDNESDAY": 3,
-          "THURSDAY": 4,
-          "FRIDAY": 5,
-          "SATURDAY": 6,
-          "SUNDAY": 7,
-        };
-      
-        const filterRange = weekdayFilter.map((weekday) => daysAsNumbers[weekday]);
+        const filterRange = weekdayFilter.map((weekday) => DAYS_AS_NUMBERS[weekday]);
 
         let displayIndex = 0;
       
         return currTimePeriods.map((period) => {
           const periodRange = [];
-          let fromDay = daysAsNumbers[period.from];
-          let toDay = daysAsNumbers[period.to];
+          let fromDay = DAYS_AS_NUMBERS[period.from];
+          let toDay = DAYS_AS_NUMBERS[period.to];
       
           for (let i = fromDay; i <= toDay; i++) {
             periodRange.push(i);
@@ -53,12 +71,12 @@ const TimePeriodList = (props: TimePeriodListProps) => {
           const isDisplayed = periodRange.every(val => filterRange.includes(val));
           let modifiedPeriod
           if (isDisplayed) {
-            modifiedPeriod = { ...period, isDisplayed, displayIndex };
+            modifiedPeriod = { ...period, isDisplayed, displayIndex};
             displayIndex++;
           } else {
-            modifiedPeriod = { ...period, isDisplayed };
+            modifiedPeriod = { ...period, isDisplayed};
           }
-      
+          
           return modifiedPeriod;
         });
       }, [currTimePeriods, weekdayFilter, append]);    
@@ -87,7 +105,6 @@ const TimePeriodList = (props: TimePeriodListProps) => {
             append(defaultWorkWeekTimePeriod);
         }
       };
-      
 
     return <TimePeriodGridItemsWithAdd
         key={`resource_calendars.${calendarKey}.time_periods`}
@@ -97,6 +114,7 @@ const TimePeriodList = (props: TimePeriodListProps) => {
         objectFieldNamePart={`resource_calendars.${calendarIndex}.time_periods` as unknown as keyof JsonData}
         onTimePeriodRemove={onTimePeriodRemove}
         onTimePeriodAdd={onTimePeriodAdd}
+        intersections={intersections}
     />
 }
 

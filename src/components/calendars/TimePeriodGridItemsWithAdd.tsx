@@ -11,6 +11,7 @@ interface TimePeriodGridItemsWithAddProps<FieldValues> {
     formState: UseFormReturn<FieldValues, object>
     objectFieldNamePart: keyof FieldValues
     modelType?: ModelType
+    intersections?: any
     onTimePeriodRemove: (index: number) => void
     onTimePeriodAdd: () => void
 }
@@ -49,7 +50,7 @@ const TimePeriodGridItemsWithAdd = <FieldValues,>(props: TimePeriodGridItemsWith
         }
 
         return (
-            <Grid item xs={12} key={`resource_calendar_${index}`} style={newStyle}>
+            <Grid item xs={12} key={`resource_calendar_${index}`} style={newStyle}>           
                 <TimePeriodGridItem
                     key={item.key}
                     formState={props.formState}
@@ -58,7 +59,8 @@ const TimePeriodGridItemsWithAdd = <FieldValues,>(props: TimePeriodGridItemsWith
                     isWithDeleteButton={!isWithoutDeleteButton}
                     timePeriodIndex={index}
                     onDelete={props.onTimePeriodRemove}
-                />
+                    intersections={props.intersections ? props.intersections[index] : null}
+                />   
             </Grid>
         )
     };

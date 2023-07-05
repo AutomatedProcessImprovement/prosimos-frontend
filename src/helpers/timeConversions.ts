@@ -1,3 +1,5 @@
+import { TimePeriod } from "../components/formData";
+
 export const secondsToNearest = (sec: string | number) => {
     const secNum : number = (typeof sec === 'string') ? parseFloat(sec) : sec
 
@@ -60,3 +62,54 @@ export const convertTime = (value: number, from: TimeUnit, to: TimeUnit): number
 }
 
 export const DAYS_OF_WEEK = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
+
+type DayNumbers = { [key: string]: number };
+export const DAYS_AS_NUMBERS: DayNumbers = {
+    "MONDAY": 1,
+    "TUESDAY": 2,
+    "WEDNESDAY": 3,
+    "THURSDAY": 4,
+    "FRIDAY": 5,
+    "SATURDAY": 6,
+    "SUNDAY": 7,
+  };
+
+export const generateDaysArray = (from:string, to:string) => 
+    Object.keys(DAYS_AS_NUMBERS).slice(DAYS_AS_NUMBERS[from] - 1, DAYS_AS_NUMBERS[to]);;
+
+export interface DayTimePeriod {
+    beginTimeMinutes: number,
+    endTimeMinutes: number
+}
+
+export const isTimeIntersects = (time1:DayTimePeriod, time2:DayTimePeriod) => {
+    return time1.beginTimeMinutes < time2.endTimeMinutes && time2.beginTimeMinutes < time1.endTimeMinutes
+}
+
+export const hasIntersection = (period1:TimePeriod, period2:TimePeriod) => {
+    let period1Days = generateDaysArray(period1.from, period1.to)
+    let period2Days = generateDaysArray(period2.from, period2.to)
+
+    let daysIntersection = period1Days.filter(day => period2Days.includes(day))
+
+    if(daysIntersection.length === 0) {
+      return false
+    }
+
+    let time1:DayTimePeriod = {
+      beginTimeMinutes: convertStringTimeToMinutes(period1.beginTime),
+      endTimeMinutes: convertStringTimeToMinutes(period1.endTime)
+    }
+
+    let time2:DayTimePeriod = {
+      beginTimeMinutes: convertStringTimeToMinutes(period2.beginTime),
+      endTimeMinutes: convertStringTimeToMinutes(period2.endTime)
+    }
+
+    return isTimeIntersects(time1,time2)
+  }
+
+export function convertStringTimeToMinutes(time:string) {
+    let [hours, minutes] = time.split(':').map(Number);
+    return convertTime(hours, TimeUnit.Hours, TimeUnit.Minutes) * 60 + minutes;
+  }
