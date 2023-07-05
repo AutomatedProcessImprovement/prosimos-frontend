@@ -31,6 +31,7 @@ const useFormState = (tasksFromModel: AllModelTasks, gateways: Gateways, eventsF
                             })
                         )
                         .min(1, MIN_LENGTH_REQUIRED_MSG("resource"))
+                        .uniqueId()
                 })
             )
             .min(1, MIN_LENGTH_REQUIRED_MSG("resource profile")),

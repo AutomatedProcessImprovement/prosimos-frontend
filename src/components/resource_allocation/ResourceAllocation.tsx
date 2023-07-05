@@ -105,6 +105,10 @@ const Row = (props: RowProps) => {
         }
     }, [fields])
 
+    const getTaskErrors = () => {
+        return (rowErrors !== undefined) ? (rowErrors?.message || "There are some validation errors") : " "
+    }
+
     return (
         <React.Fragment>
             <TableRow hover>
@@ -124,7 +128,7 @@ const Row = (props: RowProps) => {
                     </Typography>
                     <FormHelperText
                         error={rowErrors !== undefined}
-                    >{rowErrors?.message || " "}</FormHelperText>
+                    >{getTaskErrors()}</FormHelperText>
                 </TableCell>
             </TableRow>
             <TableRow>
